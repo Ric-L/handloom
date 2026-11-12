@@ -21,6 +21,9 @@ func Register(r *gin.Engine, pool *pgxpool.Pool, cfg *config.Config) {
 	authM := middleware.Auth(cfg.JWTSecret)
 	adminM := middleware.Auth(cfg.JWTSecret, "REVIEWER_ADMIN", "SUPER_ADMIN")
 
+	// Static uploads directory serving
+	r.Static("/uploads", cfg.UploadDir)
+
 	// 1. Public Endpoints
 	v1.GET("/categories", catH.List)
 	v1.GET("/applications/track", appH.Track)
@@ -34,7 +37,10 @@ func Register(r *gin.Engine, pool *pgxpool.Pool, cfg *config.Config) {
 	// 3. Applicant Endpoints (Authenticated Applicant)
 	v1.POST("/applications", authM, appH.Submit)
 	v1.GET("/applications/my", authM, appH.MyApplications)
+	v1.GET("/applications/:id/dossier", authM, appH.GetApplicationDossier)
+	v1.PUT("/applications/:id", authM, appH.UpdateApplication)
 	v1.GET("/applications/:id/approved-slip", authM, appH.GetApprovedSlip)
+	v1.POST("/upload", authM, appH.UploadFile)
 
 	// 4. Admin Moderation & Atomic Quota API (Authenticated Reviewer / Super Admin)
 	admin := v1.Group("/admin", adminM)
@@ -44,6 +50,7 @@ func Register(r *gin.Engine, pool *pgxpool.Pool, cfg *config.Config) {
 		admin.GET("/applications/:id", adminH.GetApplication)
 		admin.PATCH("/applications/:id/approve", adminH.Approve)
 		admin.PATCH("/applications/:id/reject", adminH.Reject)
+		admin.PATCH("/categories/:id/quota", adminH.UpdateCategoryQuota)
 		admin.GET("/export/csv", adminH.ExportCSV)
 	}
 }

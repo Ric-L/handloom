@@ -7,6 +7,7 @@ import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import CategoriesPage from "./pages/CategoriesPage";
 import ApplyPage from "./pages/ApplyPage";
+import RegistrationUpdatePage from "./pages/RegistrationUpdatePage";
 import DashboardPage from "./pages/DashboardPage";
 import AdminLoginPage from "./pages/admin/AdminLoginPage";
 import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
@@ -43,6 +44,14 @@ export default function App() {
               element={
                 <CandidateRoute>
                   <ApplyPage />
+                </CandidateRoute>
+              }
+            />
+            <Route
+              path="/apply/update/:id"
+              element={
+                <CandidateRoute>
+                  <RegistrationUpdatePage />
                 </CandidateRoute>
               }
             />

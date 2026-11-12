@@ -1,4 +1,6 @@
+import { useState } from "react";
 import { AdminMetrics } from "../../types";
+import CategoryQuotaModal from "./CategoryQuotaModal";
 import {
   Users,
   Clock,
@@ -10,6 +12,8 @@ import {
   BarChart3,
   ChevronRight,
   Check,
+  Sliders,
+  Crown,
 } from "lucide-react";
 
 interface QuotaMetricsHeaderProps {
@@ -27,6 +31,16 @@ export default function QuotaMetricsHeader({
   selectedCategoryId,
   onSelectCategory,
 }: QuotaMetricsHeaderProps) {
+  const [quotaModalOpen, setQuotaModalOpen] = useState(false);
+
+  const userJson = localStorage.getItem("user");
+  let isSuperAdmin = false;
+  try {
+    if (userJson) isSuperAdmin = JSON.parse(userJson).role === "SUPER_ADMIN";
+  } catch {
+    isSuperAdmin = false;
+  }
+
   if (isLoading && !metrics) {
     return (
       <div className="bg-white rounded-3xl border border-slate-200 p-8 shadow-xs animate-pulse space-y-6">
@@ -178,13 +192,27 @@ export default function QuotaMetricsHeader({
           </p>
         </div>
 
-        <button
-          onClick={onRefresh}
-          className="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold text-slate-700 bg-white hover:bg-slate-50 border border-slate-300 rounded-xl shadow-2xs transition self-start sm:self-auto cursor-pointer hover:shadow-xs active:translate-y-px"
-        >
-          <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? "animate-spin text-primary-700" : "text-slate-500"}`} />
-          <span>Refresh Live Metrics</span>
-        </button>
+        <div className="flex items-center gap-2.5 self-start sm:self-auto">
+          {isSuperAdmin && (
+            <button
+              type="button"
+              onClick={() => setQuotaModalOpen(true)}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-amber-900 bg-amber-50 hover:bg-amber-100 border border-amber-300 rounded-xl shadow-2xs transition cursor-pointer"
+              title="Super Admin: Modify category quota allocations"
+            >
+              <Sliders className="w-3.5 h-3.5 text-amber-700" />
+              <span>Modify Quota Limits</span>
+            </button>
+          )}
+
+          <button
+            onClick={onRefresh}
+            className="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold text-slate-700 bg-white hover:bg-slate-50 border border-slate-300 rounded-xl shadow-2xs transition cursor-pointer hover:shadow-xs active:translate-y-px"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? "animate-spin text-primary-700" : "text-slate-500"}`} />
+            <span>Refresh Live Metrics</span>
+          </button>
+        </div>
       </div>
 
       {/* 2. Executive Stat KPI Cards */}
@@ -381,6 +409,15 @@ export default function QuotaMetricsHeader({
           })}
         </div>
       </div>
+
+      {/* Super Admin Quota Management Modal */}
+      {isSuperAdmin && (
+        <CategoryQuotaModal
+          isOpen={quotaModalOpen}
+          onClose={() => setQuotaModalOpen(false)}
+          categories={metrics.categories}
+        />
+      )}
     </div>
   );
 }

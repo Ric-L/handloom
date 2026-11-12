@@ -405,3 +405,4 @@ export function generateApprovedApplicationPDF(app: ApprovedSlipData) {
   const fileName = `Handloom_Project_Enrolment_${app.registration_no || app.category_code}_${cleanName}.pdf`;
   doc.save(fileName);
 }
+

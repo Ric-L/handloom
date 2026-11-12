@@ -16,6 +16,7 @@ import {
   CheckCircle2,
   Download,
   FileText,
+  Edit3,
 } from "lucide-react";
 
 export default function DashboardPage() {
@@ -149,6 +150,16 @@ export default function DashboardPage() {
                       ? "🟢 SELECTED FOR ADMISSION"
                       : "🔴 APPLICATION NOT APPROVED"}
                   </span>
+
+                  {app.status === "PENDING" && (
+                    <Link
+                      to={`/apply/update/${app.id}`}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold rounded-xl transition border border-slate-300"
+                    >
+                      <Edit3 className="w-3.5 h-3.5 text-primary-700" />
+                      <span>Update Enrolment Form</span>
+                    </Link>
+                  )}
 
                   {app.status === "APPROVED" && (
                     <button

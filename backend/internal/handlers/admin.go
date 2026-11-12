@@ -625,3 +625,108 @@ func (h *AdminHandler) ExportCSV(c *gin.Context) {
 		_ = writer.Write(row)
 	}
 }
+
+// UpdateCategoryQuota allows Super Admins to modify category capacity limits within an ACID transaction
+func (h *AdminHandler) UpdateCategoryQuota(c *gin.Context) {
+	ctx := context.Background()
+	userRole := c.GetString("role")
+	if userRole != "SUPER_ADMIN" {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Only Super Administrators can modify category quota allocations."})
+		return
+	}
+
+	adminID := c.GetString("user_id")
+	clientIP := c.ClientIP()
+	catIDStr := c.Param("id")
+	catID, err := strconv.Atoi(catIDStr)
+	if err != nil || catID <= 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid category ID"})
+		return
+	}
+
+	var req struct {
+		ApprovalLimit int `json:"approval_limit" binding:"required"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil || req.ApprovalLimit <= 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Sanctioned quota limit must be a positive integer greater than zero."})
+		return
+	}
+
+	tx, err := h.DB.Begin(ctx)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to start quota update transaction"})
+		return
+	}
+	defer tx.Rollback(ctx)
+
+	var code, title string
+	var currentLimit, approvedCount int
+	var currentIsOpen bool
+
+	err = tx.QueryRow(ctx, `
+		SELECT code, title, approval_limit, approved_count, is_approval_open
+		FROM job_categories
+		WHERE id = $1
+		FOR UPDATE
+	`, catID).Scan(&code, &title, &currentLimit, &approvedCount, &currentIsOpen)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Target artisan trade category not found"})
+		return
+	}
+
+	if req.ApprovalLimit < approvedCount {
+		c.JSON(http.StatusConflict, gin.H{
+			"error": fmt.Sprintf("Cannot reduce category quota to %d because %d candidates have already been approved and inducted.", req.ApprovalLimit, approvedCount),
+		})
+		return
+	}
+
+	newIsOpen := req.ApprovalLimit > approvedCount
+
+	_, err = tx.Exec(ctx, `
+		UPDATE job_categories
+		SET approval_limit = $1, is_approval_open = $2
+		WHERE id = $3
+	`, req.ApprovalLimit, newIsOpen, catID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update category quota"})
+		return
+	}
+
+	// Audit trail logging
+	beforeJSON, _ := json.Marshal(gin.H{
+		"approval_limit":   currentLimit,
+		"approved_count":   approvedCount,
+		"is_approval_open": currentIsOpen,
+	})
+	afterJSON, _ := json.Marshal(gin.H{
+		"approval_limit":   req.ApprovalLimit,
+		"approved_count":   approvedCount,
+		"is_approval_open": newIsOpen,
+	})
+
+	_, err = tx.Exec(ctx, `
+		INSERT INTO audit_log (admin_id, action, target_id, ip_address, before_state, after_state)
+		VALUES ($1, 'UPDATE_QUOTA', NULL, $2, $3, $4)
+	`, adminID, clientIP, beforeJSON, afterJSON)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to record audit log: %v", err)})
+		return
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to commit quota modification"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message":          fmt.Sprintf("Category %s quota successfully updated to %d seats", code, req.ApprovalLimit),
+		"category_id":      catID,
+		"code":             code,
+		"title":            title,
+		"approval_limit":   req.ApprovalLimit,
+		"approved_count":   approvedCount,
+		"remaining_quota":  req.ApprovalLimit - approvedCount,
+		"is_approval_open": newIsOpen,
+	})
+}

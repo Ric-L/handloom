@@ -72,6 +72,38 @@ export const approveApplication = (id: string) =>
 export const rejectApplication = (id: string, reason: string) =>
   client.patch<{ message: string }>(`/admin/applications/${id}/reject`, { reason }).then(r => r.data);
 
+// File Upload API with size and extension validation
+export const uploadDocument = async (file: File) => {
+  const formData = new FormData();
+  formData.append("file", file);
+  const res = await client.post<{ url: string; filename: string; size: number; message: string }>("/upload", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return res.data;
+};
+
+// Candidate Dossier Retrieval & Updates
+export const getApplicationDossier = (id: string) =>
+  client.get<ApplicationDetail>(`/applications/${id}/dossier`).then(r => r.data);
+
+export const updateApplicationDossier = (id: string, data: any) =>
+  client.put<{ message: string; id: string }>(`/applications/${id}`, data).then(r => r.data);
+
+// Super Admin Category Quota Management
+export const updateCategoryQuota = (categoryId: number | string, approvalLimit: number) =>
+  client
+    .patch<{
+      message: string;
+      category_id: number;
+      code: string;
+      title: string;
+      approval_limit: number;
+      approved_count: number;
+      remaining_quota: number;
+      is_approval_open: boolean;
+    }>(`/admin/categories/${categoryId}/quota`, { approval_limit: approvalLimit })
+    .then(r => r.data);
+
 export const downloadAdminCSV = async (categoryId?: number | string, status: string = "APPROVED") => {
   const res = await client.get("/admin/export/csv", {
     params: { category_id: categoryId || undefined, status },
