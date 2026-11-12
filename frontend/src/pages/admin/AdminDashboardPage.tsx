@@ -1,8 +1,8 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { getAdminMetrics, getAdminApplications, downloadAdminCSV, getCategories } from "../../api";
 import QuotaMetricsHeader from "../../components/admin/QuotaMetricsHeader";
-import ApplicationReviewDrawer from "../../components/admin/ApplicationReviewDrawer";
 import { formatDate, statusBadgeColor } from "../../lib/utils";
 import {
   Search,
@@ -23,7 +23,7 @@ import {
 } from "lucide-react";
 
 export default function AdminDashboardPage() {
-  const [selectedAppId, setSelectedAppId] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   // Filters State
   const [searchQuery, setSearchQuery] = useState("");
@@ -341,7 +341,7 @@ export default function AdminDashboardPage() {
                   return (
                     <tr
                       key={app.id}
-                      onClick={() => setSelectedAppId(app.id)}
+                      onClick={() => navigate(`/admin/applications/${app.id}`)}
                       className="hover:bg-primary-50/40 transition-colors group cursor-pointer"
                     >
                       {/* Monospace Registration Number with 1-Click Copy */}
@@ -416,7 +416,7 @@ export default function AdminDashboardPage() {
                       <td className="px-6 py-4 text-right whitespace-nowrap" onClick={e => e.stopPropagation()}>
                         <button
                           type="button"
-                          onClick={() => setSelectedAppId(app.id)}
+                          onClick={() => navigate(`/admin/applications/${app.id}`)}
                           className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold text-primary-900 bg-primary-50 hover:bg-primary-100 border border-primary-200 rounded-xl transition shadow-2xs cursor-pointer"
                         >
                           <Eye className="w-3.5 h-3.5 text-primary-700" /> Review Dossier
@@ -481,18 +481,6 @@ export default function AdminDashboardPage() {
           </div>
         )}
       </div>
-
-      {/* 3. Detailed Application Review Drawer */}
-      {selectedAppId && (
-        <ApplicationReviewDrawer
-          applicationId={selectedAppId}
-          onClose={() => setSelectedAppId(null)}
-          onActionComplete={() => {
-            refetchApps();
-            refetchMetrics();
-          }}
-        />
-      )}
     </div>
   );
 }

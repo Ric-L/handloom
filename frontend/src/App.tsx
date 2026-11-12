@@ -10,6 +10,7 @@ import ApplyPage from "./pages/ApplyPage";
 import DashboardPage from "./pages/DashboardPage";
 import AdminLoginPage from "./pages/admin/AdminLoginPage";
 import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
+import AdminApplicationDetailPage from "./pages/admin/AdminApplicationDetailPage";
 import AdminRoute from "./components/AdminRoute";
 
 const queryClient = new QueryClient({
@@ -68,6 +69,7 @@ export default function App() {
           >
             <Route path="/admin" element={<AdminDashboardPage />} />
             <Route path="/admin/applications" element={<Navigate to="/admin" replace />} />
+            <Route path="/admin/applications/:id" element={<AdminApplicationDetailPage />} />
           </Route>
 
           {/* Fallback */}
