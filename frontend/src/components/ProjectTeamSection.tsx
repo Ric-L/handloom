@@ -256,3 +256,4 @@ export const ProjectTeamSection: React.FC = () => {
     </section>
   );
 };
+

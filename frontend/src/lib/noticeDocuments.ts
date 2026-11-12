@@ -309,3 +309,4 @@ export function generateOfficialNoticePDF(notice: ProjectNotice) {
 
   doc.save(`Notice_${notice.refNo.replace(/[^a-zA-Z0-9]/g, "_")}.pdf`);
 }
+

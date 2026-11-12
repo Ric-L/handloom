@@ -345,3 +345,4 @@ export const ProjectMediaSection: React.FC = () => {
     </section>
   );
 };
+
