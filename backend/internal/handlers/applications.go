@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -19,120 +20,262 @@ type ApplicationHandler struct {
 
 func generateRegistrationNo(categoryCode string) string {
 	year := time.Now().Year()
-	uid := uuid.New().String()[:6]
-	return fmt.Sprintf("HND-%d-%s-%s", year, categoryCode[:3], uid)
+	cleanCode := strings.ReplaceAll(categoryCode, "-", "")
+	cleanCode = strings.ReplaceAll(cleanCode, ".", "")
+	if len(cleanCode) > 3 {
+		cleanCode = cleanCode[:3]
+	}
+	uid := strings.ToUpper(uuid.New().String()[:6])
+	return fmt.Sprintf("HND-%d-%s-%s", year, cleanCode, uid)
 }
 
+type SubmitApplicationPayload struct {
+	CategoryID       int    `json:"category_id" form:"category_id"`
+	FullName         string `json:"full_name" form:"full_name" binding:"required"`
+	GuardianName     string `json:"guardian_name" form:"guardian_name" binding:"required"`
+	DOB              string `json:"dob" form:"dob" binding:"required"`
+	Gender           string `json:"gender" form:"gender" binding:"required"`
+	AltMobile        string `json:"alt_mobile" form:"alt_mobile"`
+	GovIDType        string `json:"gov_id_type" form:"gov_id_type" binding:"required"`
+	GovIDLast4       string `json:"gov_id_last4" form:"gov_id_last4" binding:"required"`
+	SocialCategory   string `json:"social_category" form:"social_category" binding:"required"`
+	AddressFull      string `json:"address_full" form:"address_full" binding:"required"`
+	DistrictStatePin string `json:"district_state_pin" form:"district_state_pin" binding:"required"`
+	HighestQual      string `json:"highest_qual" form:"highest_qual" binding:"required"`
+	InstitutionName  string `json:"institution_name" form:"institution_name"`
+	Occupation       string `json:"occupation" form:"occupation" binding:"required"`
+	PrevTraining     string `json:"prev_training" form:"prev_training"`
+	PreferredCentre  string `json:"preferred_centre" form:"preferred_centre"`
+	TrainingMode     string `json:"training_mode" form:"training_mode"`
+	BankHolderName   string `json:"bank_holder_name" form:"bank_holder_name"`
+	BankNameBranch   string `json:"bank_name_branch" form:"bank_name_branch"`
+	AccountNumber    string `json:"account_number" form:"account_number"`
+	IFSCCode         string `json:"ifsc_code" form:"ifsc_code"`
+}
+
+// Track allows applicants to check their admission progress via Mobile Number and Date of Birth
 func (h *ApplicationHandler) Track(c *gin.Context) {
-	regNo := c.Query("reg_no")
-	dob := c.Query("dob")
-	if regNo == "" || dob == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "reg_no and dob are required"})
+	// Support both identifier (mobile or reg_no) and reg_no
+	identifier := c.Query("identifier")
+	if identifier == "" {
+		identifier = c.Query("reg_no")
+	}
+	if identifier == "" {
+		identifier = c.Query("mobile_number")
+	}
+	dobStr := c.Query("dob")
+
+	if identifier == "" || dobStr == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Registered mobile number and Date of Birth are required"})
 		return
 	}
 
 	var result struct {
-		RegistrationNo  string  `json:"registration_no"`
 		FullName        string  `json:"full_name"`
 		Category        string  `json:"category"`
+		CategoryCode    string  `json:"category_code"`
 		SubmittedAt     string  `json:"submitted_at"`
 		Status          string  `json:"status"`
 		RejectionReason *string `json:"rejection_reason,omitempty"`
 	}
 
+	var submittedAt time.Time
 	err := h.DB.QueryRow(context.Background(), `
-		SELECT a.registration_no, a.full_name, jc.title, a.submitted_at, a.status, a.rejection_reason
+		SELECT a.full_name, jc.title, jc.code, a.submitted_at, a.status, a.rejection_reason
 		FROM applications a
 		JOIN job_categories jc ON jc.id = a.category_id
-		WHERE a.registration_no = $1 AND a.dob = $2::date
-	`, regNo, dob).Scan(
-		&result.RegistrationNo, &result.FullName, &result.Category,
-		&result.SubmittedAt, &result.Status, &result.RejectionReason,
+		JOIN users u ON u.id = a.user_id
+		WHERE (u.mobile_number = $1 OR a.registration_no = $1) AND a.dob = $2::date
+		ORDER BY a.submitted_at DESC
+		LIMIT 1
+	`, identifier, dobStr).Scan(
+		&result.FullName, &result.Category, &result.CategoryCode,
+		&submittedAt, &result.Status, &result.RejectionReason,
 	)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Application not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "No matching application found for provided mobile number and date of birth."})
 		return
 	}
+
+	result.SubmittedAt = submittedAt.Format(time.RFC3339)
 	c.JSON(http.StatusOK, result)
 }
 
+// Submit persists a new candidate application
 func (h *ApplicationHandler) Submit(c *gin.Context) {
 	userID := c.GetString("user_id")
-
-	categoryIDStr := c.PostForm("category_id")
-	categoryID, err := strconv.Atoi(categoryIDStr)
-	if err != nil || categoryID == 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "valid category_id is required"})
+	if userID == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User session expired. Please sign in again."})
 		return
 	}
 
-	// Fetch category code for registration number
+	var req SubmitApplicationPayload
+	// Bind JSON or Multipart
+	if err := c.ShouldBind(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("Invalid application data: %v", err)})
+		return
+	}
+
+	if req.CategoryID <= 0 {
+		// Fallback check query/form string
+		catStr := c.PostForm("category_id")
+		if catID, err := strconv.Atoi(catStr); err == nil {
+			req.CategoryID = catID
+		}
+	}
+
+	if req.CategoryID <= 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Please select a valid artisan training category"})
+		return
+	}
+
+	// Verify category exists and admissions are open
 	var catCode string
 	var isOpen bool
-	err = h.DB.QueryRow(context.Background(),
-		`SELECT code, is_approval_open FROM job_categories WHERE id = $1`, categoryID,
+	err := h.DB.QueryRow(context.Background(),
+		`SELECT code, is_approval_open FROM job_categories WHERE id = $1`, req.CategoryID,
 	).Scan(&catCode, &isOpen)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid category"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Selected artisan category does not exist"})
 		return
 	}
 
+	if !isOpen {
+		c.JSON(http.StatusConflict, gin.H{"error": "Admissions for this category are currently closed (quota reached)."})
+		return
+	}
+
+	// Verify candidate hasn't already submitted for this trade
+	var existingCount int
+	_ = h.DB.QueryRow(context.Background(),
+		`SELECT COUNT(*) FROM applications WHERE user_id = $1 AND category_id = $2`,
+		userID, req.CategoryID,
+	).Scan(&existingCount)
+	if existingCount > 0 {
+		c.JSON(http.StatusConflict, gin.H{"error": "You have already submitted an application for this artisan category. Only one submission per category is permitted."})
+		return
+	}
+
+	// Validate Date of Birth
+	parsedDOB, err := time.Parse("2006-01-02", strings.TrimSpace(req.DOB))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Date of Birth format. Please use YYYY-MM-DD."})
+		return
+	}
+
+	// Generate system tamper-proof registration number for administrators
 	regNo := generateRegistrationNo(catCode)
 
-	_, err = h.DB.Exec(context.Background(), `
+	if req.TrainingMode == "" {
+		req.TrainingMode = "CLASSROOM"
+	}
+
+	var appID string
+	var status string
+	var submittedAt time.Time
+
+	err = h.DB.QueryRow(context.Background(), `
 		INSERT INTO applications (
 			registration_no, user_id, category_id, full_name, guardian_name, dob, gender,
-			gov_id_type, gov_id_last4, social_category, address_full, district_state_pin,
-			highest_qual, occupation, training_mode
-		) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)`,
-		regNo, userID, categoryID,
-		c.PostForm("full_name"), c.PostForm("guardian_name"), c.PostForm("dob"),
-		c.PostForm("gender"), c.PostForm("gov_id_type"), c.PostForm("gov_id_last4"),
-		c.PostForm("social_category"), c.PostForm("address_full"), c.PostForm("district_state_pin"),
-		c.PostForm("highest_qual"), c.PostForm("occupation"),
-		c.DefaultPostForm("training_mode", "CLASSROOM"),
-	)
+			alt_mobile, gov_id_type, gov_id_last4, social_category, address_full, district_state_pin,
+			highest_qual, institution_name, occupation, prev_training, preferred_centre, training_mode,
+			bank_holder_name, bank_name_branch, account_number, ifsc_code, status
+		) VALUES (
+			$1, $2, $3, $4, $5, $6, $7,
+			NULLIF($8, ''), $9, $10, $11, $12, $13,
+			$14, NULLIF($15, ''), $16, NULLIF($17, ''), NULLIF($18, ''), $19,
+			NULLIF($20, ''), NULLIF($21, ''), NULLIF($22, ''), NULLIF($23, ''), 'PENDING'
+		) RETURNING id, status, submitted_at`,
+		regNo, userID, req.CategoryID,
+		strings.TrimSpace(req.FullName), strings.TrimSpace(req.GuardianName), parsedDOB, req.Gender,
+		strings.TrimSpace(req.AltMobile), req.GovIDType, strings.TrimSpace(req.GovIDLast4), req.SocialCategory,
+		strings.TrimSpace(req.AddressFull), strings.TrimSpace(req.DistrictStatePin),
+		req.HighestQual, strings.TrimSpace(req.InstitutionName), req.Occupation,
+		strings.TrimSpace(req.PrevTraining), strings.TrimSpace(req.PreferredCentre), req.TrainingMode,
+		strings.TrimSpace(req.BankHolderName), strings.TrimSpace(req.BankNameBranch),
+		strings.TrimSpace(req.AccountNumber), strings.TrimSpace(req.IFSCCode),
+	).Scan(&appID, &status, &submittedAt)
+
 	if err != nil {
-		c.JSON(http.StatusConflict, gin.H{"error": "You have already applied for this category"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to save application: %v", err)})
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"registration_no": regNo})
+	// Note: Internal registration_no is stored for Admins, but hidden from regular candidates
+	c.JSON(http.StatusCreated, gin.H{
+		"message":      "Application submitted and saved successfully",
+		"id":           appID,
+		"status":       status,
+		"submitted_at": submittedAt.Format(time.RFC3339),
+	})
 }
 
+// MyApplications returns applications for the logged-in candidate
 func (h *ApplicationHandler) MyApplications(c *gin.Context) {
 	userID := c.GetString("user_id")
+	userRole := c.GetString("role")
 
 	rows, err := h.DB.Query(context.Background(), `
-		SELECT a.id, a.registration_no, a.user_id, a.category_id, a.full_name, a.guardian_name,
-		       a.dob, a.gender, a.social_category, a.status, a.rejection_reason, a.submitted_at
-		FROM applications a WHERE a.user_id = $1 ORDER BY a.submitted_at DESC`, userID)
+		SELECT a.id, a.registration_no, a.user_id, a.category_id, jc.code, jc.title,
+		       a.full_name, a.guardian_name, a.dob, a.gender, a.social_category,
+		       a.district_state_pin, a.status, a.rejection_reason, a.submitted_at
+		FROM applications a
+		JOIN job_categories jc ON jc.id = a.category_id
+		WHERE a.user_id = $1
+		ORDER BY a.submitted_at DESC`, userID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch applications"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch candidate applications"})
 		return
 	}
 	defer rows.Close()
 
+	isAdmin := (userRole == "SUPER_ADMIN" || userRole == "REVIEWER_ADMIN")
+
 	var apps []gin.H
 	for rows.Next() {
 		var (
-			id, regNo, uid, fullName, guardianName, gender, socialCat, status string
-			catID                                                               int
-			dob, submittedAt                                                    string
-			rejectionReason                                                     *string
+			id, regNo, uid, catCode, catTitle, fullName, guardianName, gender, socialCat, district, status string
+			catID                                                                                           int
+			dob                                                                                             time.Time
+			submittedAt                                                                                     time.Time
+			rejectionReason                                                                                 *string
 		)
-		if err := rows.Scan(&id, &regNo, &uid, &catID, &fullName, &guardianName, &dob, &gender, &socialCat, &status, &rejectionReason, &submittedAt); err != nil {
+
+		if err := rows.Scan(
+			&id, &regNo, &uid, &catID, &catCode, &catTitle,
+			&fullName, &guardianName, &dob, &gender, &socialCat,
+			&district, &status, &rejectionReason, &submittedAt,
+		); err != nil {
 			continue
 		}
-		apps = append(apps, gin.H{
-			"id": id, "registration_no": regNo, "user_id": uid, "category_id": catID,
-			"full_name": fullName, "guardian_name": guardianName, "dob": dob,
-			"gender": gender, "social_category": socialCat, "status": status,
-			"rejection_reason": rejectionReason, "submitted_at": submittedAt,
-		})
+
+		item := gin.H{
+			"id":                 id,
+			"user_id":            uid,
+			"category_id":        catID,
+			"category_code":      catCode,
+			"category_title":     catTitle,
+			"full_name":          fullName,
+			"guardian_name":      guardianName,
+			"dob":                dob.Format("2006-01-02"),
+			"gender":             gender,
+			"social_category":    socialCat,
+			"district_state_pin": district,
+			"status":             status,
+			"rejection_reason":   rejectionReason,
+			"submitted_at":       submittedAt.Format(time.RFC3339),
+		}
+
+		// Only expose internal reference numbers to administrative accounts
+		if isAdmin {
+			item["registration_no"] = regNo
+		}
+
+		apps = append(apps, item)
 	}
 	if apps == nil {
 		apps = []gin.H{}
 	}
+
 	c.JSON(http.StatusOK, apps)
 }

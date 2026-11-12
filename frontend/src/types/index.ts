@@ -18,14 +18,13 @@ export interface JobCategory {
   id: number;
   code: string;
   title: string;
-  approval_limit: number;
-  approved_count: number;
   is_approval_open: boolean;
+  approval_limit?: number; // Only present for Admins
+  approved_count?: number; // Only present for Admins
 }
 
 export interface Application {
   id: string;
-  registration_no: string;
   user_id: string;
   category_id: number;
   category_code?: string;
@@ -59,12 +58,14 @@ export interface Application {
   reviewed_by?: string;
   reviewed_at?: string;
   submitted_at: string;
+  registration_no?: string; // Only populated for Admin roles
 }
 
 export interface ApplicationDetail extends Application {
   approval_limit: number;
   approved_count: number;
   is_approval_open: boolean;
+  registration_no: string;
 }
 
 export interface AuthResponse {
@@ -73,12 +74,13 @@ export interface AuthResponse {
 }
 
 export interface TrackResponse {
-  registration_no: string;
   full_name: string;
   category: string;
+  category_code?: string;
   submitted_at: string;
   status: ApplicationStatus;
   rejection_reason?: string;
+  registration_no?: string;
 }
 
 export interface CategoryMetric {

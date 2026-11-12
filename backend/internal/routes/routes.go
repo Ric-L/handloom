@@ -13,7 +13,7 @@ func Register(r *gin.Engine, pool *pgxpool.Pool, cfg *config.Config) {
 
 	// Handlers
 	authH := &handlers.AuthHandler{DB: pool, JWTSecret: cfg.JWTSecret}
-	catH := &handlers.CategoryHandler{DB: pool}
+	catH := &handlers.CategoryHandler{DB: pool, JWTSecret: cfg.JWTSecret}
 	appH := &handlers.ApplicationHandler{DB: pool, UploadDir: cfg.UploadDir}
 	adminH := &handlers.AdminHandler{DB: pool}
 

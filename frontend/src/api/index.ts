@@ -10,31 +10,30 @@ import type {
   PaginatedApplicationsResponse,
 } from "../types";
 
-// Public
+// Public Categories (Quota limits are stripped by backend for regular users)
 export const getCategories = () => client.get<JobCategory[]>("/categories").then(r => r.data);
 
-export const trackApplication = (reg_no: string, dob: string) =>
+// Public Quick-Track (Allows tracking by Mobile Number or Reference ID + DOB)
+export const trackApplication = (identifier: string, dob: string) =>
   client
-    .get<TrackResponse>(`/applications/track?reg_no=${encodeURIComponent(reg_no)}&dob=${encodeURIComponent(dob)}`)
+    .get<TrackResponse>(`/applications/track?identifier=${encodeURIComponent(identifier)}&dob=${encodeURIComponent(dob)}`)
     .then(r => r.data);
 
-// Candidate Auth
+// Candidate Authentication
 export const register = (data: { mobile_number: string; password: string; email?: string }) =>
   client.post<AuthResponse>("/auth/register", data).then(r => r.data);
 
 export const login = (data: { mobile_number: string; password: string }) =>
   client.post<AuthResponse>("/auth/login", data).then(r => r.data);
 
-// Dedicated Admin Auth
+// Dedicated Admin Authentication
 export const adminLogin = (data: { mobile_number: string; password: string }) =>
   client.post<AuthResponse>("/auth/admin-login", data).then(r => r.data);
 
-// Applicant Endpoints
-export const submitApplication = (data: FormData) =>
+// Applicant Submission (JSON or FormData, persists to PostgreSQL)
+export const submitApplication = (data: any) =>
   client
-    .post<{ registration_no: string }>("/applications", data, {
-      headers: { "Content-Type": "multipart/form-data" },
-    })
+    .post<{ message: string; id: string; status: string; submitted_at: string }>("/applications", data)
     .then(r => r.data);
 
 export const getMyApplications = () => client.get<Application[]>("/applications/my").then(r => r.data);
@@ -42,7 +41,7 @@ export const getMyApplications = () => client.get<Application[]>("/applications/
 export const getReceipt = (id: string) =>
   client.get(`/applications/my/${id}/receipt`, { responseType: "blob" }).then(r => r.data);
 
-// Admin Moderation & Atomic Quota Endpoints
+// Admin Moderation & Atomic Quota API
 export const getAdminMetrics = () => client.get<AdminMetrics>("/admin/metrics").then(r => r.data);
 
 export const getAdminApplications = (params: {
@@ -68,15 +67,6 @@ export const approveApplication = (id: string) =>
 
 export const rejectApplication = (id: string, reason: string) =>
   client.patch<{ message: string }>(`/admin/applications/${id}/reject`, { reason }).then(r => r.data);
-
-export const getExportCSVUrl = (categoryId?: number | string, status: string = "APPROVED") => {
-  const token = localStorage.getItem("token") || "";
-  let url = `${API_BASE_URL}/admin/export/csv?status=${encodeURIComponent(status)}`;
-  if (categoryId) {
-    url += `&category_id=${encodeURIComponent(categoryId)}`;
-  }
-  return { url, token };
-};
 
 export const downloadAdminCSV = async (categoryId?: number | string, status: string = "APPROVED") => {
   const res = await client.get("/admin/export/csv", {
