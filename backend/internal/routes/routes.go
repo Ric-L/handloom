@@ -17,25 +17,32 @@ func Register(r *gin.Engine, pool *pgxpool.Pool, cfg *config.Config) {
 	appH := &handlers.ApplicationHandler{DB: pool, UploadDir: cfg.UploadDir}
 	adminH := &handlers.AdminHandler{DB: pool}
 
+	// Middleware
 	authM := middleware.Auth(cfg.JWTSecret)
 	adminM := middleware.Auth(cfg.JWTSecret, "REVIEWER_ADMIN", "SUPER_ADMIN")
 
-	// Public
+	// 1. Public Endpoints
 	v1.GET("/categories", catH.List)
 	v1.GET("/applications/track", appH.Track)
 
-	// Auth
+	// 2. Auth Endpoints
 	v1.POST("/auth/register", authH.Register)
 	v1.POST("/auth/login", authH.Login)
+	v1.POST("/auth/admin-login", authH.AdminLogin)
+	v1.POST("/admin/auth/login", authH.AdminLogin)
 
-	// Applicant (authenticated)
+	// 3. Applicant Endpoints (Authenticated Applicant)
 	v1.POST("/applications", authM, appH.Submit)
 	v1.GET("/applications/my", authM, appH.MyApplications)
 
-	// Admin
+	// 4. Admin Moderation & Atomic Quota API (Authenticated Reviewer / Super Admin)
 	admin := v1.Group("/admin", adminM)
-	admin.GET("/metrics", adminH.Metrics)
-	admin.GET("/applications", adminH.ListApplications)
-	admin.PATCH("/applications/:id/approve", adminH.Approve)
-	admin.PATCH("/applications/:id/reject", adminH.Reject)
+	{
+		admin.GET("/metrics", adminH.Metrics)
+		admin.GET("/applications", adminH.ListApplications)
+		admin.GET("/applications/:id", adminH.GetApplication)
+		admin.PATCH("/applications/:id/approve", adminH.Approve)
+		admin.PATCH("/applications/:id/reject", adminH.Reject)
+		admin.GET("/export/csv", adminH.ExportCSV)
+	}
 }

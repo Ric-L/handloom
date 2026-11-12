@@ -8,19 +8,20 @@ import RegisterPage from "./pages/RegisterPage";
 import CategoriesPage from "./pages/CategoriesPage";
 import ApplyPage from "./pages/ApplyPage";
 import DashboardPage from "./pages/DashboardPage";
+import AdminLoginPage from "./pages/admin/AdminLoginPage";
 import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
-import AdminApplicationsPage from "./pages/admin/AdminApplicationsPage";
+import AdminRoute from "./components/AdminRoute";
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       retry: 1,
-      staleTime: 30_000,
+      staleTime: 15_000,
     },
   },
 });
 
-function PrivateRoute({ children }: { children: React.ReactNode }) {
+function CandidateRoute({ children }: { children: React.ReactNode }) {
   const token = localStorage.getItem("token");
   return token ? <>{children}</> : <Navigate to="/login" replace />;
 }
@@ -30,18 +31,47 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <Routes>
+          {/* Public & Candidate Experience */}
           <Route element={<AppLayout />}>
             <Route path="/" element={<HomePage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/categories" element={<CategoriesPage />} />
-            <Route path="/apply" element={<PrivateRoute><ApplyPage /></PrivateRoute>} />
-            <Route path="/dashboard" element={<PrivateRoute><DashboardPage /></PrivateRoute>} />
+            <Route
+              path="/apply"
+              element={
+                <CandidateRoute>
+                  <ApplyPage />
+                </CandidateRoute>
+              }
+            />
+            <Route
+              path="/dashboard"
+              element={
+                <CandidateRoute>
+                  <DashboardPage />
+                </CandidateRoute>
+              }
+            />
           </Route>
-          <Route element={<PrivateRoute><AdminLayout /></PrivateRoute>}>
+
+          {/* Dedicated Admin Login */}
+          <Route path="/admin/login" element={<AdminLoginPage />} />
+
+          {/* Protected Admin Console */}
+          <Route
+            element={
+              <AdminRoute>
+                <AdminLayout />
+              </AdminRoute>
+            }
+          >
             <Route path="/admin" element={<AdminDashboardPage />} />
-            <Route path="/admin/applications" element={<AdminApplicationsPage />} />
+            <Route path="/admin/applications" element={<Navigate to="/admin" replace />} />
           </Route>
+
+          {/* Fallback */}
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
     </QueryClientProvider>

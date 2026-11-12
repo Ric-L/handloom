@@ -33,6 +33,10 @@ func main() {
 		log.Printf("Warning: seed categories failed: %v", err)
 	}
 
+	if err := db.SeedDefaultAdmins(context.Background(), pool); err != nil {
+		log.Printf("Warning: seed default admins failed: %v", err)
+	}
+
 	r := gin.Default()
 	r.Use(corsMiddleware())
 	routes.Register(r, pool, cfg)

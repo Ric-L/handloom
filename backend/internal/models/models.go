@@ -25,6 +25,8 @@ type Application struct {
 	RegistrationNo   string      `json:"registration_no"`
 	UserID           string      `json:"user_id"`
 	CategoryID       int         `json:"category_id"`
+	CategoryCode     string      `json:"category_code,omitempty"`
+	CategoryTitle    string      `json:"category_title,omitempty"`
 	FullName         string      `json:"full_name"`
 	GuardianName     string      `json:"guardian_name"`
 	DOB              string      `json:"dob"`
@@ -59,4 +61,23 @@ type Application struct {
 type Claims struct {
 	UserID string `json:"user_id"`
 	Role   string `json:"role"`
+}
+
+type CategoryMetric struct {
+	CategoryID     int    `json:"category_id"`
+	Code           string `json:"code"`
+	Title          string `json:"title"`
+	ApprovalLimit  int    `json:"approval_limit"`
+	ApprovedCount  int    `json:"approved_count"`
+	RemainingQuota int    `json:"remaining_quota"`
+	PendingCount   int    `json:"pending_count"`
+	IsApprovalOpen bool   `json:"is_approval_open"`
+}
+
+type AdminMetricsResponse struct {
+	TotalApplied int              `json:"total_applied"`
+	Pending      int              `json:"pending"`
+	Approved     int              `json:"approved"`
+	Rejected     int              `json:"rejected"`
+	Categories   []CategoryMetric `json:"categories"`
 }

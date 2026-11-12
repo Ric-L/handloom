@@ -1,4 +1,4 @@
-﻿# Handloom Portal — Database Setup Script (PowerShell)
+# Handloom Portal — Database Setup Script (PowerShell)
 # Run once before starting the backend server.
 # Assumes psql is installed and PostgreSQL is running locally.
 

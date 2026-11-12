@@ -2,56 +2,75 @@ package handlers
 
 import (
 	"context"
+	"encoding/csv"
+	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"handloom-portal/internal/models"
 )
 
 type AdminHandler struct {
 	DB *pgxpool.Pool
 }
 
+// Metrics returns live counters and per-category capacity breakdowns
 func (h *AdminHandler) Metrics(c *gin.Context) {
-	var total, pending, approved, rejected int
-	h.DB.QueryRow(context.Background(), `SELECT COUNT(*) FROM applications`).Scan(&total)
-	h.DB.QueryRow(context.Background(), `SELECT COUNT(*) FROM applications WHERE status='PENDING'`).Scan(&pending)
-	h.DB.QueryRow(context.Background(), `SELECT COUNT(*) FROM applications WHERE status='APPROVED'`).Scan(&approved)
-	h.DB.QueryRow(context.Background(), `SELECT COUNT(*) FROM applications WHERE status='REJECTED'`).Scan(&rejected)
+	ctx := context.Background()
 
-	rows, _ := h.DB.Query(context.Background(), `
+	var total, pending, approved, rejected int
+	_ = h.DB.QueryRow(ctx, `SELECT COUNT(*) FROM applications`).Scan(&total)
+	_ = h.DB.QueryRow(ctx, `SELECT COUNT(*) FROM applications WHERE status='PENDING'`).Scan(&pending)
+	_ = h.DB.QueryRow(ctx, `SELECT COUNT(*) FROM applications WHERE status='APPROVED'`).Scan(&approved)
+	_ = h.DB.QueryRow(ctx, `SELECT COUNT(*) FROM applications WHERE status='REJECTED'`).Scan(&rejected)
+
+	rows, err := h.DB.Query(ctx, `
 		SELECT jc.id, jc.code, jc.title, jc.approval_limit, jc.approved_count, jc.is_approval_open,
 		       COUNT(a.id) FILTER (WHERE a.status = 'PENDING') AS pending_count
 		FROM job_categories jc
 		LEFT JOIN applications a ON a.category_id = jc.id
-		GROUP BY jc.id ORDER BY jc.id`)
+		GROUP BY jc.id, jc.code, jc.title, jc.approval_limit, jc.approved_count, jc.is_approval_open
+		ORDER BY jc.id ASC`)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to calculate category metrics"})
+		return
+	}
 	defer rows.Close()
 
-	var cats []gin.H
+	var categories []models.CategoryMetric
 	for rows.Next() {
-		var id, limit, appCount, pendingCount int
-		var code, title string
-		var isOpen bool
-		rows.Scan(&id, &code, &title, &limit, &appCount, &isOpen, &pendingCount)
-		cats = append(cats, gin.H{
-			"category_id": id, "code": code, "title": title,
-			"approval_limit": limit, "approved_count": appCount,
-			"pending_count": pendingCount, "is_approval_open": isOpen,
-		})
+		var m models.CategoryMetric
+		if err := rows.Scan(&m.CategoryID, &m.Code, &m.Title, &m.ApprovalLimit, &m.ApprovedCount, &m.IsApprovalOpen, &m.PendingCount); err != nil {
+			continue
+		}
+		m.RemainingQuota = m.ApprovalLimit - m.ApprovedCount
+		if m.RemainingQuota < 0 {
+			m.RemainingQuota = 0
+		}
+		categories = append(categories, m)
 	}
-	if cats == nil {
-		cats = []gin.H{}
+	if categories == nil {
+		categories = []models.CategoryMetric{}
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"total_applied": total, "pending": pending, "approved": approved, "rejected": rejected,
-		"categories": cats,
+	c.JSON(http.StatusOK, models.AdminMetricsResponse{
+		TotalApplied: total,
+		Pending:      pending,
+		Approved:     approved,
+		Rejected:     rejected,
+		Categories:   categories,
 	})
 }
 
+// ListApplications provides a paginated, filtered list of candidate registrations
 func (h *AdminHandler) ListApplications(c *gin.Context) {
+	ctx := context.Background()
+
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
 	if page < 1 {
@@ -62,151 +81,547 @@ func (h *AdminHandler) ListApplications(c *gin.Context) {
 	}
 	offset := (page - 1) * pageSize
 
+	categoryIDStr := c.Query("category_id")
 	status := c.Query("status")
-	query := `SELECT a.id, a.registration_no, a.user_id, a.category_id, a.full_name, a.district_state_pin, a.status, a.rejection_reason, a.submitted_at
-	           FROM applications a WHERE 1=1`
+	district := c.Query("district")
+	socialCategory := c.Query("social_category")
+	searchQuery := c.Query("search_query")
+
+	baseWhere := " WHERE 1=1"
 	args := []interface{}{}
 	argIdx := 1
 
-	if status != "" {
-		query += ` AND a.status = $` + strconv.Itoa(argIdx)
-		args = append(args, status)
+	if categoryIDStr != "" {
+		if catID, err := strconv.Atoi(categoryIDStr); err == nil && catID > 0 {
+			baseWhere += fmt.Sprintf(" AND a.category_id = $%d", argIdx)
+			args = append(args, catID)
+			argIdx++
+		}
+	}
+
+	if status != "" && status != "ALL" {
+		baseWhere += fmt.Sprintf(" AND a.status = $%d", argIdx)
+		args = append(args, strings.ToUpper(status))
 		argIdx++
 	}
 
-	var total int
-	countQ := `SELECT COUNT(*) FROM applications a WHERE 1=1`
-	if status != "" {
-		countQ += ` AND a.status = $1`
-		h.DB.QueryRow(context.Background(), countQ, status).Scan(&total)
-	} else {
-		h.DB.QueryRow(context.Background(), countQ).Scan(&total)
+	if district != "" {
+		baseWhere += fmt.Sprintf(" AND a.district_state_pin ILIKE $%d", argIdx)
+		args = append(args, "%"+district+"%")
+		argIdx++
 	}
 
-	query += ` ORDER BY a.submitted_at DESC LIMIT $` + strconv.Itoa(argIdx) + ` OFFSET $` + strconv.Itoa(argIdx+1)
-	args = append(args, pageSize, offset)
+	if socialCategory != "" && socialCategory != "ALL" {
+		baseWhere += fmt.Sprintf(" AND a.social_category = $%d", argIdx)
+		args = append(args, strings.ToUpper(socialCategory))
+		argIdx++
+	}
 
-	rows, err := h.DB.Query(context.Background(), query, args...)
+	if searchQuery != "" {
+		baseWhere += fmt.Sprintf(" AND (a.registration_no ILIKE $%d OR a.full_name ILIKE $%d)", argIdx, argIdx)
+		args = append(args, "%"+searchQuery+"%")
+		argIdx++
+	}
+
+	// Count total records
+	var total int
+	countQuery := "SELECT COUNT(*) FROM applications a" + baseWhere
+	err := h.DB.QueryRow(ctx, countQuery, args...).Scan(&total)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch applications"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to count applications"})
+		return
+	}
+
+	// Select records
+	dataQuery := fmt.Sprintf(`
+		SELECT a.id, a.registration_no, a.user_id, a.category_id, jc.code, jc.title,
+		       a.full_name, a.guardian_name, a.dob, a.gender, a.social_category,
+		       a.district_state_pin, a.gov_id_type, a.gov_id_last4, a.highest_qual,
+		       a.training_mode, a.status, a.rejection_reason, a.submitted_at, a.reviewed_at
+		FROM applications a
+		JOIN job_categories jc ON jc.id = a.category_id
+		%s
+		ORDER BY a.submitted_at DESC
+		LIMIT $%d OFFSET $%d
+	`, baseWhere, argIdx, argIdx+1)
+
+	queryArgs := append(args, pageSize, offset)
+	rows, err := h.DB.Query(ctx, dataQuery, queryArgs...)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to query applications"})
 		return
 	}
 	defer rows.Close()
 
 	var apps []gin.H
 	for rows.Next() {
-		var id, regNo, userID, fullName, district, status string
-		var catID int
-		var rejReason *string
-		var submittedAt string
-		rows.Scan(&id, &regNo, &userID, &catID, &fullName, &district, &status, &rejReason, &submittedAt)
+		var (
+			id, regNo, userID, catCode, catTitle, fullName, guardian, gender, socialCat string
+			districtState, govIDType, govIDLast4, highestQual, trainingMode, appStatus string
+			catID                                                                      int
+			dob                                                                        time.Time
+			submittedAt                                                                time.Time
+			rejectionReason                                                            *string
+			reviewedAt                                                                 *time.Time
+		)
+
+		err := rows.Scan(
+			&id, &regNo, &userID, &catID, &catCode, &catTitle,
+			&fullName, &guardian, &dob, &gender, &socialCat,
+			&districtState, &govIDType, &govIDLast4, &highestQual,
+			&trainingMode, &appStatus, &rejectionReason, &submittedAt, &reviewedAt,
+		)
+		if err != nil {
+			continue
+		}
+
 		apps = append(apps, gin.H{
-			"id": id, "registration_no": regNo, "user_id": userID, "category_id": catID,
-			"full_name": fullName, "district_state_pin": district,
-			"status": status, "rejection_reason": rejReason, "submitted_at": submittedAt,
+			"id":                 id,
+			"registration_no":    regNo,
+			"user_id":            userID,
+			"category_id":        catID,
+			"category_code":      catCode,
+			"category_title":     catTitle,
+			"full_name":          fullName,
+			"guardian_name":      guardian,
+			"dob":                dob.Format("2006-01-02"),
+			"gender":             gender,
+			"social_category":    socialCat,
+			"district_state_pin": districtState,
+			"gov_id_type":        govIDType,
+			"gov_id_last4":       govIDLast4,
+			"highest_qual":       highestQual,
+			"training_mode":      trainingMode,
+			"status":             appStatus,
+			"rejection_reason":   rejectionReason,
+			"submitted_at":       submittedAt,
+			"reviewed_at":        reviewedAt,
 		})
 	}
 	if apps == nil {
 		apps = []gin.H{}
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": apps, "total": total, "page": page, "page_size": pageSize})
+	totalPages := (total + pageSize - 1) / pageSize
+	if totalPages == 0 {
+		totalPages = 1
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"data":        apps,
+		"total":       total,
+		"page":        page,
+		"page_size":   pageSize,
+		"total_pages": totalPages,
+	})
 }
 
+// GetApplication returns full applicant dossier and documents for review drawer
+func (h *AdminHandler) GetApplication(c *gin.Context) {
+	ctx := context.Background()
+	appID := c.Param("id")
+
+	query := `
+		SELECT a.id, a.registration_no, a.user_id, a.category_id, jc.code, jc.title,
+		       jc.approval_limit, jc.approved_count, jc.is_approval_open,
+		       a.full_name, a.guardian_name, a.dob, a.gender, a.alt_mobile,
+		       a.gov_id_type, a.gov_id_last4, a.social_category, a.address_full,
+		       a.district_state_pin, a.emergency_contact, a.highest_qual, a.institution_name,
+		       a.occupation, a.prev_training, a.prior_experience, a.disability_req,
+		       a.preferred_centre, a.training_mode, a.bank_holder_name, a.bank_name_branch,
+		       a.account_number, a.ifsc_code, a.documents, a.status,
+		       a.rejection_reason, a.reviewed_by, a.reviewed_at, a.submitted_at
+		FROM applications a
+		JOIN job_categories jc ON jc.id = a.category_id
+		WHERE a.id = $1
+	`
+
+	var (
+		id, regNo, userID, catCode, catTitle, fullName, guardian, gender, govIDType, govIDLast4 string
+		socialCat, addressFull, districtState, highestQual, occupation, trainingMode, status    string
+		catID, approvalLimit, approvedCount                                                     int
+		isApprovalOpen                                                                          bool
+		dob, submittedAt                                                                        time.Time
+		altMobile, institutionName, prevTraining, preferredCentre                               *string
+		bankHolderName, bankNameBranch, accountNumber, ifscCode                                 *string
+		rejectionReason, reviewedBy                                                             *string
+		reviewedAt                                                                              *time.Time
+		emergencyContactRaw, priorExpRaw, disabilityReqRaw, documentsRaw                        []byte
+	)
+
+	err := h.DB.QueryRow(ctx, query, appID).Scan(
+		&id, &regNo, &userID, &catID, &catCode, &catTitle,
+		&approvalLimit, &approvedCount, &isApprovalOpen,
+		&fullName, &guardian, &dob, &gender, &altMobile,
+		&govIDType, &govIDLast4, &socialCat, &addressFull,
+		&districtState, &emergencyContactRaw, &highestQual, &institutionName,
+		&occupation, &prevTraining, &priorExpRaw, &disabilityReqRaw,
+		&preferredCentre, &trainingMode, &bankHolderName, &bankNameBranch,
+		&accountNumber, &ifscCode, &documentsRaw, &status,
+		&rejectionReason, &reviewedBy, &reviewedAt, &submittedAt,
+	)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Application record not found"})
+		return
+	}
+
+	var emergencyContact, priorExperience, disabilityReq, documents interface{}
+	_ = json.Unmarshal(emergencyContactRaw, &emergencyContact)
+	_ = json.Unmarshal(priorExpRaw, &priorExperience)
+	_ = json.Unmarshal(disabilityReqRaw, &disabilityReq)
+	_ = json.Unmarshal(documentsRaw, &documents)
+
+	c.JSON(http.StatusOK, gin.H{
+		"id":                 id,
+		"registration_no":    regNo,
+		"user_id":            userID,
+		"category_id":        catID,
+		"category_code":      catCode,
+		"category_title":     catTitle,
+		"approval_limit":     approvalLimit,
+		"approved_count":     approvedCount,
+		"is_approval_open":   isApprovalOpen,
+		"full_name":          fullName,
+		"guardian_name":      guardian,
+		"dob":                dob.Format("2006-01-02"),
+		"gender":             gender,
+		"alt_mobile":         altMobile,
+		"gov_id_type":        govIDType,
+		"gov_id_last4":       govIDLast4,
+		"social_category":    socialCat,
+		"address_full":       addressFull,
+		"district_state_pin": districtState,
+		"emergency_contact":  emergencyContact,
+		"highest_qual":       highestQual,
+		"institution_name":   institutionName,
+		"occupation":         occupation,
+		"prev_training":      prevTraining,
+		"prior_experience":   priorExperience,
+		"disability_req":     disabilityReq,
+		"preferred_centre":   preferredCentre,
+		"training_mode":      trainingMode,
+		"bank_holder_name":   bankHolderName,
+		"bank_name_branch":   bankNameBranch,
+		"account_number":     accountNumber,
+		"ifsc_code":          ifscCode,
+		"documents":          documents,
+		"status":             status,
+		"rejection_reason":   rejectionReason,
+		"reviewed_by":        reviewedBy,
+		"reviewed_at":        reviewedAt,
+		"submitted_at":       submittedAt,
+	})
+}
+
+// Approve atomically enforces the category quota using PostgreSQL Row-Level Lock (SELECT FOR UPDATE)
 func (h *AdminHandler) Approve(c *gin.Context) {
+	ctx := context.Background()
 	appID := c.Param("id")
 	adminID := c.GetString("user_id")
+	clientIP := c.ClientIP()
 
-	tx, err := h.DB.Begin(context.Background())
+	tx, err := h.DB.Begin(ctx)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Transaction start failed"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to initialize atomic transaction"})
 		return
 	}
-	defer tx.Rollback(context.Background())
+	defer tx.Rollback(ctx)
 
-	// Get category for this application with lock
+	// Step 1: Verify application existence and current status
 	var categoryID int
-	tx.QueryRow(context.Background(),
-		`SELECT category_id FROM applications WHERE id = $1 AND status = 'PENDING'`, appID,
-	).Scan(&categoryID)
-	if categoryID == 0 {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Application not found or not pending"})
+	var currentStatus string
+	err = tx.QueryRow(ctx,
+		`SELECT category_id, status FROM applications WHERE id = $1`, appID,
+	).Scan(&categoryID, &currentStatus)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Application not found"})
 		return
 	}
 
-	// Lock category row
+	if currentStatus != "PENDING" {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": fmt.Sprintf("Application cannot be approved because it is already %s", currentStatus),
+		})
+		return
+	}
+
+	// Step 2: Row-level lock on the target job category
 	var approvalLimit, approvedCount int
-	var isOpen bool
-	err = tx.QueryRow(context.Background(),
-		`SELECT approval_limit, approved_count, is_approval_open FROM job_categories WHERE id = $1 FOR UPDATE`,
+	var isApprovalOpen bool
+	var categoryCode string
+	err = tx.QueryRow(ctx,
+		`SELECT code, approval_limit, approved_count, is_approval_open
+		 FROM job_categories
+		 WHERE id = $1 FOR UPDATE`,
 		categoryID,
-	).Scan(&approvalLimit, &approvedCount, &isOpen)
+	).Scan(&categoryCode, &approvalLimit, &approvedCount, &isApprovalOpen)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to lock category"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to acquire quota lock on artisan category"})
 		return
 	}
 
-	if !isOpen || approvedCount >= approvalLimit {
-		c.JSON(http.StatusConflict, gin.H{"error": "Category approval quota has been reached"})
+	// Step 3: Hard quota enforcement check
+	if !isApprovalOpen || approvedCount >= approvalLimit {
+		// Rollback immediately and return HTTP 409 Conflict
+		c.JSON(http.StatusConflict, gin.H{
+			"error": fmt.Sprintf("Category approval quota for %s has been reached (%d/%d). Approvals are closed.", categoryCode, approvedCount, approvalLimit),
+			"code":  "QUOTA_FULL",
+		})
 		return
 	}
 
+	// Step 4: Advance approval
 	now := time.Now()
-	newCount := approvedCount + 1
-	_, err = tx.Exec(context.Background(),
-		`UPDATE applications SET status='APPROVED', reviewed_by=$1, reviewed_at=$2 WHERE id=$3`,
-		adminID, now, appID)
+	newApprovedCount := approvedCount + 1
+	newIsOpen := newApprovedCount < approvalLimit
+
+	// Update applications
+	_, err = tx.Exec(ctx,
+		`UPDATE applications
+		 SET status = 'APPROVED', reviewed_by = $1, reviewed_at = $2, rejection_reason = NULL
+		 WHERE id = $3 AND status = 'PENDING'`,
+		adminID, now, appID,
+	)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update application"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update candidate approval status"})
 		return
 	}
 
-	newIsOpen := newCount < approvalLimit
-	_, err = tx.Exec(context.Background(),
-		`UPDATE job_categories SET approved_count=$1, is_approval_open=$2 WHERE id=$3`,
-		newCount, newIsOpen, categoryID)
+	// Update category approved headcount and lock flag
+	_, err = tx.Exec(ctx,
+		`UPDATE job_categories
+		 SET approved_count = $1, is_approval_open = $2
+		 WHERE id = $3`,
+		newApprovedCount, newIsOpen, categoryID,
+	)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update category quota"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to increment artisan quota"})
 		return
 	}
 
-	// Audit log
-	tx.Exec(context.Background(),
-		`INSERT INTO audit_log (admin_id, action, target_id) VALUES ($1, 'APPROVE', $2)`,
-		adminID, appID)
+	// Step 5: Append immutable audit log
+	beforeState, _ := json.Marshal(gin.H{
+		"status":         currentStatus,
+		"approved_count": approvedCount,
+		"is_open":        isApprovalOpen,
+	})
+	afterState, _ := json.Marshal(gin.H{
+		"status":         "APPROVED",
+		"approved_count": newApprovedCount,
+		"is_open":        newIsOpen,
+	})
 
-	if err := tx.Commit(context.Background()); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Commit failed"})
+	_, _ = tx.Exec(ctx,
+		`INSERT INTO audit_log (admin_id, action, target_id, ip_address, before_state, after_state)
+		 VALUES ($1, 'APPROVE', $2, $3, $4, $5)`,
+		adminID, appID, clientIP, beforeState, afterState,
+	)
+
+	// Step 6: Commit transaction
+	if err := tx.Commit(ctx); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to commit approval transaction"})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Application approved"})
+	c.JSON(http.StatusOK, gin.H{
+		"message":          "Application approved successfully",
+		"category_code":    categoryCode,
+		"approved_count":   newApprovedCount,
+		"approval_limit":   approvalLimit,
+		"is_approval_open": newIsOpen,
+	})
 }
 
+// Reject updates an application with a mandatory reason within an ACID transaction
 func (h *AdminHandler) Reject(c *gin.Context) {
+	ctx := context.Background()
 	appID := c.Param("id")
 	adminID := c.GetString("user_id")
+	clientIP := c.ClientIP()
 
-	var body struct {
+	var req struct {
 		Reason string `json:"reason" binding:"required"`
 	}
-	if err := c.ShouldBindJSON(&body); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "reason is required"})
+	if err := c.ShouldBindJSON(&req); err != nil || len(strings.TrimSpace(req.Reason)) < 10 {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "A detailed rejection reason of at least 10 characters is required for audit trails.",
+		})
+		return
+	}
+	trimmedReason := strings.TrimSpace(req.Reason)
+
+	tx, err := h.DB.Begin(ctx)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to initialize rejection transaction"})
+		return
+	}
+	defer tx.Rollback(ctx)
+
+	var currentStatus string
+	err = tx.QueryRow(ctx, `SELECT status FROM applications WHERE id = $1`, appID).Scan(&currentStatus)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Application not found"})
+		return
+	}
+
+	if currentStatus != "PENDING" {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": fmt.Sprintf("Application cannot be rejected because it is currently %s", currentStatus),
+		})
 		return
 	}
 
 	now := time.Now()
-	tag, err := h.DB.Exec(context.Background(),
-		`UPDATE applications SET status='REJECTED', rejection_reason=$1, reviewed_by=$2, reviewed_at=$3
-		 WHERE id=$4 AND status='PENDING'`,
-		body.Reason, adminID, now, appID)
-	if err != nil || tag.RowsAffected() == 0 {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Application not found or not pending"})
+	_, err = tx.Exec(ctx,
+		`UPDATE applications
+		 SET status = 'REJECTED', rejection_reason = $1, reviewed_by = $2, reviewed_at = $3
+		 WHERE id = $4 AND status = 'PENDING'`,
+		trimmedReason, adminID, now, appID,
+	)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to reject application"})
 		return
 	}
 
-	h.DB.Exec(context.Background(),
-		`INSERT INTO audit_log (admin_id, action, target_id) VALUES ($1, 'REJECT', $2)`, adminID, appID)
+	beforeState, _ := json.Marshal(gin.H{"status": currentStatus})
+	afterState, _ := json.Marshal(gin.H{"status": "REJECTED", "reason": trimmedReason})
 
-	c.JSON(http.StatusOK, gin.H{"message": "Application rejected"})
+	_, _ = tx.Exec(ctx,
+		`INSERT INTO audit_log (admin_id, action, target_id, ip_address, before_state, after_state)
+		 VALUES ($1, 'REJECT', $2, $3, $4, $5)`,
+		adminID, appID, clientIP, beforeState, afterState,
+	)
+
+	if err := tx.Commit(ctx); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to commit rejection"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Application rejected and logged for audit.",
+	})
+}
+
+// ExportCSV streams a CSV file of verified and approved trainees for training centers
+func (h *AdminHandler) ExportCSV(c *gin.Context) {
+	ctx := context.Background()
+
+	categoryIDStr := c.Query("category_id")
+	status := strings.ToUpper(c.DefaultQuery("status", "APPROVED"))
+
+	whereClause := "WHERE a.status = $1"
+	args := []interface{}{status}
+
+	if categoryIDStr != "" {
+		if catID, err := strconv.Atoi(categoryIDStr); err == nil && catID > 0 {
+			whereClause += " AND a.category_id = $2"
+			args = append(args, catID)
+		}
+	}
+
+	query := fmt.Sprintf(`
+		SELECT a.registration_no, a.full_name, a.guardian_name, jc.code, jc.title,
+		       a.gender, a.dob, a.social_category, a.district_state_pin, a.gov_id_type,
+		       a.gov_id_last4, a.highest_qual, a.training_mode, COALESCE(a.bank_holder_name, ''),
+		       COALESCE(a.bank_name_branch, ''), COALESCE(a.account_number, ''),
+		       COALESCE(a.ifsc_code, ''), a.status, a.submitted_at, a.reviewed_at
+		FROM applications a
+		JOIN job_categories jc ON jc.id = a.category_id
+		%s
+		ORDER BY a.reviewed_at DESC NULLS LAST, a.submitted_at ASC
+	`, whereClause)
+
+	rows, err := h.DB.Query(ctx, query, args...)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to query trainee export records"})
+		return
+	}
+	defer rows.Close()
+
+	fileName := fmt.Sprintf("handloom_trainees_%s_%s.csv", strings.ToLower(status), time.Now().Format("20060102_150405"))
+	c.Header("Content-Type", "text/csv; charset=utf-8")
+	c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", fileName))
+	c.Header("Transfer-Encoding", "chunked")
+
+	// UTF-8 BOM for Microsoft Excel compatibility
+	c.Writer.Write([]byte{0xEF, 0xBB, 0xBF})
+
+	writer := csv.NewWriter(c.Writer)
+	defer writer.Flush()
+
+	headers := []string{
+		"Registration Number",
+		"Trainee Full Name",
+		"Father / Guardian Name",
+		"Job Role Code",
+		"Job Role Title",
+		"Gender",
+		"Date of Birth",
+		"Social Category",
+		"District & State",
+		"Govt ID Type",
+		"Govt ID Last 4",
+		"Highest Qualification",
+		"Training Mode",
+		"Bank Account Holder",
+		"Bank & Branch",
+		"Bank Account Number",
+		"IFSC Code",
+		"Application Status",
+		"Submission Timestamp",
+		"Approval / Review Timestamp",
+	}
+	if err := writer.Write(headers); err != nil {
+		return
+	}
+
+	for rows.Next() {
+		var (
+			regNo, fullName, guardian, catCode, catTitle, gender, socialCat string
+			districtState, govIDType, govIDLast4, highestQual, trainingMode string
+			bankHolder, bankBranch, accountNum, ifsc, appStatus             string
+			dob, submittedAt                                                time.Time
+			reviewedAt                                                      *time.Time
+		)
+
+		err := rows.Scan(
+			&regNo, &fullName, &guardian, &catCode, &catTitle,
+			&gender, &dob, &socialCat, &districtState, &govIDType,
+			&govIDLast4, &highestQual, &trainingMode, &bankHolder,
+			&bankBranch, &accountNum, &ifsc, &appStatus,
+			&submittedAt, &reviewedAt,
+		)
+		if err != nil {
+			continue
+		}
+
+		reviewedAtStr := ""
+		if reviewedAt != nil {
+			reviewedAtStr = reviewedAt.Format("2006-01-02 15:04:05")
+		}
+
+		row := []string{
+			regNo,
+			fullName,
+			guardian,
+			catCode,
+			catTitle,
+			gender,
+			dob.Format("2006-01-02"),
+			socialCat,
+			districtState,
+			govIDType,
+			govIDLast4,
+			highestQual,
+			trainingMode,
+			bankHolder,
+			bankBranch,
+			accountNum,
+			ifsc,
+			appStatus,
+			submittedAt.Format("2006-01-02 15:04:05"),
+			reviewedAtStr,
+		}
+		_ = writer.Write(row)
+	}
 }

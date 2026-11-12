@@ -16,7 +16,11 @@ client.interceptors.response.use(
   (err) => {
     if (err.response?.status === 401) {
       localStorage.removeItem("token");
-      if (window.location.pathname !== "/login" && window.location.pathname !== "/register") {
+      localStorage.removeItem("user");
+      const isAdminPath = window.location.pathname.startsWith("/admin");
+      if (isAdminPath && window.location.pathname !== "/admin/login") {
+        window.location.href = "/admin/login";
+      } else if (!isAdminPath && window.location.pathname !== "/login" && window.location.pathname !== "/register") {
         window.location.href = "/login";
       }
     }

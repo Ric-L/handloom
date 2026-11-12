@@ -93,6 +93,50 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"token": token, "user": user})
 }
 
+// AdminLogin strictly enforces REVIEWER_ADMIN or SUPER_ADMIN roles
+func (h *AuthHandler) AdminLogin(c *gin.Context) {
+	var req LoginRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Mobile number and password are required"})
+		return
+	}
+
+	var user models.User
+	err := h.DB.QueryRow(context.Background(),
+		`SELECT id, mobile_number, email, password_hash, role, created_at FROM users WHERE mobile_number = $1`,
+		req.MobileNumber,
+	).Scan(&user.ID, &user.MobileNumber, &user.Email, &user.PasswordHash, &user.Role, &user.CreatedAt)
+
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid administrator credentials"})
+		return
+	}
+
+	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(req.Password)); err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid administrator credentials"})
+		return
+	}
+
+	// Strictly reject APPLICANT accounts
+	if user.Role != "REVIEWER_ADMIN" && user.Role != "SUPER_ADMIN" {
+		c.JSON(http.StatusForbidden, gin.H{
+			"error": "Access denied: Applicant accounts are not permitted in the Admin Moderation Portal.",
+		})
+		return
+	}
+
+	token, err := h.generateToken(user.ID, user.Role)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate administrator session token"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"token": token,
+		"user":  user,
+	})
+}
+
 func (h *AuthHandler) generateToken(userID, role string) (string, error) {
 	claims := jwt.MapClaims{
 		"user_id": userID,
