@@ -12,6 +12,9 @@ import {
   PhoneCall,
   Home,
   CheckCircle,
+  Bell,
+  Film,
+  Users,
 } from "lucide-react";
 
 export default function AppLayout() {
@@ -36,6 +39,9 @@ export default function AppLayout() {
 
   const navLinks = [
     { to: "/", label: "Home", icon: Home },
+    { to: "/#notification-centre", label: "Notices & Updates", icon: Bell },
+    { to: "/#project-media", label: "Media & Films", icon: Film },
+    { to: "/#project-team", label: "Project Team", icon: Users },
     { to: "/categories", label: "Artisan Trades", icon: Layers },
     ...(token
       ? [
@@ -45,7 +51,27 @@ export default function AppLayout() {
       : []),
   ];
 
-  const isActive = (path: string) => location.pathname === path;
+  const isActive = (path: string) => {
+    if (path.startsWith("/#")) {
+      return location.pathname === "/" && location.hash === path.replace("/", "");
+    }
+    return location.pathname === path;
+  };
+
+  const handleNavClick = (to: string) => {
+    setMobileMenuOpen(false);
+    if (to.startsWith("/#")) {
+      const hash = to.replace("/", "");
+      if (location.pathname !== "/") {
+        navigate(to);
+      } else {
+        const el = document.querySelector(hash);
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth" });
+        }
+      }
+    }
+  };
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans text-slate-800">
@@ -53,7 +79,7 @@ export default function AppLayout() {
       <div className="h-1 w-full bg-gradient-to-r from-amber-500 via-white to-emerald-600" />
 
       {/* 2. Top Government Banner */}
-      <div className="bg-slate-900 text-slate-300 text-xs px-4 sm:px-8 py-2 border-b border-slate-800">
+      <div className="bg-slate-950 text-slate-300 text-xs px-4 sm:px-8 py-2 border-b border-slate-800">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-1 sm:gap-4">
           <div className="flex items-center gap-2 text-[11px] font-medium text-slate-400">
             <span className="text-amber-400 font-bold uppercase tracking-wider">Official Portal</span>
@@ -62,33 +88,33 @@ export default function AppLayout() {
           </div>
           <div className="flex items-center gap-4 text-[11px]">
             <span className="flex items-center gap-1 text-slate-300">
-              <PhoneCall className="w-3 h-3 text-emerald-400" /> Toll-Free Helpline: 1800-200-7890
+              <PhoneCall className="w-3 h-3 text-sky-400" /> Toll-Free Helpline: 1800-200-7890
             </span>
             <span className="text-slate-600">|</span>
             <Link
               to="/admin/login"
               className="text-slate-400 hover:text-white flex items-center gap-1 transition font-medium"
             >
-              <Shield className="w-3 h-3 text-primary-400" /> Admin Moderation Console
+              <Shield className="w-3 h-3 text-blue-400" /> Admin Moderation Console
             </Link>
           </div>
         </div>
       </div>
 
       {/* 3. Main Navigation Header */}
-      <header className="bg-white border-b border-slate-200 shadow-xs sticky top-0 z-40">
+      <header className="bg-white/95 backdrop-blur-md border-b border-slate-200/90 shadow-sm sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-20">
           {/* Logo & Identity */}
           <Link to="/" className="flex items-center gap-3.5 group">
-            <div className="w-12 h-12 bg-gradient-to-br from-primary-800 to-primary-950 rounded-2xl flex items-center justify-center text-2xl shadow-md shadow-primary-950/20 group-hover:scale-105 transition-transform duration-200">
+            <div className="w-12 h-12 bg-gradient-to-br from-blue-700 via-blue-800 to-indigo-950 rounded-2xl flex items-center justify-center text-2xl shadow-md shadow-blue-900/20 group-hover:scale-105 transition-transform duration-200">
               🧵
             </div>
             <div>
               <div className="flex items-center gap-2">
                 <span className="font-extrabold text-xl sm:text-2xl tracking-tight text-slate-950">
-                  Handloom <span className="text-primary-700">Project</span>
+                  Handloom <span className="text-blue-700">Project</span>
                 </span>
-                <span className="text-[10px] font-bold uppercase tracking-wider bg-primary-100 text-primary-900 px-2 py-0.5 rounded-full border border-primary-200 hidden sm:inline-block">
+                <span className="text-[10px] font-bold uppercase tracking-wider bg-blue-50 text-blue-800 px-2.5 py-0.5 rounded-full border border-blue-200 hidden sm:inline-block">
                   Govt. Accredited
                 </span>
               </div>
@@ -99,21 +125,38 @@ export default function AppLayout() {
           </Link>
 
           {/* Desktop Nav Links */}
-          <nav className="hidden md:flex items-center gap-1 lg:gap-2">
-            {navLinks.map(link => {
+          <nav className="hidden lg:flex items-center gap-1">
+            {navLinks.map((link) => {
               const Icon = link.icon;
               const active = isActive(link.to);
-              return (
-                <Link
+              return link.to.startsWith("/#") ? (
+                <a
                   key={link.to}
-                  to={link.to}
-                  className={`px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
+                  href={link.to}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleNavClick(link.to);
+                  }}
+                  className={`px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
                     active
-                      ? "bg-primary-50 text-primary-800 border border-primary-200"
+                      ? "bg-blue-50 text-blue-800 border border-blue-200"
                       : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
                   }`}
                 >
-                  <Icon className={`w-3.5 h-3.5 ${active ? "text-primary-700" : "text-slate-400"}`} />
+                  <Icon className={`w-3.5 h-3.5 ${active ? "text-blue-700" : "text-slate-400"}`} />
+                  {link.label}
+                </a>
+              ) : (
+                <Link
+                  key={link.to}
+                  to={link.to}
+                  className={`px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
+                    active
+                      ? "bg-blue-50 text-blue-800 border border-blue-200"
+                      : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+                  }`}
+                >
+                  <Icon className={`w-3.5 h-3.5 ${active ? "text-blue-700" : "text-slate-400"}`} />
                   {link.label}
                 </Link>
               );
@@ -125,7 +168,7 @@ export default function AppLayout() {
             {token ? (
               <div className="flex items-center gap-3">
                 <div className="flex items-center gap-2 bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200">
-                  <UserIcon className="w-4 h-4 text-primary-700" />
+                  <UserIcon className="w-4 h-4 text-blue-700" />
                   <span className="text-xs font-bold text-slate-800 font-mono">
                     {user?.mobile_number || "Candidate"}
                   </span>
@@ -146,10 +189,10 @@ export default function AppLayout() {
                   Candidate Login
                 </Link>
                 <Link
-                  to="/register"
-                  className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-primary-700 hover:bg-primary-800 shadow-sm shadow-primary-900/20 transition"
+                  to="/apply"
+                  className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-blue-700 via-blue-800 to-indigo-800 hover:from-blue-800 hover:to-indigo-900 shadow-md shadow-blue-900/20 transition"
                 >
-                  New Registration
+                  Apply Online
                 </Link>
               </div>
             )}
@@ -158,7 +201,7 @@ export default function AppLayout() {
           {/* Mobile Menu Button */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+            className="lg:hidden p-2 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100"
           >
             {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
@@ -166,19 +209,33 @@ export default function AppLayout() {
 
         {/* Mobile Dropdown Menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden bg-white border-b border-slate-200 px-4 pt-2 pb-5 space-y-2">
-            {navLinks.map(link => (
-              <Link
-                key={link.to}
-                to={link.to}
-                onClick={() => setMobileMenuOpen(false)}
-                className={`block px-3 py-2.5 rounded-xl text-sm font-semibold ${
-                  isActive(link.to) ? "bg-primary-50 text-primary-800" : "text-slate-700 hover:bg-slate-100"
-                }`}
-              >
-                {link.label}
-              </Link>
-            ))}
+          <div className="lg:hidden bg-white border-b border-slate-200 px-4 pt-2 pb-5 space-y-2">
+            {navLinks.map((link) =>
+              link.to.startsWith("/#") ? (
+                <a
+                  key={link.to}
+                  href={link.to}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleNavClick(link.to);
+                  }}
+                  className="block px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-100"
+                >
+                  {link.label}
+                </a>
+              ) : (
+                <Link
+                  key={link.to}
+                  to={link.to}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={`block px-3 py-2.5 rounded-xl text-sm font-semibold ${
+                    isActive(link.to) ? "bg-blue-50 text-blue-800" : "text-slate-700 hover:bg-slate-100"
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              )
+            )}
             <div className="pt-3 border-t border-slate-100 flex flex-col gap-2">
               {token ? (
                 <>
@@ -205,11 +262,11 @@ export default function AppLayout() {
                     Candidate Login
                   </Link>
                   <Link
-                    to="/register"
+                    to="/apply"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="block w-full text-center py-2.5 rounded-xl text-xs font-bold text-white bg-primary-700"
+                    className="block w-full text-center py-2.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-blue-700 via-blue-800 to-indigo-800"
                   >
-                    New Registration
+                    Apply Online
                   </Link>
                 </>
               )}
@@ -224,12 +281,13 @@ export default function AppLayout() {
       </main>
 
       {/* 5. Modern Government Portal Footer */}
-      <footer className="bg-slate-900 text-slate-400 text-xs border-t border-slate-800 mt-20">
+      <footer className="bg-slate-950 text-slate-400 text-xs border-t border-slate-800 mt-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
             <div className="space-y-3">
               <div className="flex items-center gap-2 text-white font-extrabold text-lg">
-                <span>🧵</span> Handloom Project Portal
+                <span className="w-8 h-8 rounded-lg bg-blue-800 flex items-center justify-center text-base">🧵</span>
+                <span>Handloom Project Portal</span>
               </div>
               <p className="text-slate-400 text-xs leading-relaxed">
                 An affirmative action skill development mission aimed at empowering traditional weavers, textile
@@ -262,17 +320,17 @@ export default function AppLayout() {
               <h4 className="font-bold text-slate-200 text-xs uppercase tracking-wider mb-3">Helpdesk & Support</h4>
               <p className="text-xs text-slate-400 leading-relaxed mb-2">
                 Toll-Free National Artisan Careline:
-                <strong className="block text-emerald-400 text-sm mt-0.5">1800-200-7890</strong>
+                <strong className="block text-sky-400 text-sm mt-0.5 font-bold">1800-200-7890</strong>
               </p>
               <p className="text-[11px] text-slate-500">
-                Email Support: helpdesk@handloom.artisan.gov.in
+                Email Support: helpdesk@handloomproject.gov.in
                 <br />
                 Operating Hours: 09:30 AM to 06:00 PM (Mon-Sat)
               </p>
             </div>
           </div>
 
-          <div className="pt-8 border-t border-slate-800 text-center flex flex-col sm:flex-row items-center justify-between text-[11px] text-slate-500 gap-2">
+          <div className="pt-8 border-t border-slate-900 text-center flex flex-col sm:flex-row items-center justify-between text-[11px] text-slate-500 gap-2">
             <div>
               © 2026 Directorate of Handloom & Skilled Artisan Development. All Rights Reserved.
             </div>
