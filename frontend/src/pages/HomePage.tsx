@@ -63,7 +63,7 @@ export default function HomePage() {
 
           <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-tight text-white drop-shadow-sm">
             Preserving Heritage. <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-sky-200 to-emerald-300">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-sky-200 to-blue-300">
               Mastering Modern Craft.
             </span>
           </h1>
@@ -84,7 +84,7 @@ export default function HomePage() {
               <span className="text-xs text-blue-100 font-medium">Accredited Curricula</span>
             </div>
             <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/15">
-              <span className="text-2xl sm:text-3xl font-black text-emerald-300 block">100% DBT</span>
+              <span className="text-2xl sm:text-3xl font-black text-blue-300 block">100% DBT</span>
               <span className="text-xs text-blue-100 font-medium">Monthly Stipend</span>
             </div>
             <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/15">
@@ -246,8 +246,8 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div className="bg-white/5 backdrop-blur-md p-5 rounded-2xl border border-white/10 space-y-2 hover:border-emerald-400/40 transition">
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-300 flex items-center justify-center font-bold">
+          <div className="bg-white/5 backdrop-blur-md p-5 rounded-2xl border border-white/10 space-y-2 hover:border-blue-400/40 transition">
+            <div className="w-10 h-10 rounded-xl bg-blue-500/20 text-blue-300 flex items-center justify-center font-bold">
               <GraduationCap className="w-5 h-5" />
             </div>
             <h3 className="font-bold text-sm text-white">Master Weaver Mentorship</h3>

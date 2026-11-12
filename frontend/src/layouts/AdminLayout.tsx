@@ -39,7 +39,7 @@ export default function AdminLayout() {
       <div className="bg-slate-950 text-slate-300 text-[11px] px-4 sm:px-8 py-2 border-b border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-1.5">
         <div className="flex items-center gap-2.5">
           <span className="flex items-center gap-1.5 font-bold tracking-wider uppercase text-amber-400">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse inline-block" />
+            <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse inline-block" />
             Official Admin Console
           </span>
           <span className="text-slate-600">|</span>
@@ -49,7 +49,7 @@ export default function AdminLayout() {
         </div>
 
         <div className="flex items-center gap-4 text-slate-400">
-          <span className="flex items-center gap-1 text-[11px] text-emerald-400 font-mono">
+          <span className="flex items-center gap-1 text-[11px] text-sky-400 font-mono">
             <Database className="w-3 h-3" /> ACID Row-Level Locked Quota Guard
           </span>
           <span className="text-slate-700">|</span>
@@ -68,8 +68,8 @@ export default function AdminLayout() {
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
           {/* Logo & Portal Identity */}
           <div className="flex items-center gap-3.5">
-            <div className="w-11 h-11 bg-gradient-to-br from-primary-800 to-slate-950 rounded-2xl flex items-center justify-center text-white shadow-md shadow-primary-950/20 border border-primary-700/30">
-              <ShieldCheck className="w-6 h-6 text-emerald-300" />
+            <div className="w-11 h-11 bg-gradient-to-br from-blue-700 via-primary-800 to-slate-950 rounded-2xl flex items-center justify-center text-white shadow-md shadow-primary-950/20 border border-primary-700/30">
+              <ShieldCheck className="w-6 h-6 text-sky-300" />
             </div>
             <div>
               <div className="flex items-center gap-2.5">
@@ -80,7 +80,7 @@ export default function AdminLayout() {
                   className={`inline-flex items-center gap-1 text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full border shadow-2xs ${
                     isSuperAdmin
                       ? "bg-amber-50 text-amber-800 border-amber-300/80"
-                      : "bg-emerald-50 text-emerald-800 border-emerald-300/80"
+                      : "bg-blue-50 text-blue-800 border-blue-300/80"
                   }`}
                 >
                   {isSuperAdmin && <Crown className="w-3 h-3 text-amber-600" />}

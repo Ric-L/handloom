@@ -89,11 +89,11 @@ export default function QuotaMetricsHeader({
       value: metrics.approved,
       subtext: `${overallApproved} of ${totalSanctionedQuota} capacity (${overallPercentage}%)`,
       icon: CheckCircle2,
-      border: "border-slate-200 hover:border-emerald-300",
+      border: "border-slate-200 hover:border-blue-300",
       bg: "bg-white",
-      iconBg: "bg-emerald-50 text-emerald-700 border border-emerald-100",
-      accent: "bg-emerald-600",
-      indicator: "text-emerald-700 font-bold",
+      iconBg: "bg-blue-50 text-blue-700 border border-blue-100",
+      accent: "bg-blue-600",
+      indicator: "text-blue-700 font-bold",
     },
     {
       label: "REJECTED APPLICATIONS",
@@ -124,15 +124,15 @@ export default function QuotaMetricsHeader({
         };
       case "JQW-03":
         return {
-          pill: "bg-emerald-50 text-emerald-800 border-emerald-200",
-          accent: "from-emerald-600 to-teal-600",
-          activeBg: "bg-emerald-50/30",
+          pill: "bg-blue-50 text-blue-800 border-blue-200",
+          accent: "from-blue-600 to-sky-600",
+          activeBg: "bg-blue-50/30",
         };
       case "LLW-04":
         return {
-          pill: "bg-teal-50 text-teal-800 border-teal-200",
-          accent: "from-teal-600 to-cyan-600",
-          activeBg: "bg-teal-50/30",
+          pill: "bg-sky-50 text-sky-800 border-sky-200",
+          accent: "from-sky-600 to-cyan-600",
+          activeBg: "bg-sky-50/30",
         };
       case "BWA-05":
         return {
@@ -182,8 +182,8 @@ export default function QuotaMetricsHeader({
             <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
               Artisan Admission Quota Status
             </h2>
-            <span className="inline-flex items-center gap-1 text-[11px] font-extrabold uppercase bg-emerald-50 text-emerald-800 border border-emerald-200 px-2.5 py-0.5 rounded-full shadow-2xs">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse" />
+            <span className="inline-flex items-center gap-1 text-[11px] font-extrabold uppercase bg-blue-50 text-blue-800 border border-blue-200 px-2.5 py-0.5 rounded-full shadow-2xs">
+              <span className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-pulse" />
               Live Monitor
             </span>
           </div>
@@ -265,8 +265,8 @@ export default function QuotaMetricsHeader({
           </div>
 
           <div className="flex items-center gap-2 text-xs font-bold">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200">
-              <Unlock className="w-3.5 h-3.5 text-emerald-600" /> Approvals Open
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-blue-50 text-blue-800 border border-blue-200">
+              <Unlock className="w-3.5 h-3.5 text-blue-600" /> Approvals Open
             </span>
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-rose-50 text-rose-800 border border-rose-200">
               <Lock className="w-3.5 h-3.5 text-rose-600" /> Quota Locked (Full)
@@ -316,8 +316,8 @@ export default function QuotaMetricsHeader({
                         <Lock className="w-3 h-3 text-rose-700" /> FULL
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-1 text-[11px] font-black text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full shadow-2xs shrink-0">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block" />
+                      <span className="inline-flex items-center gap-1 text-[11px] font-black text-blue-800 bg-blue-50 border border-blue-200 px-2.5 py-0.5 rounded-full shadow-2xs shrink-0">
+                        <span className="w-1.5 h-1.5 rounded-full bg-blue-500 inline-block" />
                         {cat.remaining_quota} left
                       </span>
                     )}

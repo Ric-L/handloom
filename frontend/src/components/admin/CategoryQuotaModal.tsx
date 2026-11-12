@@ -131,8 +131,8 @@ export default function CategoryQuotaModal({
 
         {/* Feedback Alerts */}
         {successMessage && (
-          <div className="p-3.5 bg-emerald-50 border-b border-emerald-200 text-emerald-900 text-xs font-bold flex items-center gap-2">
-            <Check className="w-4 h-4 text-emerald-600 shrink-0" />
+          <div className="p-3.5 bg-blue-50 border-b border-blue-200 text-blue-900 text-xs font-bold flex items-center gap-2">
+            <Check className="w-4 h-4 text-blue-600 shrink-0" />
             <span>{successMessage}</span>
           </div>
         )}
@@ -212,8 +212,8 @@ export default function CategoryQuotaModal({
                             <Lock className="w-3 h-3 text-rose-600" /> Quota Full
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 text-[10px] font-extrabold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
-                            <Unlock className="w-3 h-3 text-emerald-600" /> Open
+                          <span className="inline-flex items-center gap-1 text-[10px] font-extrabold text-blue-800 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-full">
+                            <Unlock className="w-3 h-3 text-blue-600" /> Open
                           </span>
                         )}
                       </td>

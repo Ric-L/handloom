@@ -94,7 +94,7 @@ const MEDIA_ITEMS: MediaItem[] = [
     location: "Bamboo & Cane Development Institute Campus",
     date: "September 2026",
     description:
-      "Fine bamboo filament processing and structural basketry. Trainees transform native green bamboo into export-grade lampshades, dining ware, and traditional utility containers.",
+      "Fine bamboo filament processing and structural basketry. Trainees transform native raw bamboo into export-grade lampshades, dining ware, and traditional utility containers.",
     credits: "Field Photography: Directorate Extension Wing",
   },
   {

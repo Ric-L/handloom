@@ -159,7 +159,7 @@ export default function AdminDashboardPage() {
                 type="button"
                 onClick={() => handleExport("APPROVED")}
                 disabled={isExporting}
-                className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 rounded-xl transition shadow-2xs disabled:opacity-50 cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-blue-800 bg-blue-50 hover:bg-blue-100 border border-blue-300 rounded-xl transition shadow-2xs disabled:opacity-50 cursor-pointer"
               >
                 <FileSpreadsheet className="w-3.5 h-3.5" />
                 {isExporting ? "Generating CSV..." : "Export Approved Trainees"}
@@ -181,7 +181,7 @@ export default function AdminDashboardPage() {
             {[
               { id: "", label: "All Applications", count: metrics?.total_applied ?? 0 },
               { id: "PENDING", label: "Pending Verification", count: metrics?.pending ?? 0, color: "text-amber-700" },
-              { id: "APPROVED", label: "Approved Candidates", count: metrics?.approved ?? 0, color: "text-emerald-700" },
+              { id: "APPROVED", label: "Approved Candidates", count: metrics?.approved ?? 0, color: "text-blue-700" },
               { id: "REJECTED", label: "Rejected Applications", count: metrics?.rejected ?? 0, color: "text-rose-700" },
             ].map(tab => {
               const active = selectedStatus === tab.id;
@@ -355,7 +355,7 @@ export default function AdminDashboardPage() {
                             className="text-slate-400 hover:text-slate-800 p-0.5 rounded transition"
                           >
                             {isCopied ? (
-                              <Check className="w-3.5 h-3.5 text-emerald-600" />
+                              <Check className="w-3.5 h-3.5 text-blue-600" />
                             ) : (
                               <Copy className="w-3.5 h-3.5" />
                             )}

@@ -18,7 +18,7 @@ export function generateApprovedApplicationPDF(app: ApprovedSlipData) {
   const navyPrimary = [30, 58, 138]; // #1e3a8a
   const slateDark = [51, 65, 85]; // #334155
   const slateLight = [241, 245, 249]; // #f1f5f9
-  const emeraldGreen = [21, 128, 61]; // #15803d
+  const statusBlue = [29, 78, 216]; // #1d4ed8 royal blue
   const goldAccent = [180, 83, 9]; // #b45309
 
   // 1. Double Border Frame
@@ -66,7 +66,7 @@ export function generateApprovedApplicationPDF(app: ApprovedSlipData) {
   doc.rect(ruleStart, ruleY, ruleW, 0.8, "F");
   doc.setFillColor(203, 213, 225); // White/Grey
   doc.rect(ruleStart + ruleW, ruleY, ruleW, 0.8, "F");
-  doc.setFillColor(22, 163, 74); // Green
+  doc.setFillColor(30, 58, 138); // Royal Navy
   doc.rect(ruleStart + ruleW * 2, ruleY, ruleW, 0.8, "F");
 
   // 3. Official Title Banner
@@ -105,13 +105,13 @@ export function generateApprovedApplicationPDF(app: ApprovedSlipData) {
   doc.text(`Applied: ${formatDate(app.submitted_at)}  •  Verified & Sanctioned via ACID Quota Guard`, 17, y + 14);
 
   // Box Right: Status & Sanction Seal
-  doc.setFillColor(240, 253, 244);
-  doc.setDrawColor(187, 247, 208);
+  doc.setFillColor(239, 246, 255);
+  doc.setDrawColor(191, 219, 254);
   doc.roundedRect(115, y, pageWidth - 115 - 14, 16, 1, 1, "FD");
 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(7.5);
-  doc.setTextColor(emeraldGreen[0], emeraldGreen[1], emeraldGreen[2]);
+  doc.setTextColor(statusBlue[0], statusBlue[1], statusBlue[2]);
   doc.text("ADMISSION STATUS:", 118, y + 4.5);
 
   doc.setFont("helvetica", "bold");
@@ -286,7 +286,7 @@ export function generateApprovedApplicationPDF(app: ApprovedSlipData) {
         {
           content: "✓ VERIFIED & LINKED FOR MONTHLY APPRENTICESHIP STIPEND",
           colSpan: 3,
-          styles: { fontStyle: "bold", textColor: [21, 128, 61] },
+          styles: { fontStyle: "bold", textColor: [29, 78, 216] },
         },
       ],
     ],

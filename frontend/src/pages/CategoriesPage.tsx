@@ -60,13 +60,18 @@ export default function CategoriesPage() {
                   {cat.code}
                 </span>
                 <span
-                  className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full ${
+                  className={`inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-0.5 rounded-full ${
                     cat.is_approval_open
-                      ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                      ? "bg-blue-50 text-blue-800 border border-blue-200"
                       : "bg-rose-50 text-rose-700 border border-rose-200"
                   }`}
                 >
-                  {cat.is_approval_open ? "🟢 Admissions Open" : "🔴 Admissions Closed"}
+                  <span
+                    className={`w-1.5 h-1.5 rounded-full ${
+                      cat.is_approval_open ? "bg-blue-600 animate-pulse" : "bg-rose-500"
+                    }`}
+                  />
+                  {cat.is_approval_open ? "Admissions Open" : "Admissions Closed"}
                 </span>
               </div>
 

@@ -150,7 +150,7 @@ export default function ApplicationReviewDrawer({
                     title="Copy Registration Number"
                     className="hover:text-white transition"
                   >
-                    {copiedRegNo ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                    {copiedRegNo ? <Check className="w-3.5 h-3.5 text-sky-400" /> : <Copy className="w-3.5 h-3.5" />}
                   </button>
                 )}
               </span>
@@ -209,7 +209,7 @@ export default function ApplicationReviewDrawer({
                 className={`p-4.5 rounded-2xl border flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
                   isCategoryLocked
                     ? "bg-rose-50/70 border-rose-200 text-rose-950"
-                    : "bg-emerald-50/70 border-emerald-200 text-emerald-950"
+                    : "bg-blue-50/70 border-blue-200 text-blue-950"
                 }`}
               >
                 <div>
@@ -230,7 +230,7 @@ export default function ApplicationReviewDrawer({
                       <Lock className="w-3 h-3" /> QUOTA FULL (LOCKED)
                     </span>
                   ) : (
-                    <span className="text-[11px] font-extrabold text-emerald-800 bg-emerald-200/90 px-2.5 py-0.5 rounded-full inline-block">
+                    <span className="text-[11px] font-extrabold text-blue-800 bg-blue-200/90 px-2.5 py-0.5 rounded-full inline-block">
                       {app.approval_limit - app.approved_count} seats remaining
                     </span>
                   )}
@@ -365,7 +365,7 @@ export default function ApplicationReviewDrawer({
                     <div className="flex items-center gap-2 font-extrabold text-slate-900 text-sm">
                       <CreditCard className="w-5 h-5 text-primary-700" /> DBT Stipend Disbursement Account
                     </div>
-                    <span className="text-[11px] font-bold text-emerald-700 bg-emerald-100 px-2.5 py-0.5 rounded-full border border-emerald-200">
+                    <span className="text-[11px] font-bold text-blue-700 bg-blue-100 px-2.5 py-0.5 rounded-full border border-blue-200">
                       ✓ Direct Benefit Transfer Eligible
                     </span>
                   </div>
@@ -422,7 +422,7 @@ export default function ApplicationReviewDrawer({
                             <span className="text-2xl">{doc.icon}</span>
                             <div>
                               <div className="text-xs font-bold text-slate-900">{doc.label}</div>
-                              <span className="text-[10px] text-emerald-600 font-bold">✓ Verified by Intake Guard</span>
+                              <span className="text-[10px] text-blue-600 font-bold">✓ Verified by Intake Guard</span>
                             </div>
                           </div>
 
@@ -496,7 +496,7 @@ export default function ApplicationReviewDrawer({
                   <button
                     type="button"
                     onClick={() => setConfirmApproveOpen(true)}
-                    className="px-6 py-2.5 text-xs font-extrabold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl transition shadow-md shadow-emerald-700/20 flex items-center gap-1.5 cursor-pointer"
+                    className="px-6 py-2.5 text-xs font-extrabold text-white bg-gradient-to-r from-blue-700 via-blue-800 to-indigo-800 hover:from-blue-800 hover:to-indigo-900 rounded-xl transition shadow-md shadow-blue-900/20 flex items-center gap-1.5 cursor-pointer"
                   >
                     <CheckCircle className="w-4 h-4" /> Approve Candidate
                   </button>
@@ -515,9 +515,9 @@ export default function ApplicationReviewDrawer({
       {confirmApproveOpen && app && (
         <div className="fixed inset-0 z-60 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl space-y-5 border border-slate-200">
-            <div className="flex items-center gap-3 text-emerald-700">
-              <div className="w-10 h-10 rounded-2xl bg-emerald-100 flex items-center justify-center">
-                <CheckCircle className="w-6 h-6 text-emerald-600" />
+            <div className="flex items-center gap-3 text-blue-700">
+              <div className="w-10 h-10 rounded-2xl bg-blue-100 flex items-center justify-center">
+                <CheckCircle className="w-6 h-6 text-blue-600" />
               </div>
               <h3 className="text-lg font-black text-slate-900 tracking-tight">Confirm Candidate Approval</h3>
             </div>
@@ -530,7 +530,7 @@ export default function ApplicationReviewDrawer({
               ?
             </p>
 
-            <div className="bg-emerald-50 border border-emerald-200 p-4 rounded-2xl text-xs text-emerald-950 space-y-1.5 font-medium">
+            <div className="bg-blue-50 border border-blue-200 p-4 rounded-2xl text-xs text-blue-950 space-y-1.5 font-medium">
               <div>
                 Current Approvals: <strong>{app.approved_count}</strong> / {app.approval_limit}
               </div>
@@ -554,7 +554,7 @@ export default function ApplicationReviewDrawer({
               <button
                 onClick={() => approveMutation.mutate(app.id)}
                 disabled={approveMutation.isPending}
-                className="px-5 py-2.5 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl transition disabled:opacity-50 flex items-center gap-1.5 cursor-pointer shadow-md shadow-emerald-700/20"
+                className="px-5 py-2.5 text-xs font-bold text-white bg-gradient-to-r from-blue-700 via-blue-800 to-indigo-800 hover:from-blue-800 hover:to-indigo-900 rounded-xl transition disabled:opacity-50 flex items-center gap-1.5 cursor-pointer shadow-md shadow-blue-900/20"
               >
                 {approveMutation.isPending ? "Executing Atomic Quota Guard..." : "Confirm & Approve"}
               </button>
@@ -619,7 +619,7 @@ export default function ApplicationReviewDrawer({
                 }`}
               />
               <div className="flex justify-between items-center mt-1.5 text-[11px]">
-                <span className={rejectReason.trim().length < 10 ? "text-amber-600 font-bold" : "text-emerald-600 font-bold"}>
+                <span className={rejectReason.trim().length < 10 ? "text-amber-600 font-bold" : "text-blue-600 font-bold"}>
                   {rejectReason.trim().length} / 10 characters minimum
                 </span>
                 {rejectError && <span className="text-rose-600 font-bold">{rejectError}</span>}

@@ -228,16 +228,16 @@ export default function DashboardPage() {
               )}
 
               {app.status === "APPROVED" && (
-                <div className="p-4 bg-emerald-50/90 border border-emerald-200 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-xs text-emerald-950 font-medium">
+                <div className="p-4 bg-blue-50/90 border border-blue-200 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-xs text-blue-950 font-medium">
                   <div className="flex items-start sm:items-center gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-700 shrink-0 border border-emerald-200">
-                      <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                    <div className="w-9 h-9 rounded-xl bg-blue-100 flex items-center justify-center text-blue-700 shrink-0 border border-blue-200">
+                      <CheckCircle2 className="w-5 h-5 text-blue-600" />
                     </div>
                     <div>
-                      <p className="font-extrabold text-emerald-950 text-sm">
+                      <p className="font-extrabold text-blue-950 text-sm">
                         Admission Sanctioned & Confirmed
                       </p>
-                      <p className="text-emerald-800 text-[11px] mt-0.5">
+                      <p className="text-blue-800 text-[11px] mt-0.5">
                         Congratulations! Your artisan training application has been approved. Download your formal confirmation slip below.
                       </p>
                     </div>
@@ -247,7 +247,7 @@ export default function DashboardPage() {
                     type="button"
                     onClick={() => handleDownloadPDF(app.id)}
                     disabled={downloadingId === app.id}
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-700 hover:bg-emerald-800 active:translate-y-px text-white text-xs font-bold rounded-xl shadow-xs transition shrink-0 cursor-pointer disabled:opacity-60"
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-700 via-blue-800 to-indigo-800 hover:from-blue-800 hover:to-indigo-900 active:translate-y-px text-white text-xs font-bold rounded-xl shadow-md shadow-blue-900/20 transition shrink-0 cursor-pointer disabled:opacity-60"
                   >
                     {downloadingId === app.id ? (
                       <>

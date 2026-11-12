@@ -88,8 +88,8 @@ export default function AppLayout() {
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans text-slate-800">
-      {/* 1. National Tricolor Strip */}
-      <div className="h-1.5 w-full bg-gradient-to-r from-amber-500 via-white to-emerald-600 shadow-xs" />
+      {/* 1. Official Blue Gradient Accent Strip */}
+      <div className="h-1.5 w-full bg-gradient-to-r from-blue-900 via-sky-400 to-indigo-800 shadow-xs" />
 
       {/* 2. Top Administrative Utility Banner */}
       <div className="bg-slate-950 text-slate-300 text-xs px-4 sm:px-8 py-2 border-b border-slate-800/80">
@@ -224,7 +224,7 @@ export default function AppLayout() {
                   to="/dashboard"
                   className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200/80 px-3.5 py-2 rounded-xl border border-slate-200 transition"
                 >
-                  <div className="w-2 h-2 rounded-full bg-emerald-500" />
+                  <div className="w-2 h-2 rounded-full bg-blue-600 animate-pulse" />
                   <UserIcon className="w-4 h-4 text-blue-700" />
                   <span className="text-xs font-bold text-slate-800 font-mono">
                     {user?.mobile_number || "Candidate"}

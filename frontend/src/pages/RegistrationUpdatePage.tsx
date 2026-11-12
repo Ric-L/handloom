@@ -229,8 +229,8 @@ export default function RegistrationUpdatePage() {
         )}
 
         {successMsg && (
-          <div className="p-4 bg-emerald-50 border-b border-emerald-200 text-emerald-900 text-xs font-bold flex items-center gap-2">
-            <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
+          <div className="p-4 bg-blue-50 border-b border-blue-200 text-blue-900 text-xs font-bold flex items-center gap-2">
+            <CheckCircle className="w-4 h-4 text-blue-600 shrink-0" />
             <span>{successMsg}</span>
           </div>
         )}

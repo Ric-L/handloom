@@ -90,8 +90,8 @@ export default function FileUploadField({
             {label} {required && <span className="text-rose-500 font-bold">*</span>}
           </span>
           {value && (
-            <span className="text-[10px] font-bold text-emerald-700 flex items-center gap-1">
-              <CheckCircle className="w-3 h-3 text-emerald-600" /> Uploaded
+            <span className="text-[10px] font-bold text-blue-700 flex items-center gap-1">
+              <CheckCircle className="w-3 h-3 text-blue-600" /> Uploaded
             </span>
           )}
         </label>
@@ -111,12 +111,12 @@ export default function FileUploadField({
               error
                 ? "border-rose-400 bg-rose-50/40"
                 : value
-                ? "border-emerald-300 bg-emerald-50/30 text-emerald-950"
+                ? "border-blue-300 bg-blue-50/30 text-blue-950"
                 : "border-slate-300 bg-white hover:border-primary-400 text-slate-600"
             }`}
           >
             <div className="flex items-center gap-2 truncate pr-2">
-              <Upload className={`w-3.5 h-3.5 shrink-0 ${value ? "text-emerald-600" : "text-slate-400"}`} />
+              <Upload className={`w-3.5 h-3.5 shrink-0 ${value ? "text-blue-600" : "text-slate-400"}`} />
               <span className="truncate font-medium text-[11px]">
                 {isUploading
                   ? "Uploading document..."
@@ -176,8 +176,8 @@ export default function FileUploadField({
           {required && <span className="text-rose-600 font-bold">*</span>}
         </label>
         {value ? (
-          <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-            <CheckCircle className="w-3 h-3 text-emerald-600" /> Attached
+          <span className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-800 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200">
+            <CheckCircle className="w-3 h-3 text-blue-600" /> Attached
           </span>
         ) : (
           <span className="text-[10px] text-slate-400 font-medium">Pending Upload</span>

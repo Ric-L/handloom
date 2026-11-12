@@ -109,7 +109,7 @@ export default function AdminApplicationsPage() {
                           <button
                             onClick={() => approve.mutate(app.id)}
                             disabled={approve.isPending}
-                            className="bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1 rounded text-xs font-semibold transition"
+                            className="bg-blue-600 hover:bg-blue-700 text-white px-2.5 py-1 rounded text-xs font-semibold transition"
                           >
                             Approve
                           </button>
