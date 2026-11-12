@@ -1,5 +1,7 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { getMyApplications } from "../api";
+import { getMyApplications, getApprovedApplicationSlip } from "../api";
+import { generateApprovedApplicationPDF } from "../lib/generateApprovedApplicationPDF";
 import { formatDate, statusBadgeColor } from "../lib/utils";
 import { Link } from "react-router-dom";
 import {
@@ -12,14 +14,34 @@ import {
   AlertCircle,
   ShieldCheck,
   CheckCircle2,
+  Download,
+  FileText,
 } from "lucide-react";
 
 export default function DashboardPage() {
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
+  const [downloadError, setDownloadError] = useState<string | null>(null);
+
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ["myApplications"],
     queryFn: getMyApplications,
     staleTime: 5000,
   });
+
+  const handleDownloadPDF = async (appId: string) => {
+    try {
+      setDownloadError(null);
+      setDownloadingId(appId);
+      const slipData = await getApprovedApplicationSlip(appId);
+      generateApprovedApplicationPDF(slipData);
+    } catch (err: any) {
+      setDownloadError(
+        err.response?.data?.error || "Failed to download approved application PDF. Please try again."
+      );
+    } finally {
+      setDownloadingId(null);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -115,7 +137,7 @@ export default function DashboardPage() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2.5">
                   <span
                     className={`inline-block px-3 py-1 rounded-full text-xs font-extrabold ${statusBadgeColor(
                       app.status
@@ -127,8 +149,38 @@ export default function DashboardPage() {
                       ? "🟢 SELECTED FOR ADMISSION"
                       : "🔴 APPLICATION NOT APPROVED"}
                   </span>
+
+                  {app.status === "APPROVED" && (
+                    <button
+                      type="button"
+                      onClick={() => handleDownloadPDF(app.id)}
+                      disabled={downloadingId === app.id}
+                      className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-primary-700 hover:bg-primary-800 active:translate-y-px text-white text-xs font-bold rounded-xl shadow-xs transition cursor-pointer disabled:opacity-60"
+                      title="Download Official Enrolment Confirmation Slip"
+                    >
+                      {downloadingId === app.id ? (
+                        <>
+                          <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          <span>Generating PDF...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Download className="w-3.5 h-3.5" />
+                          <span>Download Enrolment PDF</span>
+                        </>
+                      )}
+                    </button>
+                  )}
                 </div>
               </div>
+
+              {/* Download Error Banner */}
+              {downloadError && downloadingId === null && (
+                <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-800 flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+                  <span>{downloadError}</span>
+                </div>
+              )}
 
               {/* Candidate Info Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs bg-slate-50 p-4 rounded-xl border border-slate-100">
@@ -165,11 +217,39 @@ export default function DashboardPage() {
               )}
 
               {app.status === "APPROVED" && (
-                <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-900 flex items-center gap-2 font-medium">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span>
-                    Congratulations! Your application has been approved. The training center will contact your registered mobile number for batch induction.
-                  </span>
+                <div className="p-4 bg-emerald-50/90 border border-emerald-200 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-xs text-emerald-950 font-medium">
+                  <div className="flex items-start sm:items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-700 shrink-0 border border-emerald-200">
+                      <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                    </div>
+                    <div>
+                      <p className="font-extrabold text-emerald-950 text-sm">
+                        Admission Sanctioned & Confirmed
+                      </p>
+                      <p className="text-emerald-800 text-[11px] mt-0.5">
+                        Congratulations! Your artisan training application has been approved. Download your formal confirmation slip below.
+                      </p>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => handleDownloadPDF(app.id)}
+                    disabled={downloadingId === app.id}
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-700 hover:bg-emerald-800 active:translate-y-px text-white text-xs font-bold rounded-xl shadow-xs transition shrink-0 cursor-pointer disabled:opacity-60"
+                  >
+                    {downloadingId === app.id ? (
+                      <>
+                        <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        <span>Generating PDF...</span>
+                      </>
+                    ) : (
+                      <>
+                        <FileText className="w-4 h-4" />
+                        <span>Download Enrolment Slip (PDF)</span>
+                      </>
+                    )}
+                  </button>
                 </div>
               )}
 

@@ -102,6 +102,38 @@ export interface AdminMetrics {
   categories: CategoryMetric[];
 }
 
+export interface ApprovedSlipData {
+  id: string;
+  registration_no: string;
+  category_id: number;
+  category_code: string;
+  category_title: string;
+  full_name: string;
+  guardian_name: string;
+  dob: string;
+  gender: Gender;
+  alt_mobile?: string;
+  gov_id_type: string;
+  gov_id_last4: string;
+  social_category: SocialCategory;
+  address_full: string;
+  district_state_pin: string;
+  highest_qual: HighestQual;
+  institution_name?: string;
+  occupation?: Occupation;
+  prev_training?: string;
+  preferred_centre?: string;
+  training_mode: TrainingMode;
+  bank_holder_name?: string;
+  bank_name_branch?: string;
+  account_number?: string;
+  ifsc_code?: string;
+  status: "APPROVED";
+  submitted_at: string;
+  reviewed_at?: string;
+  reviewed_by?: string;
+}
+
 export interface PaginatedApplicationsResponse {
   data: Application[];
   total: number;

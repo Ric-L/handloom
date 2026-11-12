@@ -279,3 +279,107 @@ func (h *ApplicationHandler) MyApplications(c *gin.Context) {
 
 	c.JSON(http.StatusOK, apps)
 }
+
+// GetApprovedSlip returns full verified details for an approved application for PDF generation
+func (h *ApplicationHandler) GetApprovedSlip(c *gin.Context) {
+	ctx := context.Background()
+	appID := c.Param("id")
+	userID := c.GetString("user_id")
+	userRole := c.GetString("role")
+	if userRole == "" {
+		userRole = c.GetString("user_role")
+	}
+
+	if userID == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized session"})
+		return
+	}
+
+	isAdmin := (userRole == "SUPER_ADMIN" || userRole == "REVIEWER_ADMIN")
+
+	query := `
+		SELECT a.id, a.registration_no, a.user_id, a.category_id, jc.code, jc.title,
+		       a.full_name, a.guardian_name, a.dob, a.gender, a.alt_mobile,
+		       a.gov_id_type, a.gov_id_last4, a.social_category, a.address_full,
+		       a.district_state_pin, a.highest_qual, a.institution_name,
+		       a.occupation, a.prev_training, a.preferred_centre, a.training_mode,
+		       a.bank_holder_name, a.bank_name_branch, a.account_number, a.ifsc_code,
+		       a.status, a.reviewed_by, a.reviewed_at, a.submitted_at
+		FROM applications a
+		JOIN job_categories jc ON jc.id = a.category_id
+		WHERE a.id = $1
+	`
+
+	var (
+		id, regNo, appUserID, catCode, catTitle, fullName, guardian, gender, govIDType, govIDLast4 string
+		socialCat, addressFull, districtState, highestQual, occupation, trainingMode, status    string
+		catID                                                                                   int
+		dob, submittedAt                                                                        time.Time
+		altMobile, institutionName, prevTraining, preferredCentre                               *string
+		bankHolderName, bankNameBranch, accountNumber, ifscCode                                 *string
+		reviewedBy                                                                              *string
+		reviewedAt                                                                              *time.Time
+	)
+
+	err := h.DB.QueryRow(ctx, query, appID).Scan(
+		&id, &regNo, &appUserID, &catID, &catCode, &catTitle,
+		&fullName, &guardian, &dob, &gender, &altMobile,
+		&govIDType, &govIDLast4, &socialCat, &addressFull,
+		&districtState, &highestQual, &institutionName,
+		&occupation, &prevTraining, &preferredCentre, &trainingMode,
+		&bankHolderName, &bankNameBranch, &accountNumber, &ifscCode,
+		&status, &reviewedBy, &reviewedAt, &submittedAt,
+	)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Application record not found"})
+		return
+	}
+
+	// Permission check: if regular applicant, can only download own approved application
+	if !isAdmin && appUserID != userID {
+		c.JSON(http.StatusForbidden, gin.H{"error": "You do not have permission to view this application"})
+		return
+	}
+
+	// Status check: Must be APPROVED to download enrolment slip
+	if status != "APPROVED" {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Enrolment slip is only accessible for approved applications."})
+		return
+	}
+
+	res := gin.H{
+		"id":                 id,
+		"registration_no":    regNo,
+		"category_id":        catID,
+		"category_code":      catCode,
+		"category_title":     catTitle,
+		"full_name":          fullName,
+		"guardian_name":      guardian,
+		"dob":                dob.Format("2006-01-02"),
+		"gender":             gender,
+		"alt_mobile":         altMobile,
+		"gov_id_type":        govIDType,
+		"gov_id_last4":       govIDLast4,
+		"social_category":    socialCat,
+		"address_full":       addressFull,
+		"district_state_pin": districtState,
+		"highest_qual":       highestQual,
+		"institution_name":   institutionName,
+		"occupation":         occupation,
+		"prev_training":      prevTraining,
+		"preferred_centre":   preferredCentre,
+		"training_mode":      trainingMode,
+		"bank_holder_name":   bankHolderName,
+		"bank_name_branch":   bankNameBranch,
+		"account_number":     accountNumber,
+		"ifsc_code":          ifscCode,
+		"status":             status,
+		"submitted_at":       submittedAt.Format(time.RFC3339),
+		"reviewed_by":        reviewedBy,
+	}
+	if reviewedAt != nil {
+		res["reviewed_at"] = reviewedAt.Format(time.RFC3339)
+	}
+
+	c.JSON(http.StatusOK, res)
+}

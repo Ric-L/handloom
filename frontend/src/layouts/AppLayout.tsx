@@ -86,7 +86,7 @@ export default function AppLayout() {
             <div>
               <div className="flex items-center gap-2">
                 <span className="font-extrabold text-xl sm:text-2xl tracking-tight text-slate-950">
-                  Kala<span className="text-primary-700">Kriti</span>
+                  Handloom <span className="text-primary-700">Project</span>
                 </span>
                 <span className="text-[10px] font-bold uppercase tracking-wider bg-primary-100 text-primary-900 px-2 py-0.5 rounded-full border border-primary-200 hidden sm:inline-block">
                   Govt. Accredited
@@ -229,7 +229,7 @@ export default function AppLayout() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
             <div className="space-y-3">
               <div className="flex items-center gap-2 text-white font-extrabold text-lg">
-                <span>🧵</span> KalaKriti Handloom Portal
+                <span>🧵</span> Handloom Project Portal
               </div>
               <p className="text-slate-400 text-xs leading-relaxed">
                 An affirmative action skill development mission aimed at empowering traditional weavers, textile

@@ -129,13 +129,13 @@ export default function ApplyPage() {
   // Success Confirmation Screen (Strictly hiding reference/application numbers)
   if (successSubmitted) {
     return (
-      <div className="max-w-xl mx-auto my-12 bg-white rounded-3xl shadow-xl border border-emerald-200 p-8 sm:p-10 text-center space-y-6">
-        <div className="w-16 h-16 bg-emerald-100 text-emerald-700 rounded-2xl flex items-center justify-center mx-auto shadow-md shadow-emerald-700/10">
+      <div className="max-w-xl mx-auto my-12 bg-white rounded-3xl shadow-xl border border-primary-200 p-8 sm:p-10 text-center space-y-6">
+        <div className="w-16 h-16 bg-primary-100 text-primary-700 rounded-2xl flex items-center justify-center mx-auto shadow-md shadow-primary-700/10">
           <CheckCircle2 className="w-9 h-9" />
         </div>
 
         <div>
-          <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
+          <span className="text-xs font-bold uppercase tracking-wider text-primary-700 bg-primary-50 px-3 py-1 rounded-full border border-primary-200">
             Submission Confirmed
           </span>
           <h2 className="text-2xl font-black text-slate-900 mt-2">Application Saved Successfully!</h2>

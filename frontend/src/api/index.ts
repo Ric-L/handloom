@@ -4,6 +4,7 @@ import type {
   AuthResponse,
   Application,
   ApplicationDetail,
+  ApprovedSlipData,
   TrackResponse,
   AdminMetrics,
   JobCategory,
@@ -37,6 +38,9 @@ export const submitApplication = (data: any) =>
     .then(r => r.data);
 
 export const getMyApplications = () => client.get<Application[]>("/applications/my").then(r => r.data);
+
+export const getApprovedApplicationSlip = (id: string) =>
+  client.get<ApprovedSlipData>(`/applications/${id}/approved-slip`).then(r => r.data);
 
 export const getReceipt = (id: string) =>
   client.get(`/applications/my/${id}/receipt`, { responseType: "blob" }).then(r => r.data);

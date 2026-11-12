@@ -117,7 +117,7 @@ export default function ApplicationReviewDrawer({
     setRejectError("");
     const validation = rejectSchema.safeParse({ reason: rejectReason });
     if (!validation.success) {
-      setRejectError(validation.error.errors[0].message);
+      setRejectError(validation.error.issues?.[0]?.message || "Rejection reason must be at least 10 characters long");
       return;
     }
     rejectMutation.mutate({ id: applicationId, reason: rejectReason.trim() });

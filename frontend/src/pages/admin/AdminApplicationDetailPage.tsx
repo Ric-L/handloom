@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getAdminApplication, approveApplication, rejectApplication } from "../../api";
+import { generateApprovedApplicationPDF } from "../../lib/generateApprovedApplicationPDF";
 import { formatDate, statusBadgeColor } from "../../lib/utils";
 import {
   ArrowLeft,
@@ -29,6 +30,7 @@ import {
   ChevronRight,
   ZoomIn,
   X,
+  Download,
 } from "lucide-react";
 import { z } from "zod";
 
@@ -112,7 +114,7 @@ export default function AdminApplicationDetailPage() {
     setRejectError("");
     const validation = rejectSchema.safeParse({ reason: rejectReason });
     if (!validation.success) {
-      setRejectError(validation.error.errors[0].message);
+      setRejectError(validation.error.issues?.[0]?.message || "Rejection reason must be at least 10 characters long");
       return;
     }
     rejectMutation.mutate({ appId: id, reason: rejectReason.trim() });
@@ -265,8 +267,20 @@ export default function AdminApplicationDetailPage() {
                 )}
               </>
             ) : (
-              <div className="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 font-bold text-xs border border-slate-200">
-                Application Decision: <strong className="text-slate-950 uppercase">{app.status}</strong>
+              <div className="flex items-center gap-2.5">
+                <div className="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 font-bold text-xs border border-slate-200">
+                  Decision: <strong className="text-slate-950 uppercase">{app.status}</strong>
+                </div>
+
+                {app.status === "APPROVED" && (
+                  <button
+                    type="button"
+                    onClick={() => generateApprovedApplicationPDF(app as any)}
+                    className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary-700 hover:bg-primary-800 text-white font-bold text-xs rounded-xl shadow-xs transition cursor-pointer"
+                  >
+                    <Download className="w-3.5 h-3.5" /> Download Enrolment Slip (PDF)
+                  </button>
+                )}
               </div>
             )}
           </div>
@@ -765,3 +779,4 @@ export default function AdminApplicationDetailPage() {
     </div>
   );
 }
+

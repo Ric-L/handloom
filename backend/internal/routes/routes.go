@@ -34,6 +34,7 @@ func Register(r *gin.Engine, pool *pgxpool.Pool, cfg *config.Config) {
 	// 3. Applicant Endpoints (Authenticated Applicant)
 	v1.POST("/applications", authM, appH.Submit)
 	v1.GET("/applications/my", authM, appH.MyApplications)
+	v1.GET("/applications/:id/approved-slip", authM, appH.GetApprovedSlip)
 
 	// 4. Admin Moderation & Atomic Quota API (Authenticated Reviewer / Super Admin)
 	admin := v1.Group("/admin", adminM)
