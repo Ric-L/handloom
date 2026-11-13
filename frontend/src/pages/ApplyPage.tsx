@@ -22,6 +22,8 @@ import {
   Award,
   Layers,
   ChevronDown,
+  FileText,
+  Paperclip,
 } from "lucide-react";
 
 export default function ApplyPage() {
@@ -58,7 +60,10 @@ export default function ApplyPage() {
   const [bankNameBranch, setBankNameBranch] = useState("");
   const [accountNumber, setAccountNumber] = useState("");
   const [ifscCode, setIfscCode] = useState("");
+
+  // Document Checklist (Optional supporting document uploads)
   const [documents, setDocuments] = useState<Record<string, string>>({});
+  const [otherDocLabel, setOtherDocLabel] = useState("");
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -125,6 +130,9 @@ export default function ApplyPage() {
       const mergedDocs = { ...documents };
       if (photographUrl) {
         mergedDocs["photograph"] = photographUrl;
+      }
+      if (otherDocLabel.trim()) {
+        mergedDocs["other_doc_label"] = otherDocLabel.trim();
       }
 
       const payload = {
@@ -352,7 +360,7 @@ export default function ApplyPage() {
       )}
 
       {/* Main Form Form */}
-      <form onSubmit={handleSubmit} className="bg-white rounded-3xl border border-slate-200 shadow-md p-6 sm:p-8 space-y-8">
+      <form onSubmit={handleSubmit} className="bg-white rounded-3xl border border-slate-200 shadow-md p-6 sm:p-8 space-y-10">
         {/* ============================================================== */}
         {/* SECTION 1: APPLICANT DETAILS (2-Column Grid)                  */}
         {/* ============================================================== */}
@@ -480,7 +488,7 @@ export default function ApplyPage() {
             <div>
               <FileUploadField
                 compact
-                label="Upload Photograph"
+                label="Recent Passport-Size Photograph"
                 required
                 accept="image/jpeg,image/png"
                 value={photographUrl}
@@ -621,48 +629,183 @@ export default function ApplyPage() {
                   />
                 </div>
               </div>
-
-              {/* Supporting Document Uploads */}
-              <div className="pt-3 border-t border-slate-100">
-                <span className="block font-bold text-slate-700 mb-2">Upload Supporting Documents:</span>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <FileUploadField
-                    label="Identity Proof (Aadhaar / Voter ID)"
-                    accept="image/*,application/pdf"
-                    value={documents["id_proof"] || ""}
-                    onChange={(url) => setDocuments((prev) => ({ ...prev, id_proof: url }))}
-                  />
-                  <FileUploadField
-                    label="Bank Passbook Front Page"
-                    accept="image/*,application/pdf"
-                    value={documents["bank_passbook"] || ""}
-                    onChange={(url) => setDocuments((prev) => ({ ...prev, bank_passbook: url }))}
-                  />
-                  <FileUploadField
-                    label="Residential Address Proof"
-                    accept="image/*,application/pdf"
-                    value={documents["address_proof"] || ""}
-                    onChange={(url) => setDocuments((prev) => ({ ...prev, address_proof: url }))}
-                  />
-                  <FileUploadField
-                    label="Artisan / Caste Certificate (if applicable)"
-                    accept="image/*,application/pdf"
-                    value={documents["category_disability_cert"] || ""}
-                    onChange={(url) => setDocuments((prev) => ({ ...prev, category_disability_cert: url }))}
-                  />
-                </div>
-              </div>
             </div>
           )}
         </div>
 
         {/* ============================================================== */}
-        {/* SECTION 2: DECLARATION (Checkbox)                             */}
+        {/* SECTION 2: 5. DOCUMENT CHECKLIST (OPTIONAL UPLOADS)            */}
+        {/* ============================================================== */}
+        <div className="space-y-4 pt-4 border-t border-slate-100">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-slate-100">
+            <div className="flex items-center gap-2.5">
+              <span className="w-6 h-6 rounded-full bg-blue-800 text-white font-black text-xs flex items-center justify-center shrink-0">
+                2
+              </span>
+              <div>
+                <h3 className="text-sm font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-blue-700" />
+                  <span>5. Document Checklist (Optional Supporting Uploads)</span>
+                </h3>
+              </div>
+            </div>
+            <span className="text-[11px] font-semibold text-blue-800 bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-200 self-start sm:self-auto">
+              All uploads optional • Max 5MB each (PDF, JPG, PNG)
+            </span>
+          </div>
+
+          <p className="text-xs text-slate-500 leading-relaxed">
+            Applicants may optionally upload digital copies of their documents now for faster verification. Any documents not uploaded online can be physically produced during centre batch induction.
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
+            {/* 1. Recent passport-size photograph */}
+            <div className="bg-slate-50/70 p-4 rounded-2xl border border-slate-200 hover:border-blue-300 transition space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                  <span className="text-blue-700 font-black">■</span>
+                  <span>Recent passport-size photograph</span>
+                </span>
+                <span className="text-[10px] text-slate-400 font-medium">Optional</span>
+              </div>
+              <FileUploadField
+                compact
+                label="Photograph Copy"
+                accept="image/jpeg,image/png"
+                value={documents["photograph"] || photographUrl}
+                onChange={(url) => {
+                  setDocuments((prev) => ({ ...prev, photograph: url }));
+                  if (!photographUrl) setPhotographUrl(url);
+                }}
+              />
+            </div>
+
+            {/* 2. Identity proof (as permitted by scheme) */}
+            <div className="bg-slate-50/70 p-4 rounded-2xl border border-slate-200 hover:border-blue-300 transition space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                  <span className="text-blue-700 font-black">■</span>
+                  <span>Identity proof (as permitted by scheme)</span>
+                </span>
+                <span className="text-[10px] text-slate-400 font-medium">Optional</span>
+              </div>
+              <FileUploadField
+                compact
+                label="Aadhaar / Voter ID / PAN"
+                accept="image/*,application/pdf"
+                value={documents["id_proof"] || ""}
+                onChange={(url) => setDocuments((prev) => ({ ...prev, id_proof: url }))}
+              />
+            </div>
+
+            {/* 3. Address proof (if required) */}
+            <div className="bg-slate-50/70 p-4 rounded-2xl border border-slate-200 hover:border-blue-300 transition space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                  <span className="text-blue-700 font-black">■</span>
+                  <span>Address proof (if required)</span>
+                </span>
+                <span className="text-[10px] text-slate-400 font-medium">Optional</span>
+              </div>
+              <FileUploadField
+                compact
+                label="Electricity Bill / Domicile / Ration"
+                accept="image/*,application/pdf"
+                value={documents["address_proof"] || ""}
+                onChange={(url) => setDocuments((prev) => ({ ...prev, address_proof: url }))}
+              />
+            </div>
+
+            {/* 4. Educational certificate (if available/required) */}
+            <div className="bg-slate-50/70 p-4 rounded-2xl border border-slate-200 hover:border-blue-300 transition space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                  <span className="text-blue-700 font-black">■</span>
+                  <span>Educational certificate (if available/required)</span>
+                </span>
+                <span className="text-[10px] text-slate-400 font-medium">Optional</span>
+              </div>
+              <FileUploadField
+                compact
+                label="Class X / Marksheet / Diploma"
+                accept="image/*,application/pdf"
+                value={documents["edu_cert"] || ""}
+                onChange={(url) => setDocuments((prev) => ({ ...prev, edu_cert: url }))}
+              />
+            </div>
+
+            {/* 5. Bank passbook copy (only if required) */}
+            <div className="bg-slate-50/70 p-4 rounded-2xl border border-slate-200 hover:border-blue-300 transition space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                  <span className="text-blue-700 font-black">■</span>
+                  <span>Bank passbook copy (only if required)</span>
+                </span>
+                <span className="text-[10px] text-slate-400 font-medium">Optional</span>
+              </div>
+              <FileUploadField
+                compact
+                label="Passbook / Cancelled Cheque"
+                accept="image/*,application/pdf"
+                value={documents["bank_passbook"] || ""}
+                onChange={(url) => setDocuments((prev) => ({ ...prev, bank_passbook: url }))}
+              />
+            </div>
+
+            {/* 6. Category/disability certificate (only if applicable and required) */}
+            <div className="bg-slate-50/70 p-4 rounded-2xl border border-slate-200 hover:border-blue-300 transition space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                  <span className="text-blue-700 font-black">■</span>
+                  <span>Category/disability certificate (if applicable)</span>
+                </span>
+                <span className="text-[10px] text-slate-400 font-medium">Optional</span>
+              </div>
+              <FileUploadField
+                compact
+                label="OBC / SC / ST / Disability Cert"
+                accept="image/*,application/pdf"
+                value={documents["category_disability_cert"] || ""}
+                onChange={(url) => setDocuments((prev) => ({ ...prev, category_disability_cert: url }))}
+              />
+            </div>
+
+            {/* 7. Other Document: with custom description input */}
+            <div className="bg-slate-50/70 p-4 rounded-2xl border border-slate-200 hover:border-blue-300 transition space-y-2 md:col-span-2">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                  <span className="text-blue-700 font-black">■</span>
+                  <span>Other Document (Optional)</span>
+                </span>
+                <div className="flex items-center gap-2 flex-1 max-w-sm sm:ml-4">
+                  <span className="text-xs font-bold text-slate-500 whitespace-nowrap">Document Label:</span>
+                  <input
+                    type="text"
+                    placeholder="e.g. Master Weaver Experience Letter"
+                    value={otherDocLabel}
+                    onChange={(e) => setOtherDocLabel(e.target.value)}
+                    className="w-full px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none font-medium text-slate-800"
+                  />
+                </div>
+              </div>
+              <FileUploadField
+                compact
+                label={otherDocLabel.trim() ? otherDocLabel.trim() : "Other Supporting Document"}
+                accept="image/*,application/pdf"
+                value={documents["other_doc"] || ""}
+                onChange={(url) => setDocuments((prev) => ({ ...prev, other_doc: url }))}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* ============================================================== */}
+        {/* SECTION 3: DECLARATION (Checkbox)                             */}
         {/* ============================================================== */}
         <div className="space-y-4 pt-4 border-t border-slate-100">
           <div className="flex items-center gap-2.5">
             <span className="w-6 h-6 rounded-full bg-blue-800 text-white font-black text-xs flex items-center justify-center shrink-0">
-              2
+              3
             </span>
             <h3 className="text-sm font-extrabold text-slate-900">Declaration</h3>
           </div>
