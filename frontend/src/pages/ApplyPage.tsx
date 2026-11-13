@@ -24,6 +24,9 @@ import {
   ChevronDown,
   FileText,
   Paperclip,
+  ArrowLeft,
+  Lock,
+  ExternalLink,
 } from "lucide-react";
 
 export default function ApplyPage() {
@@ -65,6 +68,10 @@ export default function ApplyPage() {
   const [documents, setDocuments] = useState<Record<string, string>>({});
   const [otherDocLabel, setOtherDocLabel] = useState("");
 
+  // Step Review & Confirmation Mode
+  const [isReviewMode, setIsReviewMode] = useState(false);
+  const [confirmedReview, setConfirmedReview] = useState(false);
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submittedData, setSubmittedData] = useState<{
@@ -90,12 +97,12 @@ export default function ApplyPage() {
     return categories.find((c) => String(c.id) === String(selectedRoleId));
   }, [categories, selectedRoleId]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleProceedToReview = (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
     if (!selectedRoleId) {
-      setError("Please select an accredited artisan trade before submitting.");
+      setError("Please select an accredited artisan trade before continuing.");
       return;
     }
 
@@ -120,7 +127,21 @@ export default function ApplyPage() {
     }
 
     if (!declaration) {
-      setError("Please agree to the declaration statement.");
+      setError("Please agree to the applicant declaration checkbox.");
+      return;
+    }
+
+    // Switch to complete review mode and scroll to top
+    setIsReviewMode(true);
+    setConfirmedReview(false);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handleFinalSubmit = async () => {
+    setError(null);
+
+    if (!confirmedReview) {
+      setError("You must verify and confirm that all details and documents are accurate before final submission.");
       return;
     }
 
@@ -227,15 +248,9 @@ export default function ApplyPage() {
         <div className="flex flex-col sm:flex-row justify-center gap-3 pt-2">
           <Link
             to="/dashboard"
-            className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-blue-700 via-blue-800 to-indigo-800 hover:from-blue-800 hover:to-indigo-900 text-white font-bold px-6 py-3 rounded-xl text-xs shadow-md shadow-blue-900/20 transition"
+            className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-blue-700 via-blue-800 to-indigo-800 hover:from-blue-800 hover:to-indigo-900 text-white font-bold px-6 py-3 rounded-xl text-xs shadow-md shadow-blue-900/20 transition cursor-pointer"
           >
-            View in My Applications <ArrowRight className="w-4 h-4" />
-          </Link>
-          <Link
-            to={`/apply/update/${submittedData.id}`}
-            className="inline-flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-5 py-3 rounded-xl text-xs transition border border-slate-200"
-          >
-            Complete Extended Dossier & Bank Details
+            Go to My Applications <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
       </div>
@@ -359,8 +374,351 @@ export default function ApplyPage() {
         </div>
       )}
 
-      {/* Main Form Form */}
-      <form onSubmit={handleSubmit} className="bg-white rounded-3xl border border-slate-200 shadow-md p-6 sm:p-8 space-y-10">
+      {/* Review Screen or Main Form Form */}
+      {isReviewMode ? (
+        <div className="bg-white rounded-3xl border border-blue-200/90 shadow-xl overflow-hidden space-y-8 p-6 sm:p-9">
+          {/* Review Header Banner */}
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-blue-700 text-white flex items-center justify-center shrink-0 shadow-md shadow-blue-700/20">
+                <FileText className="w-5 h-5" />
+              </div>
+              <div>
+                <span className="text-[11px] font-extrabold uppercase tracking-wider text-blue-700">
+                  Pre-Submission Review Step
+                </span>
+                <h3 className="text-lg font-black text-slate-900 leading-tight">
+                  Verify Application Details &amp; Documents
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Carefully check your answers below. You can navigate back to edit any errors.
+                </p>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                setIsReviewMode(false);
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              }}
+              className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-slate-700 bg-white hover:bg-slate-100 border border-slate-300 rounded-xl transition cursor-pointer shadow-2xs shrink-0"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" /> Back to Edit Form
+            </button>
+          </div>
+
+          {/* Review Section 1: Selected Artisan Trade */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+              <h4 className="text-xs font-black uppercase tracking-wider text-slate-400">
+                1. Accredited Artisan Trade
+              </h4>
+              <button
+                type="button"
+                onClick={() => setIsReviewMode(false)}
+                className="text-xs font-bold text-blue-700 hover:underline cursor-pointer"
+              >
+                Change
+              </button>
+            </div>
+            <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+              <div>
+                <span className="font-mono text-xs font-extrabold px-2 py-0.5 rounded bg-blue-100 text-blue-800 border border-blue-200 mr-2">
+                  {selectedCategory?.code || "SKILL"}
+                </span>
+                <span className="font-extrabold text-slate-900 text-sm">{selectedCategory?.title}</span>
+              </div>
+              <span className="text-slate-500 font-medium">Training &amp; Assessment Track</span>
+            </div>
+          </div>
+
+          {/* Review Section 2: Personal & Contact Information */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+              <h4 className="text-xs font-black uppercase tracking-wider text-slate-400">
+                2. Applicant Particulars
+              </h4>
+              <button
+                type="button"
+                onClick={() => setIsReviewMode(false)}
+                className="text-xs font-bold text-blue-700 hover:underline cursor-pointer"
+              >
+                Edit
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 text-xs">
+              <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
+                <span className="text-slate-400 block text-[11px] font-medium">Full Name</span>
+                <span className="font-bold text-slate-900 text-sm">{fullName}</span>
+              </div>
+              <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
+                <span className="text-slate-400 block text-[11px] font-medium">Father / Guardian</span>
+                <span className="font-semibold text-slate-900">{guardianName}</span>
+              </div>
+              <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
+                <span className="text-slate-400 block text-[11px] font-medium">Date of Birth</span>
+                <span className="font-mono font-bold text-slate-900">{dob}</span>
+              </div>
+              <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
+                <span className="text-slate-400 block text-[11px] font-medium">Gender</span>
+                <span className="font-semibold text-slate-900">{gender}</span>
+              </div>
+              <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
+                <span className="text-slate-400 block text-[11px] font-medium">Social Category</span>
+                <span className="font-semibold text-slate-900">{socialCategory}</span>
+              </div>
+              <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
+                <span className="text-slate-400 block text-[11px] font-medium">Mobile Number</span>
+                <span className="font-mono font-bold text-slate-900">{mobileNumber || "—"}</span>
+              </div>
+              <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
+                <span className="text-slate-400 block text-[11px] font-medium">Email Address</span>
+                <span className="font-medium text-slate-900 truncate block">{email || "—"}</span>
+              </div>
+              <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
+                <span className="text-slate-400 block text-[11px] font-medium">Highest Qualification</span>
+                <span className="font-semibold text-slate-900">{highestQual}</span>
+              </div>
+              <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
+                <span className="text-slate-400 block text-[11px] font-medium">Relevant Experience</span>
+                <span className="font-semibold text-slate-900">{experience}</span>
+              </div>
+            </div>
+
+            <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 text-xs">
+              <span className="text-slate-400 block text-[11px] font-medium mb-0.5">Permanent Address</span>
+              <span className="font-semibold text-slate-900 leading-relaxed">{permanentAddress}</span>
+            </div>
+          </div>
+
+          {/* Review Section 3: DBT Stipend & ID */}
+          {(govIdLast4 || bankHolderName || accountNumber) && (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                <h4 className="text-xs font-black uppercase tracking-wider text-slate-400">
+                  3. Identity Proof &amp; DBT Stipend Bank Details
+                </h4>
+                <button
+                  type="button"
+                  onClick={() => setIsReviewMode(false)}
+                  className="text-xs font-bold text-blue-700 hover:underline cursor-pointer"
+                >
+                  Edit
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 text-xs">
+                <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
+                  <span className="text-slate-400 block text-[11px] font-medium">Government ID</span>
+                  <span className="font-semibold text-slate-900">
+                    {govIdType} {govIdLast4 ? `(ending in ${govIdLast4})` : ""}
+                  </span>
+                </div>
+                <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
+                  <span className="text-slate-400 block text-[11px] font-medium">Account Holder</span>
+                  <span className="font-semibold text-slate-900">{bankHolderName || "—"}</span>
+                </div>
+                <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
+                  <span className="text-slate-400 block text-[11px] font-medium">Bank &amp; Branch</span>
+                  <span className="font-semibold text-slate-900">{bankNameBranch || "—"}</span>
+                </div>
+                <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
+                  <span className="text-slate-400 block text-[11px] font-medium">Account / IFSC</span>
+                  <span className="font-mono font-semibold text-slate-900">
+                    {accountNumber ? `••••${accountNumber.slice(-4)}` : "—"} / {ifscCode || "—"}
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Review Section 4: Uploaded Documents Checklist */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+              <h4 className="text-xs font-black uppercase tracking-wider text-slate-400">
+                4. Uploaded Supporting Documents
+              </h4>
+              <button
+                type="button"
+                onClick={() => setIsReviewMode(false)}
+                className="text-xs font-bold text-blue-700 hover:underline cursor-pointer"
+              >
+                Change Files
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+              {/* Photograph */}
+              <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <Paperclip className="w-4 h-4 text-blue-700 shrink-0" />
+                  <span className="font-semibold text-slate-800 truncate">Candidate Photograph</span>
+                </div>
+                {photographUrl ? (
+                  <span className="font-bold text-blue-700 flex items-center gap-1 shrink-0">
+                    <CheckCircle2 className="w-3.5 h-3.5" /> Uploaded
+                  </span>
+                ) : (
+                  <span className="text-slate-400 italic text-[11px] shrink-0">Not uploaded</span>
+                )}
+              </div>
+
+              {/* ID Proof */}
+              <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <Paperclip className="w-4 h-4 text-blue-700 shrink-0" />
+                  <span className="font-semibold text-slate-800 truncate">Identity Proof</span>
+                </div>
+                {documents["identity_proof"] ? (
+                  <span className="font-bold text-blue-700 flex items-center gap-1 shrink-0">
+                    <CheckCircle2 className="w-3.5 h-3.5" /> Uploaded
+                  </span>
+                ) : (
+                  <span className="text-slate-400 italic text-[11px] shrink-0">Not provided</span>
+                )}
+              </div>
+
+              {/* Address Proof */}
+              <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <Paperclip className="w-4 h-4 text-blue-700 shrink-0" />
+                  <span className="font-semibold text-slate-800 truncate">Address Proof</span>
+                </div>
+                {documents["address_proof"] ? (
+                  <span className="font-bold text-blue-700 flex items-center gap-1 shrink-0">
+                    <CheckCircle2 className="w-3.5 h-3.5" /> Uploaded
+                  </span>
+                ) : (
+                  <span className="text-slate-400 italic text-[11px] shrink-0">Not provided</span>
+                )}
+              </div>
+
+              {/* Educational Certificate */}
+              <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <Paperclip className="w-4 h-4 text-blue-700 shrink-0" />
+                  <span className="font-semibold text-slate-800 truncate">Educational Certificate</span>
+                </div>
+                {documents["educational_cert"] ? (
+                  <span className="font-bold text-blue-700 flex items-center gap-1 shrink-0">
+                    <CheckCircle2 className="w-3.5 h-3.5" /> Uploaded
+                  </span>
+                ) : (
+                  <span className="text-slate-400 italic text-[11px] shrink-0">Not provided</span>
+                )}
+              </div>
+
+              {/* Bank Passbook */}
+              <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <Paperclip className="w-4 h-4 text-blue-700 shrink-0" />
+                  <span className="font-semibold text-slate-800 truncate">Bank Passbook Copy</span>
+                </div>
+                {documents["bank_passbook"] ? (
+                  <span className="font-bold text-blue-700 flex items-center gap-1 shrink-0">
+                    <CheckCircle2 className="w-3.5 h-3.5" /> Uploaded
+                  </span>
+                ) : (
+                  <span className="text-slate-400 italic text-[11px] shrink-0">Not provided</span>
+                )}
+              </div>
+
+              {/* Category Certificate */}
+              <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <Paperclip className="w-4 h-4 text-blue-700 shrink-0" />
+                  <span className="font-semibold text-slate-800 truncate">Category / Disability Certificate</span>
+                </div>
+                {documents["category_disability_cert"] ? (
+                  <span className="font-bold text-blue-700 flex items-center gap-1 shrink-0">
+                    <CheckCircle2 className="w-3.5 h-3.5" /> Uploaded
+                  </span>
+                ) : (
+                  <span className="text-slate-400 italic text-[11px] shrink-0">Not provided</span>
+                )}
+              </div>
+
+              {/* Other Document */}
+              {documents["other_doc"] && (
+                <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between gap-3 sm:col-span-2">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <Paperclip className="w-4 h-4 text-blue-700 shrink-0" />
+                    <span className="font-semibold text-slate-800 truncate">
+                      {otherDocLabel.trim() || "Other Supporting Document"}
+                    </span>
+                  </div>
+                  <span className="font-bold text-blue-700 flex items-center gap-1 shrink-0">
+                    <CheckCircle2 className="w-3.5 h-3.5" /> Uploaded
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Important Finalization Lock Notice */}
+          <div className="p-4.5 bg-blue-50/80 border-2 border-blue-200 rounded-2xl space-y-2">
+            <div className="flex items-center gap-2 text-blue-950 font-black text-xs uppercase tracking-wide">
+              <Lock className="w-4 h-4 text-blue-700 shrink-0" />
+              <span>Finalized Application &amp; Read-Only Lock Notice</span>
+            </div>
+            <p className="text-xs text-blue-900 leading-relaxed font-medium">
+              Once you click <strong>Final Submit Application</strong> below, your registration dossier will be
+              officially sealed in the portal. To safeguard official government record integrity, <strong>you will NOT be permitted to modify, edit, or replace any answers or uploaded files afterward</strong>.
+            </p>
+          </div>
+
+          {/* Confirmation Checkbox */}
+          <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl">
+            <label className="flex items-start gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                required
+                checked={confirmedReview}
+                onChange={(e) => setConfirmedReview(e.target.checked)}
+                className="mt-0.5 rounded text-blue-700 focus:ring-blue-600 w-4 h-4 cursor-pointer"
+              />
+              <span className="text-xs font-bold text-slate-900 leading-relaxed">
+                I have reviewed all the information and uploaded documents displayed above. I confirm that all details are accurate, complete, and authentic, and I agree to officially submit and finalize this application.
+              </span>
+            </label>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-slate-200">
+            <button
+              type="button"
+              onClick={() => {
+                setIsReviewMode(false);
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              }}
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 font-bold text-xs transition cursor-pointer"
+            >
+              <ArrowLeft className="w-4 h-4" /> Go Back to Correct Mistakes
+            </button>
+
+            <button
+              type="button"
+              onClick={handleFinalSubmit}
+              disabled={loading || !confirmedReview}
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-gradient-to-r from-blue-700 via-blue-800 to-indigo-800 hover:from-blue-800 hover:to-indigo-900 active:translate-y-px text-white font-black text-xs rounded-xl shadow-lg shadow-blue-900/25 transition cursor-pointer disabled:opacity-50 tracking-wide"
+            >
+              {loading ? (
+                <span>Submitting &amp; Locking Dossier...</span>
+              ) : (
+                <>
+                  <Lock className="w-4 h-4" />
+                  <span>Final Submit Application</span>
+                  <ChevronRight className="w-4 h-4 stroke-[3]" />
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      ) : (
+        /* Main Form Form */
+        <form onSubmit={handleProceedToReview} className="bg-white rounded-3xl border border-slate-200 shadow-md p-6 sm:p-8 space-y-10">
         {/* ============================================================== */}
         {/* SECTION 1: APPLICANT DETAILS (2-Column Grid)                  */}
         {/* ============================================================== */}
@@ -825,25 +1183,22 @@ export default function ApplyPage() {
         </div>
 
         {/* ============================================================== */}
-        {/* SUBMIT BUTTON                                                 */}
+        {/* PROCEED TO REVIEW BUTTON                                      */}
         {/* ============================================================== */}
         <div className="text-center pt-2">
           <button
             type="submit"
-            disabled={loading}
-            className="w-full sm:w-80 inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-gradient-to-r from-blue-700 via-blue-800 to-indigo-800 hover:from-blue-800 hover:to-indigo-900 active:translate-y-px text-white font-black text-xs rounded-full shadow-lg shadow-blue-900/25 transition cursor-pointer disabled:opacity-50 tracking-wide"
+            className="w-full sm:w-80 inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-gradient-to-r from-blue-700 via-blue-800 to-indigo-800 hover:from-blue-800 hover:to-indigo-900 active:translate-y-px text-white font-black text-xs rounded-full shadow-lg shadow-blue-900/25 transition cursor-pointer tracking-wide"
           >
-            {loading ? (
-              <span>Submitting Application...</span>
-            ) : (
-              <>
-                <span>Submit Application</span>
-                <ChevronRight className="w-4 h-4 stroke-[3]" />
-              </>
-            )}
+            <span>Review &amp; Confirm Application</span>
+            <ChevronRight className="w-4 h-4 stroke-[3]" />
           </button>
+          <p className="text-[11px] text-slate-400 mt-2 font-medium">
+            You will review all details and uploaded files before finalized submission.
+          </p>
         </div>
       </form>
+      )}
     </div>
   );
 }

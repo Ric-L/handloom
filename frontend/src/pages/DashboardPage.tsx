@@ -152,13 +152,13 @@ export default function DashboardPage() {
                   </span>
 
                   {app.status === "PENDING" && (
-                    <Link
-                      to={`/apply/update/${app.id}`}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold rounded-xl transition border border-slate-300"
+                    <span
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 text-slate-500 text-xs font-semibold rounded-xl border border-slate-200"
+                      title="Application is finalized and locked under official verification."
                     >
-                      <Edit3 className="w-3.5 h-3.5 text-primary-700" />
-                      <span>Update Enrolment Form</span>
-                    </Link>
+                      <ShieldCheck className="w-3.5 h-3.5 text-blue-700" />
+                      <span>Finalized &amp; Locked</span>
+                    </span>
                   )}
 
                   {app.status === "APPROVED" && (

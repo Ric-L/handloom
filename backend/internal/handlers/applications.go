@@ -608,8 +608,10 @@ func (h *ApplicationHandler) UpdateApplication(c *gin.Context) {
 		return
 	}
 
-	if currentStatus != "PENDING" && !isAdmin {
-		c.JSON(http.StatusConflict, gin.H{"error": "Approved applications cannot be modified to preserve audit integrity."})
+	if !isAdmin {
+		c.JSON(http.StatusForbidden, gin.H{
+			"error": "This application has been finalized and submitted. Submitted applications are read-only and cannot be modified or replaced.",
+		})
 		return
 	}
 

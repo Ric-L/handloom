@@ -182,13 +182,21 @@ export default function RegistrationUpdatePage() {
       <div className="flex items-center justify-between pb-2">
         <Link
           to="/dashboard"
-          className="inline-flex items-center gap-2 text-xs font-bold text-slate-600 hover:text-primary-800 transition"
+          className="inline-flex items-center gap-2 text-xs font-bold text-slate-600 hover:text-blue-800 transition"
         >
           <ArrowLeft className="w-4 h-4" /> Back to My Applications
         </Link>
         <span className="text-xs font-mono font-bold bg-slate-100 text-slate-700 px-3 py-1 rounded-lg border border-slate-200">
           Enrolment ID: {initialData.id.slice(0, 8).toUpperCase()}
         </span>
+      </div>
+
+      {/* Finalized Notice Banner */}
+      <div className="p-4 bg-amber-50 border border-amber-300 rounded-2xl flex items-center gap-3 text-xs text-amber-900 font-medium shadow-xs">
+        <AlertCircle className="w-5 h-5 text-amber-700 shrink-0" />
+        <div>
+          <span className="font-bold">Application Record Finalized:</span> Once submitted, candidate enrolment dossiers are locked under official verification to preserve audit integrity. Changes are restricted.
+        </div>
       </div>
 
       {/* Main Official Form Container */}
