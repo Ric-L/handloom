@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Link, Outlet, useNavigate, useLocation } from "react-router-dom";
 import type { User } from "../types";
 import {
@@ -8,9 +7,10 @@ import {
   LayoutDashboard,
   Crown,
   Database,
-  Activity,
-  UserCheck,
-  ChevronDown,
+  FileText,
+  Users,
+  UserCog,
+  Tag,
 } from "lucide-react";
 
 export default function AdminLayout() {
@@ -33,6 +33,23 @@ export default function AdminLayout() {
     navigate("/admin/login");
   };
 
+  const navItems = [
+    { icon: LayoutDashboard, label: "Dashboard", to: "/admin", exact: true },
+    { icon: FileText, label: "Applications", to: "/admin/applications", exact: false },
+    { icon: Users, label: "Candidates", to: "/admin/candidates", exact: false },
+    ...(isSuperAdmin
+      ? [
+          { icon: UserCog, label: "Users & RBAC", to: "/admin/users", exact: false },
+          { icon: Tag, label: "Trade Categories", to: "/admin/categories", exact: false },
+        ]
+      : []),
+  ];
+
+  const isActive = (to: string, exact: boolean) => {
+    if (exact) return location.pathname === to;
+    return location.pathname.startsWith(to);
+  };
+
   return (
     <div className="min-h-screen bg-slate-100/80 flex flex-col font-sans text-slate-800 antialiased">
       {/* 1. National Directorate Security Header Bar */}
@@ -44,7 +61,7 @@ export default function AdminLayout() {
           </span>
           <span className="text-slate-600">|</span>
           <span className="text-slate-400">
-            Ministry of Textiles • Directorate of Handloom & Skilled Artisan Development
+            Ministry of Textiles • Directorate of Handloom &amp; Skilled Artisan Development
           </span>
         </div>
 
@@ -58,17 +75,17 @@ export default function AdminLayout() {
             target="_blank"
             className="text-slate-400 hover:text-white flex items-center gap-1 transition"
           >
-            <ExternalLink className="w-3 h-3 text-primary-400" /> Public Portal
+            <ExternalLink className="w-3 h-3 text-sky-400" /> Public Portal
           </Link>
         </div>
       </div>
 
       {/* 2. Executive Navigation & Profile Header */}
       <header className="bg-white border-b border-slate-200/90 shadow-xs px-4 sm:px-8 py-3.5 sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
+        <div className="flex items-center justify-between gap-4">
           {/* Logo & Portal Identity */}
           <div className="flex items-center gap-3.5">
-            <div className="w-11 h-11 bg-gradient-to-br from-blue-700 via-primary-800 to-slate-950 rounded-2xl flex items-center justify-center text-white shadow-md shadow-primary-950/20 border border-primary-700/30">
+            <div className="w-11 h-11 bg-gradient-to-br from-blue-700 via-blue-800 to-slate-950 rounded-2xl flex items-center justify-center text-white shadow-md shadow-blue-950/20 border border-blue-700/30">
               <ShieldCheck className="w-6 h-6 text-sky-300" />
             </div>
             <div>
@@ -88,22 +105,13 @@ export default function AdminLayout() {
                 </span>
               </div>
               <p className="text-xs text-slate-500 font-medium -mt-0.5">
-                Autonomous Atomic Quota Enforcement & Verification Dossier Management
+                Autonomous Atomic Quota Enforcement &amp; Verification Dossier Management
               </p>
             </div>
           </div>
 
-          {/* Right Header Navigation & Admin Identity */}
+          {/* Right Header: Admin Identity & Logout */}
           <div className="flex items-center gap-4">
-            <nav className="hidden md:flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200/80">
-              <Link
-                to="/admin"
-                className="px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-slate-900 shadow-xs flex items-center gap-1.5 transition"
-              >
-                <LayoutDashboard className="w-3.5 h-3.5 text-primary-700" /> Verification Dashboard
-              </Link>
-            </nav>
-
             <div className="h-7 w-px bg-slate-200 hidden sm:block" />
 
             {/* Admin User Capsule */}
@@ -111,7 +119,7 @@ export default function AdminLayout() {
               <div className="hidden sm:flex items-center gap-2.5 bg-slate-50 border border-slate-200/80 px-3 py-1.5 rounded-xl">
                 <div
                   className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-extrabold text-white shadow-xs ${
-                    isSuperAdmin ? "bg-amber-600" : "bg-primary-700"
+                    isSuperAdmin ? "bg-amber-600" : "bg-blue-700"
                   }`}
                 >
                   {currentUser?.role === "SUPER_ADMIN" ? "SA" : "RA"}
@@ -139,16 +147,42 @@ export default function AdminLayout() {
         </div>
       </header>
 
-      {/* 3. Main Moderation Console Workspace */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full space-y-8">
-        <Outlet />
-      </main>
+      {/* 3. Sidebar + Content Area */}
+      <div className="flex flex-1 min-h-0">
+        {/* Left Sidebar */}
+        <aside className="w-64 bg-slate-900 flex-shrink-0 flex flex-col py-4 sticky top-[calc(var(--header-height,0px))] self-start min-h-[calc(100vh-7rem)]">
+          <nav className="flex flex-col gap-1 mt-2">
+            {navItems.map(({ icon: Icon, label, to, exact }) => {
+              const active = isActive(to, exact);
+              return (
+                <Link
+                  key={to}
+                  to={to}
+                  className={`flex items-center gap-3 px-4 py-3 rounded-xl mx-2 text-sm font-semibold transition-all cursor-pointer ${
+                    active
+                      ? "text-white bg-blue-700 shadow-lg shadow-blue-900/40"
+                      : "text-slate-400 hover:text-white hover:bg-slate-800"
+                  }`}
+                >
+                  <Icon className="w-4 h-4 shrink-0" />
+                  {label}
+                </Link>
+              );
+            })}
+          </nav>
+        </aside>
+
+        {/* Main Content */}
+        <main className="flex-1 overflow-auto px-6 py-8 space-y-6">
+          <Outlet />
+        </main>
+      </div>
 
       {/* 4. Footer Compliance Strip */}
-      <footer className="bg-white border-t border-slate-200/80 py-4 px-6 text-center text-xs text-slate-400 mt-16">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between text-[11px] gap-2">
+      <footer className="bg-white border-t border-slate-200/80 py-4 px-6 text-center text-xs text-slate-400">
+        <div className="flex flex-col sm:flex-row items-center justify-between text-[11px] gap-2">
           <span>
-            Handloom & Skilled Artisan Development Initiative • Administrative Moderation & Quota Guard
+            Handloom &amp; Skilled Artisan Development Initiative • Administrative Moderation &amp; Quota Guard
           </span>
           <span className="font-mono text-slate-500">
             PostgreSQL ACID Concurrency • 3,020 Target Quota Allocation

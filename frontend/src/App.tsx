@@ -11,6 +11,10 @@ import RegistrationUpdatePage from "./pages/RegistrationUpdatePage";
 import DashboardPage from "./pages/DashboardPage";
 import AdminLoginPage from "./pages/admin/AdminLoginPage";
 import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
+import AdminApplicationsPage from "./pages/admin/AdminApplicationsPage";
+import AdminCandidatesPage from "./pages/admin/AdminCandidatesPage";
+import AdminUsersPage from "./pages/admin/AdminUsersPage";
+import AdminCategoriesPage from "./pages/admin/AdminCategoriesPage";
 import AdminApplicationDetailPage from "./pages/admin/AdminApplicationDetailPage";
 import AdminRoute from "./components/AdminRoute";
 
@@ -79,8 +83,11 @@ export default function App() {
             }
           >
             <Route path="/admin" element={<AdminDashboardPage />} />
-            <Route path="/admin/applications" element={<Navigate to="/admin" replace />} />
+            <Route path="/admin/applications" element={<AdminApplicationsPage />} />
             <Route path="/admin/applications/:id" element={<AdminApplicationDetailPage />} />
+            <Route path="/admin/candidates" element={<AdminCandidatesPage />} />
+            <Route path="/admin/users" element={<AdminUsersPage />} />
+            <Route path="/admin/categories" element={<AdminCategoriesPage />} />
           </Route>
 
           {/* Fallback */}

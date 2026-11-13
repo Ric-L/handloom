@@ -52,5 +52,12 @@ func Register(r *gin.Engine, pool *pgxpool.Pool, cfg *config.Config) {
 		admin.PATCH("/applications/:id/reject", adminH.Reject)
 		admin.PATCH("/categories/:id/quota", adminH.UpdateCategoryQuota)
 		admin.GET("/export/csv", adminH.ExportCSV)
+		admin.GET("/candidates", adminH.ListCandidates)
+		admin.GET("/users", adminH.ListUsers)
+		admin.PUT("/users/:id/role", adminH.UpdateUserRole)
+		admin.POST("/categories", adminH.CreateCategory)
+		admin.PUT("/categories/:id", adminH.UpdateCategory)
+		admin.PATCH("/categories/:id/toggle", adminH.ToggleCategory)
+		admin.DELETE("/categories/:id", adminH.DeleteCategory)
 	}
 }

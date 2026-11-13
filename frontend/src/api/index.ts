@@ -119,3 +119,28 @@ export const downloadAdminCSV = async (categoryId?: number | string, status: str
   link.remove();
   window.URL.revokeObjectURL(url);
 };
+
+// Admin - Candidates Management
+export const getAdminCandidates = (params: { page?: number; page_size?: number; search?: string }) =>
+  client.get("/admin/candidates", { params }).then(r => r.data);
+
+// Admin - Users & RBAC Management
+export const getAdminUsers = (params: { page?: number; page_size?: number; search?: string }) =>
+  client.get("/admin/users", { params }).then(r => r.data);
+
+export const updateAdminUserRole = (id: string, role: string) =>
+  client.put(`/admin/users/${id}/role`, { role }).then(r => r.data);
+
+// Admin - Trade Categories Dynamic CRUD
+export const createAdminCategory = (data: { code: string; title: string; approval_limit: number }) =>
+  client.post("/admin/categories", data).then(r => r.data);
+
+export const updateAdminCategory = (id: number, data: { title?: string; approval_limit?: number }) =>
+  client.put(`/admin/categories/${id}`, data).then(r => r.data);
+
+export const toggleAdminCategory = (id: number) =>
+  client.patch(`/admin/categories/${id}/toggle`).then(r => r.data);
+
+export const deleteAdminCategory = (id: number) =>
+  client.delete(`/admin/categories/${id}`).then(r => r.data);
+
