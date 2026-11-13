@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { trackApplication } from "../api";
+import { useQuery } from "@tanstack/react-query";
+import { trackApplication, getCategories } from "../api";
 import { formatDate, statusBadgeColor } from "../lib/utils";
 import type { TrackResponse } from "../types";
 import { Link } from "react-router-dom";
@@ -16,9 +17,8 @@ import {
   Layers,
   FileText,
   Video,
-  Users,
-  Compass,
-  ArrowUpRight,
+  Clock,
+  ChevronRight,
 } from "lucide-react";
 import { NotificationCentre } from "../components/NotificationCentre";
 import { ProjectMediaSection } from "../components/ProjectMediaSection";
@@ -30,6 +30,11 @@ export default function HomePage() {
   const [result, setResult] = useState<TrackResponse | null>(null);
   const [error, setError] = useState("");
   const [searching, setSearching] = useState(false);
+
+  const { data: categories, isLoading: isCategoriesLoading } = useQuery({
+    queryKey: ["categories"],
+    queryFn: getCategories,
+  });
 
   const handleTrack = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,9 +55,8 @@ export default function HomePage() {
 
   return (
     <div className="space-y-16">
-      {/* 1. Hero Section: Rich High-Contrast Royal Blue Gradient with High Legibility */}
+      {/* 1. Hero Section: Rich High-Contrast Royal Blue Gradient with Clear CTAs */}
       <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-950 via-blue-950 to-indigo-950 text-white p-8 sm:p-12 lg:p-16 shadow-2xl border border-blue-800/40">
-        {/* Subtle geometric grid background */}
         <div className="absolute inset-0 bg-[radial-gradient(#3b82f6_1px,transparent_1px)] [background-size:24px_24px] opacity-15 pointer-events-none" />
 
         <div className="relative z-10 max-w-4xl space-y-6">
@@ -95,17 +99,23 @@ export default function HomePage() {
 
           {/* Action CTAs */}
           <div className="flex flex-wrap items-center gap-3 pt-4">
-            <Link
-              to="/apply"
-              className="inline-flex items-center gap-2 bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 hover:from-amber-500 hover:to-amber-700 text-slate-950 font-black px-7 py-3.5 rounded-xl text-sm shadow-xl shadow-amber-500/25 transition-all transform hover:-translate-y-0.5"
+            <a
+              href="#trades"
+              className="inline-flex items-center gap-2 bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 hover:from-amber-500 hover:to-amber-700 text-slate-950 font-black px-7 py-3.5 rounded-xl text-sm shadow-xl shadow-amber-500/25 transition-all transform hover:-translate-y-0.5 cursor-pointer"
             >
-              Apply Online <ArrowRight className="w-4 h-4" />
+              Apply for a Trade <ArrowRight className="w-4 h-4" />
+            </a>
+            <Link
+              to="/categories"
+              className="inline-flex items-center gap-2 bg-blue-800/60 hover:bg-blue-700/80 text-white font-bold px-6 py-3.5 rounded-xl text-sm backdrop-blur-md border border-blue-400/30 transition shadow-sm"
+            >
+              <Layers className="w-4 h-4 text-sky-300" /> Explore All Trades
             </Link>
             <a
               href="#notification-centre"
-              className="inline-flex items-center gap-2 bg-blue-800/60 hover:bg-blue-700/80 text-white font-bold px-6 py-3.5 rounded-xl text-sm backdrop-blur-md border border-blue-400/30 transition shadow-sm"
+              className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white font-bold px-5 py-3.5 rounded-xl text-sm backdrop-blur-sm border border-white/15 transition"
             >
-              <FileText className="w-4 h-4 text-blue-300" /> Official Notices & Circulars
+              <FileText className="w-4 h-4 text-blue-300" /> Notices & Circulars
             </a>
             <a
               href="#project-media"
@@ -214,16 +224,117 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 3. Notification Centre (Notices & Updates Tabs with Authentic PDF Download) */}
+      {/* 3. Original Flow: Select Your Craft Training Trade & Apply */}
+      <section id="trades" className="scroll-mt-24 space-y-8">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-6 border-b border-slate-200">
+          <div>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-blue-50 text-blue-800 border border-blue-200 mb-3">
+              <Layers className="w-3.5 h-3.5 text-blue-700" />
+              Accredited Artisan Courses
+            </div>
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+              Select Your Craft Training Trade
+            </h2>
+            <p className="mt-2 text-sm text-slate-600 max-w-2xl">
+              Certified curricula structured by the Textile Sector Skill Council (TSC). Maximum 1 application per artisan per category. Select a trade below to apply directly.
+            </p>
+          </div>
+
+          <Link
+            to="/categories"
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-700 hover:text-blue-900 bg-blue-50 hover:bg-blue-100 px-4 py-2 rounded-xl border border-blue-200 transition shrink-0 self-start md:self-auto"
+          >
+            <span>Full Curriculum & Syllabus</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {isCategoriesLoading ? (
+            <div className="col-span-full text-center py-12 text-slate-400 font-medium">
+              Loading accredited artisan trades...
+            </div>
+          ) : (
+            categories?.map((cat) => (
+              <div
+                key={cat.id}
+                className="bg-white rounded-3xl border border-slate-200/90 hover:border-blue-300 hover:shadow-xl hover:shadow-blue-900/5 transition-all duration-300 p-6 flex flex-col justify-between group"
+              >
+                <div>
+                  <div className="flex items-center justify-between gap-2 mb-3">
+                    <span className="text-xs font-mono font-bold px-2.5 py-1 rounded-lg bg-blue-50 text-blue-800 border border-blue-200">
+                      {cat.code}
+                    </span>
+                    <span
+                      className={`inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-0.5 rounded-full ${
+                        cat.is_approval_open
+                          ? "bg-blue-50 text-blue-800 border border-blue-200"
+                          : "bg-rose-50 text-rose-700 border border-rose-200"
+                      }`}
+                    >
+                      <span
+                        className={`w-1.5 h-1.5 rounded-full ${
+                          cat.is_approval_open ? "bg-blue-600 animate-pulse" : "bg-rose-500"
+                        }`}
+                      />
+                      {cat.is_approval_open ? "Admissions Open" : "Batch Full"}
+                    </span>
+                  </div>
+
+                  <h3 className="font-extrabold text-slate-900 text-lg leading-snug mb-3 group-hover:text-blue-700 transition">
+                    {cat.title}
+                  </h3>
+
+                  <div className="space-y-2.5 text-xs text-slate-600 py-3 border-y border-slate-100 mb-6">
+                    <div className="flex items-center gap-2">
+                      <Clock className="w-3.5 h-3.5 text-blue-700 shrink-0" />
+                      <span>Duration: <strong>6 Months (Full-Time Hands-on)</strong></span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Award className="w-3.5 h-3.5 text-blue-700 shrink-0" />
+                      <span>Certification: <strong>NSQF Aligned Govt. Credential</strong></span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-blue-700 shrink-0" />
+                      <span>Allowance: <strong>Monthly DBT Stipend Backed</strong></span>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  {cat.is_approval_open ? (
+                    <Link
+                      to={`/apply?category=${cat.id}`}
+                      className="w-full inline-flex items-center justify-center gap-2 bg-gradient-to-r from-blue-700 via-blue-800 to-indigo-800 hover:from-blue-800 hover:to-indigo-900 text-white font-extrabold py-3 rounded-xl text-xs shadow-md shadow-blue-900/20 hover:shadow-lg transition-all transform hover:-translate-y-0.5"
+                    >
+                      <span>Apply for this Trade</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </Link>
+                  ) : (
+                    <button
+                      disabled
+                      className="w-full bg-slate-100 text-slate-400 font-bold py-3 rounded-xl text-xs cursor-not-allowed border border-slate-200"
+                    >
+                      Admissions Locked (Batch Full)
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </section>
+
+      {/* 4. Notification Centre (Notices & Updates Tabs with Authentic PDF Download) */}
       <NotificationCentre />
 
-      {/* 4. Project Media Section (Videos, Documentaries & Live Photographs) */}
+      {/* 5. Project Media Section (Videos, Documentaries & Live Photographs) */}
       <ProjectMediaSection />
 
-      {/* 5. Project Team Section (Officers, Instructors & Leadership Directory) */}
+      {/* 6. Project Team Section (Officers, Instructors & Leadership Directory) */}
       <ProjectTeamSection />
 
-      {/* 6. Trainee Benefits / Institutional Features */}
+      {/* 7. Trainee Benefits / Institutional Features */}
       <section className="bg-gradient-to-br from-slate-950 via-blue-950 to-indigo-950 text-white rounded-3xl p-8 sm:p-12 border border-blue-900/50 shadow-xl">
         <div className="text-center max-w-2xl mx-auto space-y-2 mb-10">
           <span className="text-xs font-bold uppercase tracking-widest text-blue-300 bg-blue-900/80 px-3 py-1 rounded-full border border-blue-500/30">

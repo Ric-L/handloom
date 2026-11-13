@@ -52,10 +52,10 @@ export default function AppLayout() {
 
   const navLinks = [
     { to: "/", label: "Home", icon: Home },
+    { to: "/#trades", label: "Artisan Trades", icon: Layers },
     { to: "/#notification-centre", label: "Notices & Updates", icon: Bell, badge: "New" },
     { to: "/#project-media", label: "Media & Films", icon: Film },
     { to: "/#project-team", label: "Project Team", icon: Users },
-    { to: "/categories", label: "Artisan Trades", icon: Layers },
     ...(token
       ? [
           { to: "/apply", label: "New Application", icon: FileCheck2 },

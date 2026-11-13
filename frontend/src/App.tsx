@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import AppLayout from "./layouts/AppLayout";
 import AdminLayout from "./layouts/AdminLayout";
@@ -25,7 +25,9 @@ const queryClient = new QueryClient({
 
 function CandidateRoute({ children }: { children: React.ReactNode }) {
   const token = localStorage.getItem("token");
-  return token ? <>{children}</> : <Navigate to="/login" replace />;
+  const location = useLocation();
+  const returnUrl = encodeURIComponent(location.pathname + location.search);
+  return token ? <>{children}</> : <Navigate to={`/login?redirect=${returnUrl}`} replace />;
 }
 
 export default function App() {

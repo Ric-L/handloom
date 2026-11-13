@@ -93,10 +93,16 @@ export default function ApplyPage() {
   } | null>(null);
 
   useEffect(() => {
-    if (initialCatParam && !selectedRoleId) {
+    if (initialCatParam) {
       setSelectedRoleId(initialCatParam);
     }
   }, [initialCatParam]);
+
+  // Find currently selected category object for clear visual indicator
+  const selectedCategory = React.useMemo(() => {
+    if (!categories || !selectedRoleId) return null;
+    return categories.find((c) => String(c.id) === String(selectedRoleId));
+  }, [categories, selectedRoleId]);
 
   // Sort categories according to the reference image
   const sortedCategories = React.useMemo(() => {
@@ -304,6 +310,23 @@ export default function ApplyPage() {
               <span className="text-xs font-normal text-slate-500">(Please choose one)</span>
             </h3>
           </div>
+
+          {selectedCategory && (
+            <div className="p-3.5 bg-blue-50 border border-blue-200 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-blue-950 font-bold shadow-2xs">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-blue-600 shrink-0" />
+                <span>
+                  Selected Trade:{" "}
+                  <strong className="text-blue-900">
+                    {selectedCategory.code} — {selectedCategory.title}
+                  </strong>
+                </span>
+              </div>
+              <span className="text-[11px] text-blue-700 font-medium">
+                Pre-selected • You can click another role below to switch
+              </span>
+            </div>
+          )}
 
           {isCategoriesLoading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">

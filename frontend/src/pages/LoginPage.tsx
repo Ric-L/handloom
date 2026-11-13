@@ -18,8 +18,11 @@ export default function LoginPage() {
       const data = await login({ mobile_number: mobile.trim(), password });
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
+      const redirectParam = new URLSearchParams(window.location.search).get("redirect");
       if (data.user.role === "SUPER_ADMIN" || data.user.role === "REVIEWER_ADMIN") {
         navigate("/admin");
+      } else if (redirectParam) {
+        navigate(decodeURIComponent(redirectParam));
       } else {
         navigate("/dashboard");
       }
@@ -95,7 +98,16 @@ export default function LoginPage() {
       <div className="pt-4 border-t border-slate-100 text-center space-y-3">
         <p className="text-xs text-slate-500">
           New applicant?{" "}
-          <Link to="/register" className="font-bold text-primary-700 hover:underline">
+          <Link
+            to={
+              new URLSearchParams(window.location.search).get("redirect")
+                ? `/register?redirect=${encodeURIComponent(
+                    new URLSearchParams(window.location.search).get("redirect")!
+                  )}`
+                : "/register"
+            }
+            className="font-bold text-primary-700 hover:underline"
+          >
             Register for Training
           </Link>
         </p>

@@ -32,7 +32,12 @@ export default function RegisterPage() {
       });
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
-      navigate("/dashboard");
+      const redirectParam = new URLSearchParams(window.location.search).get("redirect");
+      if (redirectParam) {
+        navigate(decodeURIComponent(redirectParam));
+      } else {
+        navigate("/dashboard");
+      }
     } catch (err: any) {
       setError(
         err.response?.data?.error ||
@@ -128,7 +133,16 @@ export default function RegisterPage() {
       <div className="pt-4 border-t border-slate-100 text-center space-y-3">
         <p className="text-xs text-slate-500">
           Already registered?{" "}
-          <Link to="/login" className="font-bold text-primary-700 hover:underline">
+          <Link
+            to={
+              new URLSearchParams(window.location.search).get("redirect")
+                ? `/login?redirect=${encodeURIComponent(
+                    new URLSearchParams(window.location.search).get("redirect")!
+                  )}`
+                : "/login"
+            }
+            className="font-bold text-primary-700 hover:underline"
+          >
             Sign In Here
           </Link>
         </p>
