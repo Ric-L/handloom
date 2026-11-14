@@ -17,11 +17,21 @@ import {
   Download,
   FileText,
   Edit3,
+  Copy,
+  Check,
 } from "lucide-react";
 
 export default function DashboardPage() {
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const [downloadError, setDownloadError] = useState<string | null>(null);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  const copyToClipboard = (text: string, id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigator.clipboard.writeText(text);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000);
+  };
 
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ["myApplications"],
@@ -124,13 +134,31 @@ export default function DashboardPage() {
               {/* Card Header */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
                 <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono text-xs font-bold text-primary-800 bg-primary-50 px-2 py-0.5 rounded border border-primary-200">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="font-mono text-xs font-bold text-blue-800 bg-blue-50 px-2.5 py-0.5 rounded border border-blue-200">
                       {app.category_code || "TRADE"}
                     </span>
                     <h2 className="text-base font-extrabold text-slate-900 leading-snug">
                       {app.category_title || "Artisan Training Programme"}
                     </h2>
+                    {app.registration_no && (
+                      <div className="inline-flex items-center gap-1.5 font-mono text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-800 px-2.5 py-0.5 rounded border border-slate-300">
+                        <span className="text-[10px] text-slate-500 uppercase font-sans font-semibold">Reg ID:</span>
+                        <span>{app.registration_no}</span>
+                        <button
+                          type="button"
+                          title="Copy Registration ID"
+                          onClick={(e) => copyToClipboard(app.registration_no!, app.id, e)}
+                          className="text-slate-400 hover:text-slate-700 p-0.5 rounded transition cursor-pointer"
+                        >
+                          {copiedId === app.id ? (
+                            <Check className="w-3.5 h-3.5 text-blue-600" />
+                          ) : (
+                            <Copy className="w-3.5 h-3.5" />
+                          )}
+                        </button>
+                      </div>
+                    )}
                   </div>
                   <div className="text-xs text-slate-500 flex items-center gap-1.5">
                     <Clock className="w-3.5 h-3.5 text-slate-400" />

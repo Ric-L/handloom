@@ -79,6 +79,7 @@ func (h *ApplicationHandler) Track(c *gin.Context) {
 	}
 
 	var result struct {
+		RegistrationNo  string  `json:"registration_no"`
 		FullName        string  `json:"full_name"`
 		Category        string  `json:"category"`
 		CategoryCode    string  `json:"category_code"`
@@ -89,7 +90,7 @@ func (h *ApplicationHandler) Track(c *gin.Context) {
 
 	var submittedAt time.Time
 	err := h.DB.QueryRow(context.Background(), `
-		SELECT a.full_name, jc.title, jc.code, a.submitted_at, a.status, a.rejection_reason
+		SELECT a.registration_no, a.full_name, jc.title, jc.code, a.submitted_at, a.status, a.rejection_reason
 		FROM applications a
 		JOIN job_categories jc ON jc.id = a.category_id
 		JOIN users u ON u.id = a.user_id
@@ -97,7 +98,7 @@ func (h *ApplicationHandler) Track(c *gin.Context) {
 		ORDER BY a.submitted_at DESC
 		LIMIT 1
 	`, identifier, dobStr).Scan(
-		&result.FullName, &result.Category, &result.CategoryCode,
+		&result.RegistrationNo, &result.FullName, &result.Category, &result.CategoryCode,
 		&submittedAt, &result.Status, &result.RejectionReason,
 	)
 	if err != nil {
@@ -246,19 +247,18 @@ func (h *ApplicationHandler) Submit(c *gin.Context) {
 		return
 	}
 
-	// Note: Internal registration_no is stored for Admins, but hidden from regular candidates
 	c.JSON(http.StatusCreated, gin.H{
-		"message":      "Application submitted and saved successfully",
-		"id":           appID,
-		"status":       status,
-		"submitted_at": submittedAt.Format(time.RFC3339),
+		"message":         "Application submitted and saved successfully",
+		"id":              appID,
+		"registration_no": regNo,
+		"status":          status,
+		"submitted_at":    submittedAt.Format(time.RFC3339),
 	})
 }
 
 // MyApplications returns applications for the logged-in candidate
 func (h *ApplicationHandler) MyApplications(c *gin.Context) {
 	userID := c.GetString("user_id")
-	userRole := c.GetString("role")
 
 	rows, err := h.DB.Query(context.Background(), `
 		SELECT a.id, a.registration_no, a.user_id, a.category_id, jc.code, jc.title,
@@ -273,8 +273,6 @@ func (h *ApplicationHandler) MyApplications(c *gin.Context) {
 		return
 	}
 	defer rows.Close()
-
-	isAdmin := (userRole == "SUPER_ADMIN" || userRole == "REVIEWER_ADMIN")
 
 	var apps []gin.H
 	for rows.Next() {
@@ -296,6 +294,7 @@ func (h *ApplicationHandler) MyApplications(c *gin.Context) {
 
 		item := gin.H{
 			"id":                 id,
+			"registration_no":    regNo,
 			"user_id":            uid,
 			"category_id":        catID,
 			"category_code":      catCode,
@@ -309,11 +308,6 @@ func (h *ApplicationHandler) MyApplications(c *gin.Context) {
 			"status":             status,
 			"rejection_reason":   rejectionReason,
 			"submitted_at":       submittedAt.Format(time.RFC3339),
-		}
-
-		// Only expose internal reference numbers to administrative accounts
-		if isAdmin {
-			item["registration_no"] = regNo
 		}
 
 		apps = append(apps, item)
@@ -578,9 +572,7 @@ func (h *ApplicationHandler) GetApplicationDossier(c *gin.Context) {
 		"status":             status,
 		"rejection_reason":   rejectionReason,
 		"submitted_at":       submittedAt.Format(time.RFC3339),
-	}
-	if isAdmin {
-		res["registration_no"] = regNo
+		"registration_no":    regNo,
 	}
 
 	c.JSON(http.StatusOK, res)

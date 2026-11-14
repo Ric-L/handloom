@@ -34,7 +34,7 @@ export const adminLogin = (data: { mobile_number: string; password: string }) =>
 // Applicant Submission (JSON or FormData, persists to PostgreSQL)
 export const submitApplication = (data: any) =>
   client
-    .post<{ message: string; id: string; status: string; submitted_at: string }>("/applications", data)
+    .post<{ message: string; id: string; registration_no: string; status: string; submitted_at: string }>("/applications", data)
     .then(r => r.data);
 
 export const getMyApplications = () => client.get<Application[]>("/applications/my").then(r => r.data);

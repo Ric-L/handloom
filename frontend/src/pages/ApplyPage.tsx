@@ -78,6 +78,7 @@ export default function ApplyPage() {
     tradeTitle: string;
     tradeCode: string;
     id: string;
+    registrationNo?: string;
   } | null>(null);
 
   useEffect(() => {
@@ -190,6 +191,7 @@ export default function ApplyPage() {
         tradeTitle: selectedCategory?.title || "Artisan Skill Course",
         tradeCode: selectedCategory?.code || "SKILL",
         id: res.id,
+        registrationNo: res.registration_no,
       });
     } catch (err: any) {
       if (err.response?.status === 409) {
@@ -227,6 +229,21 @@ export default function ApplyPage() {
         </div>
 
         <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 text-left space-y-2.5 text-xs">
+          {submittedData.registrationNo && (
+            <div className="flex justify-between items-center pb-2.5 border-b border-blue-200/80 bg-blue-50/70 -mx-5 -mt-5 p-4 rounded-t-2xl">
+              <div>
+                <span className="text-[10px] font-black uppercase tracking-wider text-blue-700 block">
+                  Official Registration ID / Tracking Number
+                </span>
+                <span className="font-mono text-sm sm:text-base font-black text-slate-900 tracking-tight">
+                  {submittedData.registrationNo}
+                </span>
+              </div>
+              <span className="text-[11px] font-bold text-blue-800 bg-white px-2.5 py-1 rounded-lg border border-blue-200 shadow-2xs">
+                Keep Safe for Tracking
+              </span>
+            </div>
+          )}
           <div className="flex justify-between items-center pb-2 border-b border-slate-200">
             <span className="text-slate-500 font-medium">Applied Trade:</span>
             <span className="font-bold text-slate-900 text-sm">

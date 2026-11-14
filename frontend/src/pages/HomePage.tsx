@@ -25,7 +25,7 @@ import { ProjectMediaSection } from "../components/ProjectMediaSection";
 import { ProjectTeamSection } from "../components/ProjectTeamSection";
 
 export default function HomePage() {
-  const [mobileNumber, setMobileNumber] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [dob, setDob] = useState("");
   const [result, setResult] = useState<TrackResponse | null>(null);
   const [error, setError] = useState("");
@@ -42,11 +42,11 @@ export default function HomePage() {
     setResult(null);
     setSearching(true);
     try {
-      const data = await trackApplication(mobileNumber.trim(), dob);
+      const data = await trackApplication(identifier.trim(), dob);
       setResult(data);
     } catch {
       setError(
-        "No matching application record found. Please verify your 10-digit registered mobile number and Date of Birth."
+        "No matching application record found. Please verify your Registration ID or 10-digit mobile number along with your Date of Birth."
       );
     } finally {
       setSearching(false);
@@ -142,22 +142,21 @@ export default function HomePage() {
             <h2 className="text-lg font-extrabold text-slate-900">Track Application & Admission Status</h2>
           </div>
           <p className="text-xs text-slate-500 mb-6">
-            Candidates can verify admission scrutiny status using registered mobile number and Date of Birth.
+            Candidates can verify admission scrutiny status using their <strong>Registration ID</strong> (e.g. HND-2026-EMB-...) or registered mobile number and Date of Birth without signing in.
           </p>
 
           <form onSubmit={handleTrack} className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                  Registered Mobile Number
+                  Registration ID or Mobile Number
                 </label>
                 <input
-                  type="tel"
-                  value={mobileNumber}
-                  onChange={(e) => setMobileNumber(e.target.value)}
+                  type="text"
+                  value={identifier}
+                  onChange={(e) => setIdentifier(e.target.value)}
                   required
-                  maxLength={10}
-                  placeholder="e.g. 9876543210"
+                  placeholder="e.g. HND-2026-EMB-AB12CD or 9876543210"
                   className="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:ring-2 focus:ring-blue-600 focus:border-blue-600 focus:outline-none transition font-medium bg-slate-50 focus:bg-white"
                 />
               </div>
@@ -193,6 +192,16 @@ export default function HomePage() {
 
           {result && (
             <div className="mt-6 p-5 bg-blue-50/50 rounded-2xl border border-blue-200 space-y-3 text-xs">
+              {result.registration_no && (
+                <div className="flex items-center justify-between pb-2 border-b border-blue-200/60 bg-blue-100/60 -mx-5 -mt-5 p-3.5 rounded-t-2xl">
+                  <span className="text-slate-600 font-bold uppercase tracking-wide text-[10px]">
+                    Registration ID / Tracking Ref:
+                  </span>
+                  <span className="font-mono font-black text-slate-950 text-xs sm:text-sm">
+                    {result.registration_no}
+                  </span>
+                </div>
+              )}
               <div className="flex items-center justify-between pb-2 border-b border-blue-200/60">
                 <span className="text-slate-500 font-medium">Candidate Name:</span>
                 <span className="font-bold text-slate-900 text-sm">{result.full_name}</span>

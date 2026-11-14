@@ -58,7 +58,7 @@ export interface Application {
   reviewed_by?: string;
   reviewed_at?: string;
   submitted_at: string;
-  registration_no?: string; // Only populated for Admin roles
+  registration_no?: string; // Official registration / tracking reference number
 }
 
 export interface ApplicationDetail extends Application {
