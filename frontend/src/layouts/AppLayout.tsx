@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, Outlet, useNavigate, useLocation } from "react-router-dom";
 import type { User } from "../types";
+import { logoutUser } from "../api";
 import {
   Menu,
   X,
@@ -44,7 +45,12 @@ export default function AppLayout() {
     user = null;
   }
 
-  const logout = () => {
+  const logout = async () => {
+    try {
+      await logoutUser();
+    } catch {
+      // ignore
+    }
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     navigate("/login");

@@ -16,7 +16,10 @@ import AdminCandidatesPage from "./pages/admin/AdminCandidatesPage";
 import AdminUsersPage from "./pages/admin/AdminUsersPage";
 import AdminCategoriesPage from "./pages/admin/AdminCategoriesPage";
 import AdminApplicationDetailPage from "./pages/admin/AdminApplicationDetailPage";
+import AdminAuditLogsPage from "./pages/admin/AdminAuditLogsPage";
 import AdminRoute from "./components/AdminRoute";
+import { useIdleTimeout } from "./hooks/useIdleTimeout";
+import SessionTimeoutModal from "./components/SessionTimeoutModal";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -34,10 +37,28 @@ function CandidateRoute({ children }: { children: React.ReactNode }) {
   return token ? <>{children}</> : <Navigate to={`/login?redirect=${returnUrl}`} replace />;
 }
 
+function GlobalSessionGuard() {
+  const { isWarningOpen, secondsRemaining, extendSession, logout } = useIdleTimeout({
+    timeoutSeconds: 180, // strict 3-minute idle session timeout
+    warningSeconds: 45,  // 45-second advance warning countdown
+  });
+
+  return (
+    <SessionTimeoutModal
+      isOpen={isWarningOpen}
+      secondsRemaining={secondsRemaining}
+      onExtend={extendSession}
+      onLogout={logout}
+      maxSeconds={45}
+    />
+  );
+}
+
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
+        <GlobalSessionGuard />
         <Routes>
           {/* Public & Candidate Experience */}
           <Route element={<AppLayout />}>
@@ -88,6 +109,7 @@ export default function App() {
             <Route path="/admin/candidates" element={<AdminCandidatesPage />} />
             <Route path="/admin/users" element={<AdminUsersPage />} />
             <Route path="/admin/categories" element={<AdminCategoriesPage />} />
+            <Route path="/admin/audit-logs" element={<AdminAuditLogsPage />} />
           </Route>
 
           {/* Fallback */}

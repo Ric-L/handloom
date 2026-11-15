@@ -1,5 +1,6 @@
 import { Link, Outlet, useNavigate, useLocation } from "react-router-dom";
 import type { User } from "../types";
+import { logoutUser } from "../api";
 import {
   ShieldCheck,
   LogOut,
@@ -11,6 +12,7 @@ import {
   Users,
   UserCog,
   Tag,
+  ScrollText,
 } from "lucide-react";
 
 export default function AdminLayout() {
@@ -27,7 +29,12 @@ export default function AdminLayout() {
 
   const isSuperAdmin = currentUser?.role === "SUPER_ADMIN";
 
-  const logout = () => {
+  const logout = async () => {
+    try {
+      await logoutUser();
+    } catch {
+      // ignore
+    }
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     navigate("/admin/login");
@@ -41,6 +48,7 @@ export default function AdminLayout() {
       ? [
           { icon: UserCog, label: "Users & RBAC", to: "/admin/users", exact: false },
           { icon: Tag, label: "Trade Categories", to: "/admin/categories", exact: false },
+          { icon: ScrollText, label: "Audit Ledger", to: "/admin/audit-logs", exact: false },
         ]
       : []),
   ];

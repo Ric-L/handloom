@@ -9,6 +9,8 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"handloom-portal/internal/audit"
+	"handloom-portal/internal/session"
 )
 
 // ListCandidates lists all users with role='APPLICANT', paginated, with optional mobile search
@@ -91,6 +93,32 @@ func (h *AdminHandler) ListCandidates(c *gin.Context) {
 		totalPages = 1
 	}
 
+	adminID := c.GetString("user_id")
+	var aID *string
+	if adminID != "" {
+		aID = &adminID
+	}
+	audit.LogDetailed(
+		ctx,
+		h.DB,
+		aID,
+		c.GetString("role"),
+		audit.ActionCandidatesViewed,
+		nil,
+		"candidates",
+		c.ClientIP(),
+		c.GetHeader("User-Agent"),
+		nil,
+		nil,
+		map[string]any{
+			"page":          page,
+			"page_size":     pageSize,
+			"search":        search,
+			"total_matches": total,
+		},
+		"SUCCESS",
+	)
+
 	c.JSON(http.StatusOK, gin.H{
 		"data":        candidates,
 		"total":       total,
@@ -163,6 +191,31 @@ func (h *AdminHandler) ListUsers(c *gin.Context) {
 		totalPages = 1
 	}
 
+	adminID := c.GetString("user_id")
+	var aID *string
+	if adminID != "" {
+		aID = &adminID
+	}
+	audit.LogDetailed(
+		ctx,
+		h.DB,
+		aID,
+		c.GetString("role"),
+		audit.ActionUsersListViewed,
+		nil,
+		"users",
+		c.ClientIP(),
+		c.GetHeader("User-Agent"),
+		nil,
+		nil,
+		map[string]any{
+			"page":          page,
+			"page_size":     pageSize,
+			"total_matches": total,
+		},
+		"SUCCESS",
+	)
+
 	c.JSON(http.StatusOK, gin.H{
 		"data":        users,
 		"total":       total,
@@ -201,6 +254,14 @@ func (h *AdminHandler) UpdateUserRole(c *gin.Context) {
 
 	ctx := context.Background()
 
+	// Capture previous role for audit ledger
+	var oldRole string
+	err := h.DB.QueryRow(ctx, `SELECT role FROM users WHERE id = $1`, userID).Scan(&oldRole)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		return
+	}
+
 	res, err := h.DB.Exec(ctx, `UPDATE users SET role = $1 WHERE id = $2`, newRole, userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update user role"})
@@ -210,6 +271,30 @@ func (h *AdminHandler) UpdateUserRole(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 		return
 	}
+
+	// Security: Immediately terminate active sessions so user cannot reuse outdated permissions
+	_ = session.RevokeAllUserSessions(ctx, h.DB, userID, "ROLE_CHANGED")
+
+	adminID := c.GetString("user_id")
+	var aID *string
+	if adminID != "" {
+		aID = &adminID
+	}
+	audit.LogDetailed(
+		ctx,
+		h.DB,
+		aID,
+		c.GetString("role"),
+		audit.ActionUserRoleUpdated,
+		&userID,
+		"user",
+		c.ClientIP(),
+		c.GetHeader("User-Agent"),
+		map[string]any{"role": oldRole},
+		map[string]any{"role": newRole},
+		map[string]any{"target_user": userID, "old_role": oldRole, "new_role": newRole},
+		"SUCCESS",
+	)
 
 	c.JSON(http.StatusOK, gin.H{
 		"message":  "User role updated successfully",

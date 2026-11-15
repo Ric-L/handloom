@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"handloom-portal/internal/audit"
 )
 
 // CreateCategory creates a new job category (SUPER_ADMIN only)
@@ -67,6 +68,19 @@ func (h *AdminHandler) CreateCategory(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create category"})
 		return
 	}
+
+	userID := c.GetString("user_id")
+	userRole := c.GetString("role")
+	var uID *string
+	if userID != "" {
+		uID = &userID
+	}
+	audit.Log(ctx, h.DB, uID, userRole, audit.ActionCategoryCreated, nil, c.ClientIP(), nil, map[string]any{
+		"id":    id,
+		"code":  code,
+		"title": title,
+		"limit": approvalLimit,
+	}, map[string]any{"code": code}, "SUCCESS")
 
 	c.JSON(http.StatusCreated, gin.H{
 		"id":               id,
@@ -147,6 +161,22 @@ func (h *AdminHandler) UpdateCategory(c *gin.Context) {
 		return
 	}
 
+	userID := c.GetString("user_id")
+	userRole := c.GetString("role")
+	var uID *string
+	if userID != "" {
+		uID = &userID
+	}
+	audit.Log(ctx, h.DB, uID, userRole, audit.ActionCategoryUpdated, nil, c.ClientIP(), map[string]any{
+		"title":          title,
+		"approval_limit": approvalLimit,
+	}, map[string]any{
+		"id":             catID,
+		"code":           code,
+		"title":          title,
+		"approval_limit": approvalLimit,
+	}, map[string]any{"cat_id": catID}, "SUCCESS")
+
 	c.JSON(http.StatusOK, gin.H{
 		"id":               catID,
 		"code":             code,
@@ -187,6 +217,18 @@ func (h *AdminHandler) ToggleCategory(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Category not found"})
 		return
 	}
+
+	userID := c.GetString("user_id")
+	userRole := c.GetString("role")
+	var uID *string
+	if userID != "" {
+		uID = &userID
+	}
+	audit.Log(ctx, h.DB, uID, userRole, audit.ActionCategoryToggled, nil, c.ClientIP(), nil, map[string]any{
+		"id":               id,
+		"code":             code,
+		"is_approval_open": isApprovalOpen,
+	}, map[string]any{"cat_id": id}, "SUCCESS")
 
 	c.JSON(http.StatusOK, gin.H{
 		"id":               id,
@@ -229,6 +271,14 @@ func (h *AdminHandler) DeleteCategory(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Category not found"})
 		return
 	}
+
+	userID := c.GetString("user_id")
+	userRole := c.GetString("role")
+	var uID *string
+	if userID != "" {
+		uID = &userID
+	}
+	audit.Log(ctx, h.DB, uID, userRole, audit.ActionCategoryDeleted, nil, c.ClientIP(), nil, nil, map[string]any{"cat_id": catID}, "SUCCESS")
 
 	c.JSON(http.StatusOK, gin.H{"message": "Category deleted successfully"})
 }

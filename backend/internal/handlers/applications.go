@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -14,7 +15,16 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"handloom-portal/internal/audit"
 )
+
+var htmlTagRegex = regexp.MustCompile(`<[^>]*>`)
+
+func sanitizeInput(s string) string {
+	trimmed := strings.TrimSpace(s)
+	clean := htmlTagRegex.ReplaceAllString(trimmed, "")
+	return strings.TrimSpace(clean)
+}
 
 type ApplicationHandler struct {
 	DB        *pgxpool.Pool
@@ -232,13 +242,13 @@ func (h *ApplicationHandler) Submit(c *gin.Context) {
 			NULLIF($21, ''), NULLIF($22, ''), NULLIF($23, ''), NULLIF($24, ''), $25, 'PENDING'
 		) RETURNING id, status, submitted_at`,
 		regNo, userID, req.CategoryID,
-		strings.TrimSpace(req.FullName), strings.TrimSpace(req.GuardianName), parsedDOB, req.Gender,
-		strings.TrimSpace(req.AltMobile), req.GovIDType, strings.TrimSpace(req.GovIDLast4), req.SocialCategory,
-		strings.TrimSpace(req.AddressFull), strings.TrimSpace(req.DistrictStatePin),
-		req.HighestQual, strings.TrimSpace(req.InstitutionName), req.Occupation,
-		strings.TrimSpace(req.PrevTraining), expBytes, strings.TrimSpace(req.PreferredCentre), req.TrainingMode,
-		strings.TrimSpace(req.BankHolderName), strings.TrimSpace(req.BankNameBranch),
-		strings.TrimSpace(req.AccountNumber), strings.TrimSpace(req.IFSCCode),
+		sanitizeInput(req.FullName), sanitizeInput(req.GuardianName), parsedDOB, req.Gender,
+		sanitizeInput(req.AltMobile), req.GovIDType, sanitizeInput(req.GovIDLast4), req.SocialCategory,
+		sanitizeInput(req.AddressFull), sanitizeInput(req.DistrictStatePin),
+		req.HighestQual, sanitizeInput(req.InstitutionName), req.Occupation,
+		sanitizeInput(req.PrevTraining), expBytes, sanitizeInput(req.PreferredCentre), req.TrainingMode,
+		sanitizeInput(req.BankHolderName), sanitizeInput(req.BankNameBranch),
+		sanitizeInput(req.AccountNumber), sanitizeInput(req.IFSCCode),
 		docBytes,
 	).Scan(&appID, &status, &submittedAt)
 
@@ -246,6 +256,12 @@ func (h *ApplicationHandler) Submit(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to save application: %v", err)})
 		return
 	}
+
+	userRole := c.GetString("role")
+	audit.Log(c.Request.Context(), h.DB, &userID, userRole, audit.ActionApplicationSubmit, &appID, c.ClientIP(), nil, nil, map[string]any{
+		"registration_no": regNo,
+		"category_id":     req.CategoryID,
+	}, "SUCCESS")
 
 	c.JSON(http.StatusCreated, gin.H{
 		"message":         "Application submitted and saved successfully",
@@ -423,7 +439,7 @@ func (h *ApplicationHandler) GetApprovedSlip(c *gin.Context) {
 	c.JSON(http.StatusOK, res)
 }
 
-// UploadFile handles candidate document uploads with file type and 5MB validation
+// UploadFile handles candidate document uploads with file type, size, and content magic bytes validation
 func (h *ApplicationHandler) UploadFile(c *gin.Context) {
 	file, err := c.FormFile("file")
 	if err != nil {
@@ -434,14 +450,14 @@ func (h *ApplicationHandler) UploadFile(c *gin.Context) {
 		return
 	}
 
-	// 5MB limit
+	// 1. Enforce 5MB limit
 	const maxFileSize = 5 * 1024 * 1024
 	if file.Size > maxFileSize {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "File size exceeds 5MB limit. Please compress or choose a smaller file."})
 		return
 	}
 
-	// Validate extension
+	// 2. Validate declared extension
 	ext := strings.ToLower(filepath.Ext(file.Filename))
 	allowed := map[string]bool{
 		".jpg":  true,
@@ -455,6 +471,48 @@ func (h *ApplicationHandler) UploadFile(c *gin.Context) {
 		return
 	}
 
+	// 3. Inspect real content bytes (magic numbers) to prevent disguised executable/script uploads
+	src, err := file.Open()
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to read uploaded file stream."})
+		return
+	}
+	defer src.Close()
+
+	header := make([]byte, 512)
+	n, _ := src.Read(header)
+	header = header[:n]
+
+	detectedType := http.DetectContentType(header)
+	validContent := false
+
+	switch ext {
+	case ".jpg", ".jpeg":
+		if detectedType == "image/jpeg" || (len(header) >= 3 && header[0] == 0xFF && header[1] == 0xD8 && header[2] == 0xFF) {
+			validContent = true
+		}
+	case ".png":
+		if detectedType == "image/png" || (len(header) >= 8 && string(header[:8]) == "\x89PNG\r\n\x1a\n") {
+			validContent = true
+		}
+	case ".webp":
+		if detectedType == "image/webp" || (len(header) >= 12 && string(header[:4]) == "RIFF" && string(header[8:12]) == "WEBP") {
+			validContent = true
+		}
+	case ".pdf":
+		if strings.HasPrefix(detectedType, "application/pdf") || (len(header) >= 5 && string(header[:5]) == "%PDF-") {
+			validContent = true
+		}
+	}
+
+	if !validContent {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "File content does not match the declared file extension or contains unsupported binary data.",
+			"code":  "INVALID_FILE_CONTENT",
+		})
+		return
+	}
+
 	uploadDir := h.UploadDir
 	if uploadDir == "" {
 		uploadDir = "./uploads"
@@ -464,8 +522,9 @@ func (h *ApplicationHandler) UploadFile(c *gin.Context) {
 		return
 	}
 
-	// Safe filename: prefix with 8 char UUID
-	safeName := fmt.Sprintf("%s%s", uuid.New().String()[:12], ext)
+	// 4. Safe filename: random UUID prefix, clean extension, prevent directory traversal
+	cleanExt := filepath.Clean(ext)
+	safeName := fmt.Sprintf("%s%s", uuid.New().String()[:12], cleanExt)
 	dstPath := filepath.Join(uploadDir, safeName)
 
 	if err := c.SaveUploadedFile(file, dstPath); err != nil {
@@ -473,12 +532,25 @@ func (h *ApplicationHandler) UploadFile(c *gin.Context) {
 		return
 	}
 
+	userID := c.GetString("user_id")
+	userRole := c.GetString("role")
+	var uID *string
+	if userID != "" {
+		uID = &userID
+	}
+	audit.Log(c.Request.Context(), h.DB, uID, userRole, audit.ActionDocumentUploaded, nil, c.ClientIP(), nil, nil, map[string]any{
+		"filename":  filepath.Base(file.Filename),
+		"stored_as": safeName,
+		"size":      file.Size,
+		"ext":       ext,
+	}, "SUCCESS")
+
 	c.JSON(http.StatusOK, gin.H{
 		"url":       "/uploads/" + safeName,
-		"filename":  file.Filename,
+		"filename":  filepath.Base(file.Filename),
 		"size":      file.Size,
 		"extension": ext,
-		"message":   "File uploaded successfully",
+		"message":   "File verified and uploaded successfully",
 	})
 }
 
@@ -678,6 +750,29 @@ func (h *ApplicationHandler) UpdateApplication(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to update application: %v", err)})
 		return
+	}
+
+	if isAdmin {
+		adminID := c.GetString("user_id")
+		var aID *string
+		if adminID != "" {
+			aID = &adminID
+		}
+		audit.LogDetailed(
+			ctx,
+			h.DB,
+			aID,
+			userRole,
+			audit.ActionApplicationDossierUpdated,
+			&appID,
+			"application",
+			c.ClientIP(),
+			c.GetHeader("User-Agent"),
+			map[string]any{"status": currentStatus},
+			map[string]any{"full_name": req.FullName, "highest_qual": req.HighestQual},
+			map[string]any{"app_id": appID, "updated_by": userRole},
+			"SUCCESS",
+		)
 	}
 
 	c.JSON(http.StatusOK, gin.H{

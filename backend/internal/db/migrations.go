@@ -67,26 +67,82 @@ CREATE TABLE IF NOT EXISTS applications (
 
 CREATE TABLE IF NOT EXISTS audit_log (
     id          BIGSERIAL PRIMARY KEY,
-    admin_id    UUID NOT NULL REFERENCES users(id),
-    action      VARCHAR(50) NOT NULL,
+    admin_id    UUID REFERENCES users(id),
+    actor_id    UUID REFERENCES users(id),
+    actor_role  VARCHAR(30),
+    action      VARCHAR(100) NOT NULL,
     target_id   UUID,
     ip_address  VARCHAR(45),
     before_state JSONB,
     after_state  JSONB,
-    created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    details      JSONB DEFAULT '{}',
+    status       VARCHAR(20) NOT NULL DEFAULT 'SUCCESS',
+    created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS user_sessions (
+    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id         UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    session_token   VARCHAR(128) UNIQUE NOT NULL,
+    ip_address      VARCHAR(45),
+    user_agent      TEXT,
+    last_activity   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    expires_at      TIMESTAMPTZ NOT NULL,
+    is_revoked      BOOLEAN NOT NULL DEFAULT FALSE,
+    revoked_reason  VARCHAR(100),
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS login_attempts (
+    id           BIGSERIAL PRIMARY KEY,
+    identifier   VARCHAR(100) NOT NULL,
+    ip_address   VARCHAR(45) NOT NULL,
+    attempted_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    success      BOOLEAN NOT NULL
 );
 
 CREATE INDEX IF NOT EXISTS idx_applications_registration_no ON applications(registration_no);
 CREATE INDEX IF NOT EXISTS idx_applications_user_id ON applications(user_id);
 CREATE INDEX IF NOT EXISTS idx_applications_status ON applications(status);
 CREATE INDEX IF NOT EXISTS idx_applications_category_id ON applications(category_id);
+CREATE INDEX IF NOT EXISTS idx_user_sessions_token ON user_sessions(session_token);
+CREATE INDEX IF NOT EXISTS idx_user_sessions_user_id ON user_sessions(user_id);
+CREATE INDEX IF NOT EXISTS idx_user_sessions_active ON user_sessions(user_id, is_revoked, expires_at);
+CREATE INDEX IF NOT EXISTS idx_login_attempts_lookup ON login_attempts(identifier, ip_address, attempted_at DESC);
+CREATE INDEX IF NOT EXISTS idx_audit_log_created_at ON audit_log(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_audit_log_action ON audit_log(action);
+`
+
+const schemaUpdates = `
+ALTER TABLE audit_log ALTER COLUMN admin_id DROP NOT NULL;
+ALTER TABLE audit_log ADD COLUMN IF NOT EXISTS actor_id UUID REFERENCES users(id);
+ALTER TABLE audit_log ADD COLUMN IF NOT EXISTS actor_role VARCHAR(30);
+ALTER TABLE audit_log ADD COLUMN IF NOT EXISTS resource_type VARCHAR(50);
+ALTER TABLE audit_log ADD COLUMN IF NOT EXISTS user_agent TEXT;
+ALTER TABLE audit_log ADD COLUMN IF NOT EXISTS details JSONB DEFAULT '{}';
+ALTER TABLE audit_log ADD COLUMN IF NOT EXISTS status VARCHAR(20) NOT NULL DEFAULT 'SUCCESS';
+
+CREATE OR REPLACE FUNCTION prevent_audit_tampering()
+RETURNS TRIGGER AS $$
+BEGIN
+    RAISE EXCEPTION 'Audit log records are immutable and tamper-resistant; UPDATE and DELETE operations are strictly prohibited by Government Cyber Security Controls.';
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trg_prevent_audit_tampering ON audit_log;
+CREATE TRIGGER trg_prevent_audit_tampering
+BEFORE UPDATE OR DELETE ON audit_log
+FOR EACH ROW EXECUTE FUNCTION prevent_audit_tampering();
 `
 
 func RunMigrations(ctx context.Context, pool *pgxpool.Pool) error {
 	log.Println("Running database migrations...")
-	_, err := pool.Exec(ctx, schema)
-	if err != nil {
+	if _, err := pool.Exec(ctx, schema); err != nil {
 		return err
+	}
+	// Run non-destructive schema updates for existing tables
+	if _, err := pool.Exec(ctx, schemaUpdates); err != nil {
+		log.Printf("Notice on schema updates: %v", err)
 	}
 	log.Println("Migrations complete.")
 	return nil

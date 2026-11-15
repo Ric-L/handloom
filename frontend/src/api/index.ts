@@ -31,6 +31,22 @@ export const login = (data: { mobile_number: string; password: string }) =>
 export const adminLogin = (data: { mobile_number: string; password: string }) =>
   client.post<AuthResponse>("/auth/admin-login", data).then(r => r.data);
 
+// Session Management & Invalidation
+export const logoutUser = () =>
+  client.post<{ message: string }>("/auth/logout").then(r => r.data).catch(() => ({ message: "Logged out" }));
+
+export const refreshSession = () =>
+  client.post<{ message: string; expires_in: number }>("/auth/refresh-session").then(r => r.data);
+
+export const getSessionStatus = () =>
+  client.get<{ active: boolean; remaining_seconds: number; idle_timeout: number }>("/auth/session-status").then(r => r.data);
+
+export const getCSRFToken = () =>
+  client.get<{ csrf_token: string }>("/auth/csrf-token").then(r => r.data);
+
+export const getCurrentUser = () =>
+  client.get<{ user: any; remaining_seconds: number }>("/auth/me").then(r => r.data);
+
 // Applicant Submission (JSON or FormData, persists to PostgreSQL)
 export const submitApplication = (data: any) =>
   client
@@ -143,4 +159,20 @@ export const toggleAdminCategory = (id: number) =>
 
 export const deleteAdminCategory = (id: number) =>
   client.delete(`/admin/categories/${id}`).then(r => r.data);
+
+// Admin - Tamper-Resistant Audit Logs & Daily Files (Super Admin only)
+export const getAdminAuditLogs = (params: {
+  page?: number;
+  page_size?: number;
+  action?: string;
+  actor_role?: string;
+  resource_type?: string;
+  search?: string;
+  start_date?: string;
+  end_date?: string;
+}) =>
+  client.get<import("../types").AuditLogResult>("/admin/audit-logs", { params }).then(r => r.data);
+
+export const getAdminAuditFiles = () =>
+  client.get<{ files: import("../types").AuditFileInfo[]; count: number }>("/admin/audit-logs/files").then(r => r.data);
 

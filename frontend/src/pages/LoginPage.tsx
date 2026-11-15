@@ -1,9 +1,12 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { login } from "../api";
-import { Smartphone, Lock, ArrowRight, AlertCircle, Shield } from "lucide-react";
+import { Smartphone, Lock, ArrowRight, AlertCircle, Shield, Clock } from "lucide-react";
 
 export default function LoginPage() {
+  const [searchParams] = useSearchParams();
+  const isSessionExpired = searchParams.get("reason") === "session_expired";
+
   const [mobile, setMobile] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -18,7 +21,7 @@ export default function LoginPage() {
       const data = await login({ mobile_number: mobile.trim(), password });
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
-      const redirectParam = new URLSearchParams(window.location.search).get("redirect");
+      const redirectParam = searchParams.get("redirect");
       if (data.user.role === "SUPER_ADMIN" || data.user.role === "REVIEWER_ADMIN") {
         navigate("/admin");
       } else if (redirectParam) {
@@ -26,8 +29,9 @@ export default function LoginPage() {
       } else {
         navigate("/dashboard");
       }
-    } catch {
-      setError("Invalid mobile number or password. Please verify your credentials.");
+    } catch (err: any) {
+      const serverMsg = err.response?.data?.error;
+      setError(serverMsg || "Invalid mobile number or password. Please verify your credentials.");
     } finally {
       setLoading(false);
     }
@@ -42,6 +46,15 @@ export default function LoginPage() {
         <h1 className="text-2xl font-black text-slate-900 tracking-tight">Candidate Sign In</h1>
         <p className="text-xs text-slate-500">Access your artisan admission applications & status</p>
       </div>
+
+      {isSessionExpired && (
+        <div className="p-3.5 rounded-xl bg-amber-50 border border-amber-300 text-amber-900 text-xs font-medium flex items-start gap-2.5">
+          <Clock className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+          <div>
+            <span className="font-bold">Session Timed Out:</span> Your session was automatically closed after 3 minutes of inactivity in compliance with government security standards. Please sign in again to continue.
+          </div>
+        </div>
+      )}
 
       {error && (
         <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-medium flex items-start gap-2.5">

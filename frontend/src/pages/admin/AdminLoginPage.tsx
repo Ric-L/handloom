@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { useNavigate, useLocation, Link } from "react-router-dom";
+import { useNavigate, useLocation, useSearchParams, Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { adminLogin } from "../../api";
-import { ShieldCheck, Lock, Smartphone, AlertTriangle, KeyRound } from "lucide-react";
+import { ShieldCheck, Lock, Smartphone, AlertTriangle, KeyRound, Clock } from "lucide-react";
 
 const adminLoginSchema = z.object({
   mobile_number: z.string().regex(/^\d{10}$/, "Administrator mobile number must be exactly 10 digits"),
@@ -16,6 +16,9 @@ type AdminLoginFormValues = z.infer<typeof adminLoginSchema>;
 export default function AdminLoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
+  const isSessionExpired = searchParams.get("reason") === "session_expired";
+
   const [serverError, setServerError] = useState<string>(
     (location.state as any)?.error || ""
   );
@@ -77,6 +80,15 @@ export default function AdminLoginPage() {
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-gray-900/80 backdrop-blur-md py-8 px-6 shadow-2xl rounded-2xl border border-gray-800 sm:px-10">
+          {isSessionExpired && (
+            <div className="mb-6 p-4 rounded-xl bg-amber-950/80 border border-amber-600/80 text-amber-200 text-xs flex items-start gap-3">
+              <Clock className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+              <div className="leading-relaxed font-medium">
+                <span className="font-bold text-amber-300">Security Logout:</span> Administrator session automatically expired after 3 minutes of inactivity in compliance with National Cyber Security Guidelines. Please sign in again.
+              </div>
+            </div>
+          )}
+
           {serverError && (
             <div className="mb-6 p-4 rounded-xl bg-red-950/70 border border-red-800/80 text-red-200 text-xs flex items-start gap-3">
               <AlertTriangle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />

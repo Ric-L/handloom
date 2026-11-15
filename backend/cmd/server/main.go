@@ -7,8 +7,10 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
+	"handloom-portal/internal/audit"
 	"handloom-portal/internal/config"
 	"handloom-portal/internal/db"
+	"handloom-portal/internal/middleware"
 	"handloom-portal/internal/routes"
 )
 
@@ -18,6 +20,7 @@ func main() {
 	}
 
 	cfg := config.Load()
+	audit.Init(cfg.AuditLogDir)
 
 	pool, err := db.Connect(context.Background(), cfg.DatabaseURL)
 	if err != nil {
@@ -39,6 +42,7 @@ func main() {
 
 	r := gin.Default()
 	r.Use(corsMiddleware())
+	r.Use(middleware.SecurityHeaders())
 	routes.Register(r, pool, cfg)
 
 	port := os.Getenv("PORT")
@@ -53,9 +57,15 @@ func main() {
 
 func corsMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		c.Header("Access-Control-Allow-Origin", "*")
+		origin := c.GetHeader("Origin")
+		if origin == "" {
+			origin = "http://localhost:5173"
+		}
+		c.Header("Access-Control-Allow-Origin", origin)
+		c.Header("Access-Control-Allow-Credentials", "true")
 		c.Header("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS")
-		c.Header("Access-Control-Allow-Headers", "Authorization,Content-Type")
+		c.Header("Access-Control-Allow-Headers", "Authorization,Content-Type,X-CSRF-Token,X-Requested-With")
+		c.Header("Access-Control-Expose-Headers", "X-CSRF-Token,Retry-After")
 		if c.Request.Method == "OPTIONS" {
 			c.AbortWithStatus(204)
 			return

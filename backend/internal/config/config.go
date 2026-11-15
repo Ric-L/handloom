@@ -7,6 +7,7 @@ type Config struct {
 	JWTSecret   string
 	Port        string
 	UploadDir   string
+	AuditLogDir string
 }
 
 func Load() *Config {
@@ -15,6 +16,7 @@ func Load() *Config {
 		JWTSecret:   getEnv("JWT_SECRET", "change-me-in-production-use-32-chars-min"),
 		Port:        getEnv("PORT", "8080"),
 		UploadDir:   getEnv("UPLOAD_DIR", "./uploads"),
+		AuditLogDir: getEnv("AUDIT_LOG_DIR", "./logs/audit"),
 	}
 }
 

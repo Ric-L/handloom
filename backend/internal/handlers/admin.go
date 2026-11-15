@@ -12,6 +12,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"handloom-portal/internal/audit"
 	"handloom-portal/internal/models"
 )
 
@@ -207,6 +208,36 @@ func (h *AdminHandler) ListApplications(c *gin.Context) {
 		totalPages = 1
 	}
 
+	adminID := c.GetString("user_id")
+	var aID *string
+	if adminID != "" {
+		aID = &adminID
+	}
+	audit.LogDetailed(
+		ctx,
+		h.DB,
+		aID,
+		c.GetString("role"),
+		audit.ActionApplicationsViewed,
+		nil,
+		"applications",
+		c.ClientIP(),
+		c.GetHeader("User-Agent"),
+		nil,
+		nil,
+		map[string]any{
+			"page":            page,
+			"page_size":       pageSize,
+			"category_id":     categoryIDStr,
+			"status":          status,
+			"district":        district,
+			"social_category": socialCategory,
+			"search_query":    searchQuery,
+			"total_results":   total,
+		},
+		"SUCCESS",
+	)
+
 	c.JSON(http.StatusOK, gin.H{
 		"data":        apps,
 		"total":       total,
@@ -270,6 +301,31 @@ func (h *AdminHandler) GetApplication(c *gin.Context) {
 	_ = json.Unmarshal(priorExpRaw, &priorExperience)
 	_ = json.Unmarshal(disabilityReqRaw, &disabilityReq)
 	_ = json.Unmarshal(documentsRaw, &documents)
+
+	adminID := c.GetString("user_id")
+	var aID *string
+	if adminID != "" {
+		aID = &adminID
+	}
+	audit.LogDetailed(
+		ctx,
+		h.DB,
+		aID,
+		c.GetString("role"),
+		audit.ActionApplicationInspected,
+		&appID,
+		"application",
+		c.ClientIP(),
+		c.GetHeader("User-Agent"),
+		nil,
+		nil,
+		map[string]any{
+			"registration_no": regNo,
+			"category_code":   catCode,
+			"status":          status,
+		},
+		"SUCCESS",
+	)
 
 	c.JSON(http.StatusOK, gin.H{
 		"id":                 id,
@@ -399,29 +455,46 @@ func (h *AdminHandler) Approve(c *gin.Context) {
 		return
 	}
 
-	// Step 5: Append immutable audit log
-	beforeState, _ := json.Marshal(gin.H{
-		"status":         currentStatus,
-		"approved_count": approvedCount,
-		"is_open":        isApprovalOpen,
-	})
-	afterState, _ := json.Marshal(gin.H{
-		"status":         "APPROVED",
-		"approved_count": newApprovedCount,
-		"is_open":        newIsOpen,
-	})
-
-	_, _ = tx.Exec(ctx,
-		`INSERT INTO audit_log (admin_id, action, target_id, ip_address, before_state, after_state)
-		 VALUES ($1, 'APPROVE', $2, $3, $4, $5)`,
-		adminID, appID, clientIP, beforeState, afterState,
-	)
-
-	// Step 6: Commit transaction
+	// Step 5: Commit transaction
 	if err := tx.Commit(ctx); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to commit approval transaction"})
 		return
 	}
+
+	// Step 6: Append immutable audit log to date-partitioned file & database
+	var aID *string
+	if adminID != "" {
+		aID = &adminID
+	}
+	audit.LogDetailed(
+		ctx,
+		h.DB,
+		aID,
+		c.GetString("role"),
+		audit.ActionApplicationApprove,
+		&appID,
+		"application",
+		clientIP,
+		c.GetHeader("User-Agent"),
+		map[string]any{
+			"status":         currentStatus,
+			"approved_count": approvedCount,
+			"is_open":        isApprovalOpen,
+			"category_code":  categoryCode,
+		},
+		map[string]any{
+			"status":         "APPROVED",
+			"approved_count": newApprovedCount,
+			"is_open":        newIsOpen,
+			"category_code":  categoryCode,
+		},
+		map[string]any{
+			"category_id":   categoryID,
+			"category_code": categoryCode,
+			"app_id":        appID,
+		},
+		"SUCCESS",
+	)
 
 	c.JSON(http.StatusOK, gin.H{
 		"message":          "Application approved successfully",
@@ -483,19 +556,38 @@ func (h *AdminHandler) Reject(c *gin.Context) {
 		return
 	}
 
-	beforeState, _ := json.Marshal(gin.H{"status": currentStatus})
-	afterState, _ := json.Marshal(gin.H{"status": "REJECTED", "reason": trimmedReason})
-
-	_, _ = tx.Exec(ctx,
-		`INSERT INTO audit_log (admin_id, action, target_id, ip_address, before_state, after_state)
-		 VALUES ($1, 'REJECT', $2, $3, $4, $5)`,
-		adminID, appID, clientIP, beforeState, afterState,
-	)
-
 	if err := tx.Commit(ctx); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to commit rejection"})
 		return
 	}
+
+	var aID *string
+	if adminID != "" {
+		aID = &adminID
+	}
+	audit.LogDetailed(
+		ctx,
+		h.DB,
+		aID,
+		c.GetString("role"),
+		audit.ActionApplicationReject,
+		&appID,
+		"application",
+		clientIP,
+		c.GetHeader("User-Agent"),
+		map[string]any{
+			"status": currentStatus,
+		},
+		map[string]any{
+			"status": "REJECTED",
+			"reason": trimmedReason,
+		},
+		map[string]any{
+			"app_id": appID,
+			"reason": trimmedReason,
+		},
+		"SUCCESS",
+	)
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Application rejected and logged for audit.",
@@ -537,6 +629,30 @@ func (h *AdminHandler) ExportCSV(c *gin.Context) {
 		return
 	}
 	defer rows.Close()
+
+	adminID := c.GetString("user_id")
+	var aID *string
+	if adminID != "" {
+		aID = &adminID
+	}
+	audit.LogDetailed(
+		ctx,
+		h.DB,
+		aID,
+		c.GetString("role"),
+		audit.ActionDataExported,
+		nil,
+		"trainee_export",
+		c.ClientIP(),
+		c.GetHeader("User-Agent"),
+		nil,
+		nil,
+		map[string]any{
+			"status":      status,
+			"category_id": categoryIDStr,
+		},
+		"SUCCESS",
+	)
 
 	fileName := fmt.Sprintf("handloom_trainees_%s_%s.csv", strings.ToLower(status), time.Now().Format("20060102_150405"))
 	c.Header("Content-Type", "text/csv; charset=utf-8")
@@ -693,31 +809,45 @@ func (h *AdminHandler) UpdateCategoryQuota(c *gin.Context) {
 		return
 	}
 
-	// Audit trail logging
-	beforeJSON, _ := json.Marshal(gin.H{
-		"approval_limit":   currentLimit,
-		"approved_count":   approvedCount,
-		"is_approval_open": currentIsOpen,
-	})
-	afterJSON, _ := json.Marshal(gin.H{
-		"approval_limit":   req.ApprovalLimit,
-		"approved_count":   approvedCount,
-		"is_approval_open": newIsOpen,
-	})
-
-	_, err = tx.Exec(ctx, `
-		INSERT INTO audit_log (admin_id, action, target_id, ip_address, before_state, after_state)
-		VALUES ($1, 'UPDATE_QUOTA', NULL, $2, $3, $4)
-	`, adminID, clientIP, beforeJSON, afterJSON)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to record audit log: %v", err)})
-		return
-	}
-
 	if err := tx.Commit(ctx); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to commit quota modification"})
 		return
 	}
+
+	// Audit trail logging to persistent file and database
+	var aID *string
+	if adminID != "" {
+		aID = &adminID
+	}
+	catIDStrVal := strconv.Itoa(catID)
+	audit.LogDetailed(
+		ctx,
+		h.DB,
+		aID,
+		userRole,
+		audit.ActionQuotaUpdated,
+		&catIDStrVal,
+		"job_category",
+		clientIP,
+		c.GetHeader("User-Agent"),
+		map[string]any{
+			"code":             code,
+			"approval_limit":   currentLimit,
+			"approved_count":   approvedCount,
+			"is_approval_open": currentIsOpen,
+		},
+		map[string]any{
+			"code":             code,
+			"approval_limit":   req.ApprovalLimit,
+			"approved_count":   approvedCount,
+			"is_approval_open": newIsOpen,
+		},
+		map[string]any{
+			"category_id": catID,
+			"code":        code,
+		},
+		"SUCCESS",
+	)
 
 	c.JSON(http.StatusOK, gin.H{
 		"message":          fmt.Sprintf("Category %s quota successfully updated to %d seats", code, req.ApprovalLimit),

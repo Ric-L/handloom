@@ -141,3 +141,34 @@ export interface PaginatedApplicationsResponse {
   page_size: number;
   total_pages: number;
 }
+
+export interface AuditLogRowItem {
+  id: number;
+  actor_id?: string;
+  actor_role: string;
+  action: string;
+  target_id?: string;
+  resource_type?: string;
+  ip_address?: string;
+  user_agent?: string;
+  before_state?: any;
+  after_state?: any;
+  details?: any;
+  status: string;
+  created_at: string;
+}
+
+export interface AuditLogResult {
+  total: number;
+  page: number;
+  page_size: number;
+  entries: AuditLogRowItem[];
+}
+
+export interface AuditFileInfo {
+  date: string;
+  filename: string;
+  size_bytes: number;
+  last_modified: string;
+}
+
