@@ -130,10 +130,11 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	}
 
 	var user models.User
+	var isDisabled bool
 	err := h.DB.QueryRow(ctx,
-		`SELECT id, mobile_number, email, password_hash, role, created_at FROM users WHERE mobile_number = $1`,
+		`SELECT id, mobile_number, email, password_hash, role, created_at, COALESCE(is_disabled, FALSE) FROM users WHERE mobile_number = $1`,
 		cleanMobile,
-	).Scan(&user.ID, &user.MobileNumber, &user.Email, &user.PasswordHash, &user.Role, &user.CreatedAt)
+	).Scan(&user.ID, &user.MobileNumber, &user.Email, &user.PasswordHash, &user.Role, &user.CreatedAt, &isDisabled)
 
 	if err != nil {
 		if h.RateLimiter != nil {
@@ -145,6 +146,18 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		}, "FAILED")
 
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid mobile number or password"})
+		return
+	}
+
+	if isDisabled {
+		audit.Log(ctx, h.DB, &user.ID, user.Role, "LOGIN_BLOCKED_DISABLED", &user.ID, ip, nil, nil, map[string]any{
+			"mobile": cleanMobile,
+			"reason": "Account is disabled by Super Administrator",
+		}, "BLOCKED")
+		c.JSON(http.StatusForbidden, gin.H{
+			"error": "This administrator account has been disabled by a Super Administrator. Please contact system support.",
+			"code":  "ACCOUNT_DISABLED",
+		})
 		return
 	}
 

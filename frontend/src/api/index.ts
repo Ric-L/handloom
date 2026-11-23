@@ -137,15 +137,68 @@ export const downloadAdminCSV = async (categoryId?: number | string, status: str
 };
 
 // Admin - Candidates Management
-export const getAdminCandidates = (params: { page?: number; page_size?: number; search?: string }) =>
+export const getAdminCandidates = (params: {
+  page?: number;
+  page_size?: number;
+  search?: string;
+  name?: string;
+  mobile?: string;
+  email?: string;
+  min_applications?: number;
+  max_applications?: number;
+  has_applications?: string;
+  status?: string;
+  social_category?: string;
+  date_from?: string;
+  date_to?: string;
+}) =>
   client.get("/admin/candidates", { params }).then(r => r.data);
 
 // Admin - Users & RBAC Management
-export const getAdminUsers = (params: { page?: number; page_size?: number; search?: string }) =>
+export const getAdminUsers = (params: {
+  page?: number;
+  page_size?: number;
+  search?: string;
+  user_id?: string;
+  mobile?: string;
+  name?: string;
+  email?: string;
+  role?: string;
+  include_applicants?: boolean;
+}) =>
   client.get("/admin/users", { params }).then(r => r.data);
 
 export const updateAdminUserRole = (id: string, role: string) =>
   client.put(`/admin/users/${id}/role`, { role }).then(r => r.data);
+
+export const createAdminUser = (data: {
+  full_name: string;
+  mobile_number: string;
+  email?: string;
+  password: string;
+  role?: string;
+}) => client.post("/admin/users", data).then(r => r.data);
+
+export const deleteAdminUser = (id: string) =>
+  client.delete(`/admin/users/${id}`).then(r => r.data);
+
+export const disableAdminUser = (id: string, reason?: string) =>
+  client.post(`/admin/users/${id}/disable`, { reason }).then(r => r.data);
+
+export const enableAdminUser = (id: string) =>
+  client.post(`/admin/users/${id}/enable`).then(r => r.data);
+
+export const resetAdminUserPassword = (id: string, new_password: string) =>
+  client.post(`/admin/users/${id}/reset-password`, { new_password }).then(r => r.data);
+
+export const forceLogoutAdminUser = (id: string) =>
+  client.post(`/admin/users/${id}/force-logout`).then(r => r.data);
+
+export const updateAdminUserPermissions = (id: string, permissions: Record<string, boolean>) =>
+  client.put(`/admin/users/${id}/permissions`, { permissions }).then(r => r.data);
+
+export const getAdminUserActivity = (id: string) =>
+  client.get(`/admin/users/${id}/activity`).then(r => r.data);
 
 // Admin - Trade Categories Dynamic CRUD
 export const createAdminCategory = (data: { code: string; title: string; approval_limit: number }) =>

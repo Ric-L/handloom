@@ -12,6 +12,7 @@ export interface User {
   email?: string;
   role: UserRole;
   created_at: string;
+  full_name?: string;
 }
 
 export interface JobCategory {

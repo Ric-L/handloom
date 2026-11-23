@@ -48,9 +48,10 @@ func SeedDefaultAdmins(ctx context.Context, pool *pgxpool.Pool) error {
 		Email    string
 		Password string
 		Role     string
+		FullName string
 	}{
-		{"9999999999", "superadmin@handloom.gov.in", "Admin@12345", "SUPER_ADMIN"},
-		{"8888888888", "reviewer@handloom.gov.in", "Reviewer@12345", "REVIEWER_ADMIN"},
+		{"9999999999", "superadmin@handloom.gov.in", "Admin@12345", "SUPER_ADMIN", "Super Administrator"},
+		{"8888888888", "reviewer@handloom.gov.in", "Reviewer@12345", "REVIEWER_ADMIN", "Reviewer Admin"},
 	}
 
 	for _, a := range defaultAdmins {
@@ -59,10 +60,10 @@ func SeedDefaultAdmins(ctx context.Context, pool *pgxpool.Pool) error {
 			return err
 		}
 		_, err = pool.Exec(ctx,
-			`INSERT INTO users (mobile_number, email, password_hash, role)
-             VALUES ($1, $2, $3, $4)
-             ON CONFLICT (mobile_number) DO UPDATE SET role = EXCLUDED.role`,
-			a.Mobile, a.Email, string(hash), a.Role,
+			`INSERT INTO users (mobile_number, email, password_hash, role, full_name)
+             VALUES ($1, $2, $3, $4, $5)
+             ON CONFLICT (mobile_number) DO UPDATE SET role = EXCLUDED.role, full_name = COALESCE(EXCLUDED.full_name, users.full_name)`,
+			a.Mobile, a.Email, string(hash), a.Role, a.FullName,
 		)
 		if err != nil {
 			return err

@@ -257,6 +257,11 @@ func (h *ApplicationHandler) Submit(c *gin.Context) {
 		return
 	}
 
+	// Sync full_name back to user record if empty or updated
+	if strings.TrimSpace(req.FullName) != "" {
+		_, _ = h.DB.Exec(context.Background(), `UPDATE users SET full_name = $1 WHERE id = $2`, sanitizeInput(req.FullName), userID)
+	}
+
 	userRole := c.GetString("role")
 	audit.Log(c.Request.Context(), h.DB, &userID, userRole, audit.ActionApplicationSubmit, &appID, c.ClientIP(), nil, nil, map[string]any{
 		"registration_no": regNo,
@@ -750,6 +755,10 @@ func (h *ApplicationHandler) UpdateApplication(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to update application: %v", err)})
 		return
+	}
+
+	if strings.TrimSpace(req.FullName) != "" {
+		_, _ = h.DB.Exec(ctx, `UPDATE users SET full_name = $1 WHERE id = (SELECT user_id FROM applications WHERE id = $2)`, strings.TrimSpace(req.FullName), appID)
 	}
 
 	if isAdmin {

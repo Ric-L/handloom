@@ -16,7 +16,12 @@ CREATE TABLE IF NOT EXISTS users (
     email         VARCHAR(255),
     password_hash TEXT NOT NULL,
     role          VARCHAR(20) NOT NULL DEFAULT 'APPLICANT' CHECK (role IN ('APPLICANT','REVIEWER_ADMIN','SUPER_ADMIN')),
-    created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    full_name       VARCHAR(150),
+    is_disabled     BOOLEAN NOT NULL DEFAULT FALSE,
+    disabled_reason VARCHAR(255),
+    disabled_at     TIMESTAMPTZ,
+    permissions     JSONB NOT NULL DEFAULT '{"can_review": true, "can_approve": true, "can_reject": true, "can_export": true}',
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS job_categories (
@@ -114,6 +119,28 @@ CREATE INDEX IF NOT EXISTS idx_audit_log_action ON audit_log(action);
 `
 
 const schemaUpdates = `
+ALTER TABLE users ADD COLUMN IF NOT EXISTS full_name VARCHAR(150);
+
+-- Seed administrator full names if not set
+UPDATE users SET full_name = 'Super Administrator' WHERE role = 'SUPER_ADMIN' AND (full_name IS NULL OR full_name = '');
+UPDATE users SET full_name = 'Reviewer Admin' WHERE role = 'REVIEWER_ADMIN' AND (full_name IS NULL OR full_name = '');
+
+-- Populate applicant names from latest submitted applications if blank
+UPDATE users u
+SET full_name = a.full_name
+FROM (
+    SELECT DISTINCT ON (user_id) user_id, full_name
+    FROM applications
+    WHERE full_name IS NOT NULL AND full_name != ''
+    ORDER BY user_id, submitted_at DESC
+) a
+WHERE u.id = a.user_id AND (u.full_name IS NULL OR u.full_name = '');
+
+ALTER TABLE users ADD COLUMN IF NOT EXISTS is_disabled BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS disabled_reason VARCHAR(255);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS disabled_at TIMESTAMPTZ;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS permissions JSONB NOT NULL DEFAULT '{"can_review": true, "can_approve": true, "can_reject": true, "can_export": true}';
+
 ALTER TABLE audit_log ALTER COLUMN admin_id DROP NOT NULL;
 ALTER TABLE audit_log ADD COLUMN IF NOT EXISTS actor_id UUID REFERENCES users(id);
 ALTER TABLE audit_log ADD COLUMN IF NOT EXISTS actor_role VARCHAR(30);

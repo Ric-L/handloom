@@ -5,7 +5,8 @@ tmp_dir = "tmp"
 [build]
   args_bin = []
   bin = "tmp/main.exe"
-  cmd = "go build -o ./tmp/main.exe ./cmd/server/main.go"
+  entrypoint = "tmp/main.exe"
+  cmd = "cmd /C \"set GOROOT=C:\\Users\\Cain\\go_root&& set PATH=C:\\Users\\Cain\\go_root\\bin;%PATH%&& go build -o ./tmp/main.exe ./cmd/server/main.go\""
   delay = 1000
   exclude_dir = ["assets", "tmp", "vendor", "testdata", "uploads"]
   exclude_file = []

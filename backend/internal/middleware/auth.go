@@ -127,6 +127,19 @@ func Auth(secret string, db *pgxpool.Pool, roles ...string) gin.HandlerFunc {
 			c.Set("last_activity", sess.LastActivity)
 		}
 
+		// 4b. Verify user account is not disabled
+		if db != nil {
+			var isDisabled bool
+			if err := db.QueryRow(c.Request.Context(), `SELECT COALESCE(is_disabled, FALSE) FROM users WHERE id = $1`, userID).Scan(&isDisabled); err == nil && isDisabled {
+				clearAuthCookie(c)
+				c.AbortWithStatusJSON(http.StatusForbidden, gin.H{
+					"error": "This administrator account has been disabled by a Super Administrator.",
+					"code":  "ACCOUNT_DISABLED",
+				})
+				return
+			}
+		}
+
 		// 5. Server-Side Role-Based Access Control (RBAC)
 		if len(roles) > 0 {
 			allowed := false

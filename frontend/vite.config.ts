@@ -4,11 +4,8 @@ import react from '@vitejs/plugin-react'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
-  build: {
-    cssMinify: false,
-    rollupOptions: {
-      external: ['fflate', 'html2canvas', 'canvg'],
-    },
+  optimizeDeps: {
+    include: ['fflate', 'jspdf', 'jspdf-autotable', 'canvg', 'html2canvas'],
   },
   server: {
     port: 5173,
