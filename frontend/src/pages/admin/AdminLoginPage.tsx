@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { adminLogin } from "../../api";
-import { ShieldCheck, Lock, Smartphone, AlertTriangle, KeyRound, Clock } from "lucide-react";
+import { Lock, Smartphone, AlertTriangle, KeyRound, Clock } from "lucide-react";
 
 const adminLoginSchema = z.object({
   mobile_number: z.string().regex(/^\d{10}$/, "Administrator mobile number must be exactly 10 digits"),
@@ -63,15 +63,19 @@ export default function AdminLoginPage() {
     <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-950 to-black text-gray-100 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex justify-center">
-          <div className="w-16 h-16 bg-primary-800 border-2 border-primary-500 rounded-2xl flex items-center justify-center shadow-xl shadow-primary-900/40">
-            <ShieldCheck className="w-10 h-10 text-primary-300" />
+          <div className="bg-white/95 px-4 py-2.5 rounded-2xl flex items-center justify-center shadow-xl border border-slate-200">
+            <img
+              src="/mhhdcl-logo.png"
+              alt="Manipur Handloom &amp; Handicrafts Development Corporation Ltd."
+              className="h-16 w-auto object-contain"
+            />
           </div>
         </div>
         <h2 className="mt-4 text-center text-3xl font-extrabold tracking-tight text-white">
-          Admin Moderation Portal
+          MHHDC Admin Portal
         </h2>
         <p className="mt-1 text-center text-xs text-primary-400 font-medium uppercase tracking-wider">
-          Handloom & Skilled Artisan Development Initiative
+          Manipur Handloom &amp; Handicrafts Development Corporation Ltd.
         </p>
         <p className="mt-2 text-center text-xs text-gray-400">
           Restricted access for Reviewer Administrators and Super Administrators only.
@@ -84,7 +88,7 @@ export default function AdminLoginPage() {
             <div className="mb-6 p-4 rounded-xl bg-amber-950/80 border border-amber-600/80 text-amber-200 text-xs flex items-start gap-3">
               <Clock className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
               <div className="leading-relaxed font-medium">
-                <span className="font-bold text-amber-300">Security Logout:</span> Administrator session automatically expired after 3 minutes of inactivity in compliance with National Cyber Security Guidelines. Please sign in again.
+                <span className="font-bold text-amber-300">Security Logout:</span> Administrator session automatically expired after 3 minutes of inactivity in compliance with portal security guidelines. Please sign in again.
               </div>
             </div>
           )}

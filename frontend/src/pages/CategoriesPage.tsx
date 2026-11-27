@@ -53,13 +53,13 @@ export default function CategoriesPage() {
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
             <span className="inline-block text-xs font-bold text-blue-800 bg-blue-50 px-3 py-1 rounded-full border border-blue-200">
-              Free Government Skill Training
+              MHHDC Allocated Training Quota • PM VIKAS Scheme
             </span>
             <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-2 tracking-tight">
               Available Handloom &amp; Artisan Courses
             </h1>
             <p className="text-sm text-slate-600 mt-1 max-w-2xl leading-relaxed">
-              Choose a course below to apply online. All open courses include free training, a monthly stipend, and a government certificate.
+              Choose a course below to apply through Manipur Handloom &amp; Handicrafts Development Corporation Ltd. Selected candidates admitted under MHHDC&apos;s PM VIKAS Scheme quota receive free training, a monthly stipend, and recognized NSQF certification.
             </p>
           </div>
         </div>

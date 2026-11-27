@@ -616,7 +616,7 @@ export default function ApplicationReviewDrawer({
             </div>
 
             <p className="text-xs text-slate-600 leading-relaxed">
-              Government compliance requires an official reason for rejecting candidate{" "}
+              Admission policy requires a documented reason for rejecting candidate{" "}
               <strong>{app.full_name}</strong> (Min 10 characters). This will be recorded in audit logs and visible to the applicant.
             </p>
 

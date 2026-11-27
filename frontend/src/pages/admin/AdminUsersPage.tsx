@@ -794,7 +794,7 @@ export default function AdminUsersPage() {
                   type="email"
                   value={addForm.email}
                   onChange={(e) => setAddForm({ ...addForm, email: e.target.value })}
-                  placeholder="e.g. anand.kumar@handloom.gov.in"
+                  placeholder="e.g. staff.name@example.com"
                   className="w-full px-3 py-2 text-xs border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>

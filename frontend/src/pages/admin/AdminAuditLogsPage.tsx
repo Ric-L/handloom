@@ -461,7 +461,7 @@ export default function AdminAuditLogsPage() {
       <div className="bg-amber-50/80 border border-amber-200/80 rounded-xl p-4 text-xs text-amber-900 flex items-start gap-3">
         <Lock className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
         <div>
-          <strong className="font-semibold">Automated Redaction Guarantee:</strong> In accordance with government cybersecurity guidelines, all sensitive attributes including passwords, cryptographic tokens, bank account numbers, credentials, and session secrets are scrubbed at ingestion to <code className="font-mono text-amber-800 font-bold bg-amber-100 px-1 py-0.5 rounded">[REDACTED]</code> before any persistent record is written.
+          <strong className="font-semibold">Automated Redaction Guarantee:</strong> In accordance with portal cybersecurity guidelines, all sensitive attributes including passwords, cryptographic tokens, bank account numbers, credentials, and session secrets are scrubbed at ingestion to <code className="font-mono text-amber-800 font-bold bg-amber-100 px-1 py-0.5 rounded">[REDACTED]</code> before any persistent record is written.
         </div>
       </div>
 

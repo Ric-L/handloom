@@ -42,7 +42,7 @@ const MEDIA_ITEMS: MediaItem[] = [
     date: "November 2026",
     description:
       "A deep dive into the painstaking tension-loom techniques handed down across generations. Witness how indigenous artisans weave intricate traditional patterns with back-strap tension and natural organic vegetable dyes.",
-    credits: "Produced by Directorate of Handloom Media Division in collaboration with National Craft Council",
+    credits: "Produced by MHHDC Media Division in collaboration with Regional Craft Trainers",
   },
   {
     id: "med-02",
@@ -55,7 +55,7 @@ const MEDIA_ITEMS: MediaItem[] = [
     date: "October 2026",
     description:
       "Trainee artisans practicing jacquard loom harness threading and pattern synchronization. Over 360 candidates are receiving direct hands-on NSQF Level 4 training under expert master instructors.",
-    credits: "Photography by R. K. Singha, State Visual Documentation Team",
+    credits: "Photography by MHHDC Visual Documentation Team",
   },
   {
     id: "med-03",
@@ -65,11 +65,11 @@ const MEDIA_ITEMS: MediaItem[] = [
     thumbnail:
       "https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=900&q=80",
     duration: "07:18 Min",
-    location: "Eri & Muga Sericulture Cluster, Silk Directorate",
+    location: "Eri & Muga Sericulture Cluster, Imphal",
     date: "October 2026",
     description:
       "Explore the organic reeling of wild eri silk and traditional hand-spinning on the takli spindle. The video highlights how zero-carbon local production empowers rural women artisans.",
-    credits: "State Directorate Documentary Initiative",
+    credits: "MHHDC Craft Documentary Initiative",
   },
   {
     id: "med-04",
@@ -78,11 +78,11 @@ const MEDIA_ITEMS: MediaItem[] = [
     category: "Workshops",
     thumbnail:
       "https://images.unsplash.com/photo-1617050318658-a9a3175e34cb?auto=format&fit=crop&w=900&q=80",
-    location: "State Institute of Handicrafts & Design",
+    location: "Institute of Handicrafts & Design, Imphal",
     date: "September 2026",
     description:
       "Artisan apprentices mastering ari and zardozi raised embroidery on pure silk organza. Each piece integrates heritage motifs with contemporary home furnishing demands.",
-    credits: "Handloom Project Training Documentation Unit",
+    credits: "MHHDC Training Documentation Unit",
   },
   {
     id: "med-05",
@@ -91,25 +91,25 @@ const MEDIA_ITEMS: MediaItem[] = [
     category: "Workshops",
     thumbnail:
       "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=900&q=80",
-    location: "Bamboo & Cane Development Institute Campus",
+    location: "Bamboo & Cane Craft Training Campus",
     date: "September 2026",
     description:
       "Fine bamboo filament processing and structural basketry. Trainees transform native raw bamboo into export-grade lampshades, dining ware, and traditional utility containers.",
-    credits: "Field Photography: Directorate Extension Wing",
+    credits: "Field Photography: MHHDC Extension Wing",
   },
   {
     id: "med-06",
     type: "video",
-    title: "National Handloom Expo 2026: Artisan Showcase & Direct Sales",
+    title: "Manipur Handloom Expo 2026: Artisan Showcase & Direct Sales",
     category: "Exhibitions",
     thumbnail:
       "https://images.unsplash.com/photo-1528459801416-a9e53bbf4e17?auto=format&fit=crop&w=900&q=80",
     duration: "04:15 Min",
-    location: "State Trade Fair Grounds, Pragati Pavilion",
+    location: "Trade Fair Grounds, Imphal",
     date: "August 2026",
     description:
       "Over 120 certified trainee batches set up live stalls and direct-to-consumer weaver pavilions, generating over ₹34 Lakhs in cumulative sales without intermediaries.",
-    credits: "Directorate of Handloom Marketing Division",
+    credits: "MHHDC Marketing & Exhibition Division",
   },
 ];
 
@@ -299,9 +299,9 @@ export const ProjectMediaSection: React.FC = () => {
                       <div className="w-16 h-16 rounded-full bg-blue-600 text-white flex items-center justify-center shadow-xl shadow-blue-900/60 mb-3 animate-pulse">
                         <Play className="w-7 h-7 fill-white ml-1" />
                       </div>
-                      <p className="text-white text-sm font-bold">Government Documentary Video Stream</p>
+                      <p className="text-white text-sm font-bold">Craft Documentary Video Stream</p>
                       <p className="text-xs text-blue-200 mt-1 max-w-md">
-                        Directorate HD Stream • {activeItem.duration || "Full Feature"} • Verified Production
+                        MHHDC Media Stream • {activeItem.duration || "Full Feature"} • Verified Showcase
                       </p>
                     </div>
                   </div>

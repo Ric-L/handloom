@@ -82,12 +82,12 @@ export default function AdminLayout() {
           {/* Logo & Portal Identity */}
           <div className="px-5 py-4 border-b border-slate-800/80 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0">
-                <img src="/favicon.svg" alt="PM VIKAS" className="w-9 h-9 object-contain drop-shadow" />
+              <div className="bg-white/95 px-2 py-1 rounded-xl flex items-center justify-center shrink-0 shadow-xs">
+                <img src="/mhhdcl-logo.png" alt="MHHDCL" className="h-9 w-auto object-contain" />
               </div>
               <div className="min-w-0">
                 <h2 className="font-black text-white text-sm tracking-tight leading-tight truncate">
-                  PM VIKAS Portal
+                  MHHDC Admin
                 </h2>
                 <div className="flex items-center gap-1.5 mt-0.5">
                   <span
@@ -179,16 +179,16 @@ export default function AdminLayout() {
 
       {/* 2. Main Content Layout (Permanently offset by sidebar on desktop) */}
       <div className="md:pl-64 flex flex-col flex-1 min-w-0 min-h-screen">
-        {/* National Directorate Security Header Bar */}
+        {/* MHHDC Admin Security Header Bar */}
         <div className="bg-slate-950 text-slate-300 text-[11px] px-4 sm:px-8 py-2 border-b border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-1.5 shrink-0">
           <div className="flex items-center gap-2.5">
             <span className="flex items-center gap-1.5 font-bold tracking-wider uppercase text-amber-400">
               <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse inline-block" />
-              Official Admin Console
+              MHHDC Admin Console
             </span>
             <span className="text-slate-600 hidden sm:inline">|</span>
             <span className="text-slate-400 hidden sm:inline">
-              Ministry of Minority Affairs • Pradhan Mantri Virasat Ka Samvardhan (PM VIKAS)
+              Manipur Handloom &amp; Handicrafts Development Corporation Ltd.
             </span>
           </div>
 
@@ -223,7 +223,7 @@ export default function AdminLayout() {
 
               <div className="min-w-0">
                 <h1 className="font-extrabold text-slate-900 text-base sm:text-lg tracking-tight leading-tight truncate">
-                  PM VIKAS Official Portal
+                  MHHDC Registration &amp; Admission Console
                 </h1>
                 <p className="text-xs text-slate-500 font-medium truncate hidden sm:block">
                   Application Review, Seat Quota Management &amp; Candidate Verification
@@ -258,10 +258,10 @@ export default function AdminLayout() {
         <footer className="bg-white border-t border-slate-200/80 py-4 px-6 text-center text-xs text-slate-400 shrink-0">
           <div className="flex flex-col sm:flex-row items-center justify-between text-[11px] gap-2">
             <span>
-              Handloom &amp; Skilled Artisan Development Initiative • Administrative Moderation &amp; Quota Guard
+              Manipur Handloom &amp; Handicrafts Development Corporation Ltd. • Admissions &amp; Quota Guard
             </span>
             <span className="font-mono text-slate-500">
-              PostgreSQL ACID Concurrency • 3,020 Target Quota Allocation
+              PostgreSQL ACID Concurrency • Allocated PM VIKAS Scheme Quota
             </span>
           </div>
         </footer>

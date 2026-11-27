@@ -93,9 +93,9 @@ export default function AppLayout() {
       <div className="bg-slate-900 text-slate-200 text-[11px] px-4 sm:px-6 lg:px-8 py-1 border-b border-slate-800">
         <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2">
-            <span className="font-semibold text-amber-300">Handloom Cooperation Imphal</span>
+            <span className="font-semibold text-amber-300">Manipur Handloom &amp; Handicrafts Development Corporation Ltd.</span>
             <span className="text-slate-600 hidden sm:inline">|</span>
-            <span className="text-slate-300 hidden sm:inline">Paona Bazar, Imphal 795001 • PM VIKAS</span>
+            <span className="text-slate-300 hidden sm:inline">Paona Bazar, Imphal 795001</span>
           </div>
 
           <div className="flex items-center gap-3">
@@ -112,9 +112,8 @@ export default function AppLayout() {
                   key={size}
                   type="button"
                   onClick={() => setTextScale(size)}
-                  className={`px-1.5 py-0.5 rounded text-[10px] font-bold transition cursor-pointer ${
-                    textScale === size ? "bg-blue-600 text-white" : "bg-slate-800 text-slate-300 hover:bg-slate-700"
-                  }`}
+                  className={`px-1.5 py-0.5 rounded text-[10px] font-bold transition cursor-pointer ${textScale === size ? "bg-blue-600 text-white" : "bg-slate-800 text-slate-300 hover:bg-slate-700"
+                    }`}
                 >
                   {idx === 0 ? "A-" : idx === 1 ? "A" : "A+"}
                 </button>
@@ -125,7 +124,7 @@ export default function AppLayout() {
 
             <Link to="/admin/login" className="inline-flex items-center gap-1 text-slate-300 hover:text-white transition">
               <Shield className="w-3 h-3 text-sky-400" />
-              <span>Official Login</span>
+              <span>Admin Login</span>
             </Link>
           </div>
         </div>
@@ -133,24 +132,23 @@ export default function AppLayout() {
 
       {/* Clean White e-Seba Style Main Header */}
       <header
-        className={`sticky top-0 z-40 bg-white transition-shadow duration-200 border-b border-slate-200/80 ${
-          scrolled ? "shadow-md" : ""
-        }`}
+        className={`sticky top-0 z-40 bg-white transition-shadow duration-200 border-b border-slate-200/80 ${scrolled ? "shadow-md" : ""
+          }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-18 flex items-center justify-between gap-4">
-          {/* Left: Emblem + PM VIKAS Brand Lockup */}
-          <Link to="/" className="flex items-center gap-2.5 shrink-0">
+          {/* Left: Company Identity & Brand Lockup */}
+          <Link to="/" className="flex items-center gap-3 shrink-0">
             <img
-              src="/emblem-india.png"
-              alt="State Emblem of India"
-              className="h-10 w-auto object-contain shrink-0"
+              src="/mhhdcl-logo.png"
+              alt="Manipur Handloom and Handicrafts Development Corporation Ltd."
+              className="h-12 w-auto object-contain shrink-0"
             />
             <div className="leading-tight">
-              <div className="text-xs font-bold text-amber-600 tracking-wide">
-                प्रधानमंत्री विरासत का संवर्धन
+              <div className="text-[10px] sm:text-[11px] font-bold text-amber-700 tracking-wide uppercase">
+                MHHDC • Admissions Portal
               </div>
-              <div className="text-lg font-extrabold text-emerald-800 tracking-tight font-serif">
-                PM VIKAS <span className="text-[#0f256e] font-sans font-bold text-sm">Portal</span>
+              <div className="text-xs sm:text-[13px] font-extrabold text-[#0f256e] tracking-tight leading-snug max-w-[220px] sm:max-w-[290px]">
+                Manipur Handloom &amp; Handicrafts Development Corporation Ltd.
               </div>
             </div>
           </Link>
@@ -166,11 +164,10 @@ export default function AppLayout() {
                     e.preventDefault();
                     handleNavClick(link.to);
                   }}
-                  className={`text-xs font-semibold tracking-wider transition cursor-pointer ${
-                    isActive(link.to)
+                  className={`text-xs font-semibold tracking-wider transition cursor-pointer ${isActive(link.to)
                       ? "text-[#0f256e] font-bold"
                       : "text-slate-700 hover:text-[#0f256e]"
-                  }`}
+                    }`}
                 >
                   {link.label}
                 </a>
@@ -178,11 +175,10 @@ export default function AppLayout() {
                 <Link
                   key={link.to}
                   to={link.to}
-                  className={`text-xs font-semibold tracking-wider transition ${
-                    isActive(link.to)
+                  className={`text-xs font-semibold tracking-wider transition ${isActive(link.to)
                       ? "text-[#0f256e] font-bold"
                       : "text-slate-700 hover:text-[#0f256e]"
-                  }`}
+                    }`}
                 >
                   {link.label}
                 </Link>
@@ -283,9 +279,8 @@ export default function AppLayout() {
 
       {/* Main Content */}
       <main
-        className={`flex-1 w-full bg-slate-50 ${
-          location.pathname === "/" ? "" : "max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8"
-        }`}
+        className={`flex-1 w-full bg-slate-50 ${location.pathname === "/" ? "" : "max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8"
+          }`}
       >
         <Outlet />
       </main>
@@ -295,12 +290,14 @@ export default function AppLayout() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
             <div className="space-y-3">
-              <div className="flex items-center gap-2.5 text-white font-bold text-lg">
-                <img src="/favicon.svg" alt="PM VIKAS" className="w-8 h-8 object-contain" />
-                <span>Handloom Cooperation Imphal</span>
+              <div className="flex items-center gap-3 text-white font-bold text-base sm:text-lg leading-snug">
+                <span className="bg-white/95 rounded-xl px-2 py-1.5 shadow-xs shrink-0 inline-flex items-center justify-center">
+                  <img src="/mhhdcl-logo.png" alt="MHHDCL" className="h-10 w-auto object-contain" />
+                </span>
+                <span>Manipur Handloom &amp; Handicrafts Development Corporation Ltd.</span>
               </div>
               <p className="text-slate-400 text-sm leading-relaxed">
-                PM VIKAS Residential Skill Training Portal by Handloom Cooperation Imphal—providing free craft training, monthly stipend, and certification to artisans and weavers across Manipur.
+                Registration and admission portal operated by Manipur Handloom &amp; Handicrafts Development Corporation Ltd. (MHHDC) for residential skill training programmes conducted under the PM VIKAS Scheme.
               </p>
             </div>
 
@@ -310,7 +307,7 @@ export default function AppLayout() {
                 <li><Link to="/categories" className="hover:text-amber-300 transition">Training Courses</Link></li>
                 <li><Link to="/apply" className="hover:text-amber-300 transition">Apply for Training</Link></li>
                 <li><Link to="/dashboard" className="hover:text-amber-300 transition">My Submitted Applications</Link></li>
-                <li><Link to="/login" className="hover:text-amber-300 transition">Citizen Sign In / Register</Link></li>
+                <li><Link to="/login" className="hover:text-amber-300 transition">Applicant Sign In / Register</Link></li>
               </ul>
             </div>
 
@@ -326,19 +323,17 @@ export default function AppLayout() {
               <p className="text-xs text-slate-400 leading-relaxed">
                 Governor Road, Paona Bazar, Imphal 795001
                 <br />
-                Email: helpdesk@handloomproject.gov.in
-                <br />
                 Hours: 9:30 AM to 6:00 PM (Monday – Saturday)
               </p>
             </div>
           </div>
 
           <div className="pt-6 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-400 gap-3">
-            <div>© 2026 Handloom Cooperation Imphal (PM VIKAS). All Rights Reserved.</div>
+            <div>© 2026 Manipur Handloom and Handicrafts Development Corporation Ltd. All Rights Reserved.</div>
             <div className="flex gap-5">
               <Link to="/categories" className="hover:text-white">Courses</Link>
               <Link to="/apply" className="hover:text-white">Apply</Link>
-              <Link to="/admin/login" className="hover:text-white">Official Login</Link>
+              <Link to="/admin/login" className="hover:text-white">Admin Login</Link>
             </div>
           </div>
         </div>

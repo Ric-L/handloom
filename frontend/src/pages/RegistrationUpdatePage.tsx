@@ -224,7 +224,7 @@ export default function RegistrationUpdatePage() {
             TRAINEE ADMISSION / ENROLMENT FORM
           </h1>
           <p className="text-[11px] text-slate-500 font-medium">
-            Directorate of Handloom & Skilled Artisan Development • Official Enrolment Dossier
+            Manipur Handloom &amp; Handicrafts Development Corporation Ltd. • Trainee Enrolment Dossier
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-4 text-left text-xs border-t border-slate-200/80 mt-4">

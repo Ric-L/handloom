@@ -16,91 +16,91 @@ interface TeamMember {
 const TEAM_MEMBERS: TeamMember[] = [
   {
     id: "tm-01",
-    name: "Shri Brajakishore Singh, IAS",
-    designation: "Mission Director & Special Secretary",
-    division: "Directorate of Handloom & Textile Development",
+    name: "Thokchom Basanta Singh",
+    designation: "Managing Director",
+    division: "Manipur Handloom & Handicrafts Development Corp. Ltd.",
     roleType: "Leadership",
     photo: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80",
-    experience: "24+ Years Public Administration",
-    email: "mission.director@handloomproject.gov.in",
-    responsibilities: "Overall policy formulation, inter-ministerial liaison, state cluster expansion, and strategic steering of the 3,020 artisan admission mission.",
+    experience: "Corporate & Craft Sector Leadership",
+    email: "Paona Bazar Head Office • Tel: 0385-245 1495",
+    responsibilities: "Overall oversight of MHHDC skill training programmes, training centre partnerships, and strategic execution of allocated seats under the PM VIKAS Scheme.",
   },
   {
     id: "tm-02",
     name: "Dr. Ananya Devi Choudhury",
-    designation: "Joint Director (Weaving Technology & Clusters)",
-    division: "Handloom Technical Operations Wing",
+    designation: "Head of Weaving Technology & Clusters",
+    division: "MHHDC Technical Operations Wing",
     roleType: "Leadership",
     photo: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=600&q=80",
     experience: "19 Years Textile Research & NSQF",
-    email: "jointdirector.tech@handloomproject.gov.in",
-    responsibilities: "Modernization of jacquard and frame looms, NSQF Level 4 curriculum standardization, and master instructor capacity building.",
+    email: "MHHDC Technical Wing • Imphal 795001",
+    responsibilities: "Modernization of jacquard and frame looms, NSQF Level 4 curriculum alignment, and master instructor capacity building.",
   },
   {
     id: "tm-03",
     name: "Shri Kh. Ratan Kumar",
-    designation: "State Admissions Controller & Registrar",
-    division: "Artisan Admission & Enrolment Cell",
+    designation: "Admissions Controller & Registrar",
+    division: "MHHDC Artisan Admission & Enrolment Cell",
     roleType: "Admissions",
     photo: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=600&q=80",
     experience: "15 Years Academic & Enrolment Administration",
-    email: "admissions.controller@handloomproject.gov.in",
-    responsibilities: "Supervision of candidate eligibility scrutiny, reservation rosters, 9-category quota allocations, and training centre allotment.",
+    email: "MHHDC Admissions Desk • Imphal 795001",
+    responsibilities: "Supervision of candidate eligibility scrutiny, quota allocations across 9 craft trades, and training centre allotment.",
   },
   {
     id: "tm-04",
     name: "Smt. L. Memcha Devi",
-    designation: "National Awardee & Master Craft Instructor",
-    division: "Loin Loom & Traditional Weaving Academy",
+    designation: "Master Craft Instructor",
+    division: "Loin Loom & Traditional Weaving Training Unit",
     roleType: "Craft Instruction",
     photo: "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=600&q=80",
     experience: "32 Years Traditional Weaving & Master Mentorship",
-    email: "master.memcha@handloomproject.gov.in",
+    email: "MHHDC Craft Studio • Imphal",
     responsibilities: "Direct practical masterclasses in authentic tension back-strap loom weaving, natural plant dye chemistry, and indigenous motif design.",
   },
   {
     id: "tm-05",
     name: "Shri Debabrata Mukherjee",
-    designation: "Nodal Officer (DBT, Stipend & Accounts)",
-    division: "Finance & PFMS Disbursal Division",
+    designation: "Lead Officer (Stipend & Accounts)",
+    division: "MHHDC Finance & DBT Coordination Cell",
     roleType: "DBT & Operations",
     photo: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=600&q=80",
-    experience: "14 Years Public Financial Management",
-    email: "dbt.nodal@handloomproject.gov.in",
-    responsibilities: "Direct Benefit Transfer (DBT) monthly trainee stipend calculations, Aadhaar NPCI bank account mapping, and biometric attendance audit.",
+    experience: "14 Years Financial & Stipend Operations",
+    email: "MHHDC Finance Desk • Paona Bazar",
+    responsibilities: "Trainee stipend coordination, Aadhaar-linked bank account cross-verification, and biometric attendance compliance.",
   },
   {
     id: "tm-06",
     name: "Ms. Priyanka Sen",
     designation: "Lead Consultant (Contemporary Design & Marketing)",
-    division: "Product Innovation & Export Promotion Cell",
+    division: "MHHDC Product Innovation & Market Linkage Cell",
     roleType: "Craft Instruction",
     photo: "https://images.unsplash.com/photo-1567532939604-b6b5b0db2604?auto=format&fit=crop&w=600&q=80",
     experience: "11 Years NIFT Alumni / Commercial Fashion",
-    email: "design.cell@handloomproject.gov.in",
-    responsibilities: "Connecting traditional handloom & embroidery batches to modern retail e-commerce channels, state emporiums, and luxury apparel houses.",
+    email: "MHHDC Design Studio • Imphal",
+    responsibilities: "Connecting trained handloom & embroidery batches to retail channels, exhibitions, and commercial craft buyers.",
   },
   {
     id: "tm-07",
     name: "Shri M. Ibobi Meitei",
     designation: "Senior Verification Officer & Field Auditor",
-    division: "District Scrutiny & Verification Directorate",
+    division: "MHHDC Scrutiny & Document Verification Cell",
     roleType: "Admissions",
     photo: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=600&q=80",
-    experience: "12 Years Field Verification & Caste Certificate Scrutiny",
-    email: "verification.lead@handloomproject.gov.in",
-    responsibilities: "Rigorous document verification for caste/disability certificates, residential identity checks, and fraud prevention protocols.",
+    experience: "12 Years Field Verification & Document Scrutiny",
+    email: "MHHDC Verification Cell • Imphal",
+    responsibilities: "Rigorous document verification for Aadhaar, community/minority certificates, residential proofs, and eligibility screening.",
   },
   {
     id: "tm-08",
     name: "Smt. Anita Sharma",
     designation: "Lead Quality Officer & NSQF Assessor",
-    division: "Skill Assessment & Certification Council",
+    division: "MHHDC Skill Assessment & Quality Unit",
     roleType: "Craft Instruction",
     photo: "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&w=600&q=80",
     experience: "13 Years Textile Skill Evaluation",
-    email: "quality.nsqf@handloomproject.gov.in",
-    responsibilities: "Terminal craft competency exams, practical warp/weft tension benchmarking, and government NSQF certificate issuance.",
+    email: "MHHDC Quality Cell • Imphal",
+    responsibilities: "Terminal craft competency exams, practical warp/weft tension benchmarking, and NSQF assessment coordination.",
   },
 ];
 
@@ -123,19 +123,19 @@ export const ProjectTeamSection: React.FC = () => {
           <div>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-blue-50 text-blue-700 border border-blue-200 mb-3">
               <Users className="w-3.5 h-3.5 text-blue-600" />
-              Administrative & Master Craft Leadership
+              Program Operations &amp; Master Craft Team
             </div>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-              Project Team & Directorate Officers
+              MHHDC Admissions &amp; Training Team
             </h2>
             <p className="mt-2 text-sm text-slate-600 max-w-2xl">
-              Meet the public administrators, master craft instructors, admissions controllers, and technical specialists executing the Handloom & Skilled Artisan Development Mission.
+              Meet the coordinators, master craft instructors, admissions controllers, and technical specialists managing training under Manipur Handloom &amp; Handicrafts Development Corporation Ltd.
             </p>
           </div>
 
           <div className="mt-4 md:mt-0 flex items-center gap-2">
             <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-              {TEAM_MEMBERS.length} Key Mission Personnel
+              {TEAM_MEMBERS.length} Key Program Personnel
             </span>
           </div>
         </div>

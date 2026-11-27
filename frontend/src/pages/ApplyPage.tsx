@@ -618,7 +618,7 @@ export default function ApplyPage() {
           </div>
 
           <div className="pt-4 border-t border-slate-100 space-y-4">
-            <h3 className="text-sm font-bold text-slate-800">Government ID (Optional)</h3>
+            <h3 className="text-sm font-bold text-slate-800">Govt-Issued ID Details (Optional)</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label htmlFor="gov-id-type" className="block text-sm font-medium text-slate-700 mb-1.5">

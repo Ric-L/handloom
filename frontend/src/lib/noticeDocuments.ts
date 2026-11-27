@@ -1,5 +1,6 @@
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
+import mhhdclLogoPdf from "../assets/mhhdcl-logo-pdf.png?inline";
 
 export interface ProjectNotice {
   id: string;
@@ -26,60 +27,60 @@ export interface ProjectUpdate {
 export const OFFICIAL_NOTICES: ProjectNotice[] = [
   {
     id: "not-01",
-    refNo: "NOT-HND/2026/041",
-    title: "Official Notification: Admissions Open for Academic Session 2026-2027 across 9 Accredited Artisan Trades",
+    refNo: "MHHDC-122/HWT/2026/041",
+    title: "Admission Notice: Applications Invited for Residential Skill Training across 9 Craft Trades (PM VIKAS Scheme Quota)",
     category: "Admission",
     date: "12 Nov 2026",
     isNew: true,
     fileSize: "245 KB",
     summary:
-      "Directorate of Handloom & Skilled Artisan Development invites applications for 3,020 sanctioned training seats across handloom, jacquard weaving, hand embroidery, bamboo work, and allied trades. Enrolment is free with monthly DBT stipend backing.",
-    signedBy: "State Admissions Controller, Directorate of Handloom",
+      "Manipur Handloom & Handicrafts Development Corporation Ltd. (MHHDC) invites applications under its allocated PM VIKAS Scheme quota across handloom weaving, jacquard weaving, hand embroidery, bamboo work, and allied trades. Training is free with stipend support.",
+    signedBy: "Admissions Controller, MHHDC Training Cell",
   },
   {
     id: "not-02",
-    refNo: "NOT-HND/2026/039",
+    refNo: "MHHDC-122/HWT/2026/039",
     title: "Operating Guidelines for Direct Benefit Transfer (DBT) Monthly Trainee Sustenance Stipend Disbursement",
     category: "DBT & Finance",
     date: "08 Nov 2026",
     isNew: true,
     fileSize: "310 KB",
     summary:
-      "Detailed operational guidelines regarding Aadhaar-seeded bank account cross-verification and biometric attendance prerequisites (minimum 80% monthly attendance) for DBT stipend release.",
-    signedBy: "Joint Director (Finance & DBT), Ministry of Textiles Cell",
+      "Detailed operational guidelines regarding Aadhaar-seeded bank account cross-verification and biometric attendance prerequisites (minimum 80% monthly attendance) for stipend release under MHHDC's PM VIKAS quota batches.",
+    signedBy: "Finance & DBT Desk, MHHDC",
   },
   {
     id: "not-03",
-    refNo: "NOT-HND/2026/035",
-    title: "Physical Cross-Verification Schedule & Document Checklist for Approved Artisan Batches at District Centres",
+    refNo: "MHHDC-122/HWT/2026/035",
+    title: "Physical Cross-Verification Schedule & Document Checklist for Approved Trainees at Training Centres",
     category: "Verification",
     date: "02 Nov 2026",
     fileSize: "190 KB",
     summary:
-      "Schedule of dates for approved candidates to report to their designated District Handloom Training Centres with original Government ID, educational certificates, and Bank Passbook.",
-    signedBy: "Director of Training, Handloom Skill Development Mission",
+      "Schedule of dates for approved candidates to report to their designated training centres with original Govt-issued ID, educational certificates, and Bank Passbook.",
+    signedBy: "Training Coordinator, MHHDC Skill Division",
   },
   {
     id: "not-04",
-    refNo: "NOT-HND/2026/028",
-    title: "Accredited Training Facilities, Equipment Standards & Master Craft Instructor Allocation List",
+    refNo: "MHHDC-122/HWT/2026/028",
+    title: "Training Facilities, Equipment Standards & Master Craft Instructor Allocation List",
     category: "Schedule",
     date: "26 Oct 2026",
     fileSize: "420 KB",
     summary:
-      "Comprehensive directory of verified training workshops, loom equipment provisions, and National Awardee master weaver mentors assigned across district clusters.",
-    signedBy: "Technical Coordinator, Textile Sector Skill Council",
+      "Comprehensive directory of partner training workshops, loom equipment provisions, and master weaver instructors assigned across clusters.",
+    signedBy: "Technical Coordinator, MHHDC Skill Division",
   },
   {
     id: "not-05",
-    refNo: "NOT-HND/2026/021",
-    title: "Affirmative Action Guidelines & Social Category Reservation Norms for Artisan Skill Intake",
+    refNo: "MHHDC-122/HWT/2026/021",
+    title: "Eligibility & Category Reservation Norms for MHHDC Skill Training Admissions",
     category: "Policy",
     date: "15 Oct 2026",
     fileSize: "280 KB",
     summary:
-      "Affirmative action intake distribution guaranteeing equitable participation for rural weavers, SC/ST, and OBC artisan communities with atomic capacity locking.",
-    signedBy: "Special Secretary, Directorate of Handloom & Textiles",
+      "Seat allocation guidelines for eligible weavers, minorities, SC/ST, OBC, and PwD artisan communities with strict quota capacity locking.",
+    signedBy: "Managing Director's Secretariat, MHHDC",
   },
 ];
 
@@ -91,8 +92,8 @@ export const PROJECT_UPDATES: ProjectUpdate[] = [
     tag: "Batch Announcement",
     isHot: true,
     content:
-      "Candidates approved under Trade MER-01 (Merchandiser) and EMB-02 (Traditional Hand Embroiderer) are hereby informed that the first batch of practical training commences on 1st December 2026. Reporting instructions and centre timings have been uploaded to the candidate portal.",
-    author: "Admissions Directorate",
+      "Candidates approved under Trade MER-01 (Merchandiser) and EMB-02 (Traditional Hand Embroiderer) are hereby informed that the first batch of practical training commences on 1st December 2026. Reporting instructions and centre timings are available on your dashboard.",
+    author: "MHHDC Admissions Cell",
   },
   {
     id: "upd-02",
@@ -101,26 +102,26 @@ export const PROJECT_UPDATES: ProjectUpdate[] = [
     tag: "Portal Feature",
     isHot: true,
     content:
-      "Approved candidates can now download their formal, government-standard Enrolment Confirmation Slip (PDF) directly from their portal dashboard. The slip features official digital endorsement, verification hash, and assigned centre instructions.",
-    author: "IT & Systems Cell",
+      "Approved candidates can now download their standardized Enrolment Confirmation Slip (PDF) directly from their MHHDC portal dashboard. The slip features digital endorsement, verification hash, and assigned centre instructions.",
+    author: "MHHDC IT & Systems Desk",
   },
   {
     id: "upd-03",
-    title: "Ministry of Textiles Sanctions 3,020 Affirmative Action Training Seats for Artisan Empowerment",
+    title: "MHHDC Allocates Training Seats Across 9 Traditional Trades Under PM VIKAS Scheme Quota",
     date: "05 Nov 2026",
-    tag: "Government Sanction",
+    tag: "Quota Allocation",
     content:
-      "Under the National Handloom Development Programme, the Ministry of Textiles has officially approved 3,020 subsidized training berths across 9 traditional craft disciplines with direct DBT monthly stipend assistance.",
-    author: "Ministry Press Desk",
+      "Under its allocated quota for the PM VIKAS Scheme, Manipur Handloom & Handicrafts Development Corporation Ltd. (MHHDC) is conducting online admissions across 9 traditional handloom and craft disciplines with monthly stipend assistance.",
+    author: "MHHDC Admissions Desk",
   },
   {
     id: "upd-04",
-    title: "Autonomous ACID Row-Level Quota Allocation Guard Deployed to Guarantee Fair Trainee Intake",
+    title: "Atomic Row-Level Quota Allocation Guard Deployed for Transparent Seat Management",
     date: "28 Oct 2026",
     tag: "Admissions Integrity",
     content:
-      "The Handloom Project admission engine now enforces strict row-level locking (SELECT FOR UPDATE) in PostgreSQL. When sanctioned category capacity is reached, further approvals lock atomically, eliminating quota over-allocations.",
-    author: "Technical Administration",
+      "The MHHDC admission portal enforces strict row-level locking in PostgreSQL. When category seat capacity is reached, further approvals lock automatically to prevent over-allocation.",
+    author: "MHHDC Systems Administration",
   },
   {
     id: "upd-05",
@@ -158,20 +159,26 @@ export function generateOfficialNoticePDF(notice: ProjectNotice) {
   doc.setLineWidth(0.3);
   doc.rect(11.5, 11.5, pageWidth - 23, pageHeight - 23);
 
-  // Official Header
+  // Corporate Header with MHHDCL Logo
+  try {
+    doc.addImage(mhhdclLogoPdf, "PNG", 14, 15.5, 10, 18);
+  } catch {
+    // Continue gracefully if image rendering is unavailable
+  }
+
   doc.setTextColor(navy[0], navy[1], navy[2]);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(13);
-  doc.text("DIRECTORATE OF HANDLOOM & SKILLED ARTISAN DEVELOPMENT", pageWidth / 2, 22, { align: "center" });
+  doc.setFontSize(11);
+  doc.text("MANIPUR HANDLOOM & HANDICRAFTS DEVELOPMENT CORPORATION LTD.", pageWidth / 2, 22, { align: "center" });
 
   doc.setTextColor(slate[0], slate[1], slate[2]);
-  doc.setFontSize(9);
-  doc.text("HANDLOOM PROJECT • SKILLED ARTISAN ADMISSION & SKILL DEVELOPMENT MISSION", pageWidth / 2, 28, { align: "center" });
+  doc.setFontSize(8.5);
+  doc.text("REGISTRATION & ADMISSION PORTAL • SKILL TRAINING UNDER PM VIKAS SCHEME QUOTA", pageWidth / 2, 28, { align: "center" });
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(7.5);
   doc.setTextColor(100, 116, 139);
-  doc.text("Government Accredited Affirmative Action Skill Training Initiative", pageWidth / 2, 33, { align: "center" });
+  doc.text("Governor Road, Paona Bazar, Imphal 795001 • Tel: 0385-245 1495", pageWidth / 2, 33, { align: "center" });
 
   // Tricolor horizontal rule
   doc.setFillColor(245, 158, 11);
@@ -238,8 +245,8 @@ export function generateOfficialNoticePDF(notice: ProjectNotice) {
         { content: notice.date },
       ],
       [
-        { content: "Regulatory Scope:", styles: { fontStyle: "bold" } },
-        { content: "All Accredited Handloom & Skilled Artisan Development Training Centers" },
+        { content: "Applicable Scope:", styles: { fontStyle: "bold" } },
+        { content: "All Participating MHHDC Skill Training Centres & Applicants" },
       ],
       [
         { content: "Notice Summary:", styles: { fontStyle: "bold" } },
@@ -261,16 +268,16 @@ export function generateOfficialNoticePDF(notice: ProjectNotice) {
   doc.setFont("helvetica", "bold");
   doc.setFontSize(8);
   doc.setTextColor(navy[0], navy[1], navy[2]);
-  doc.text("EXECUTIVE DIRECTIVES & COMPLIANCE REQUIREMENTS:", 14, y);
+  doc.text("KEY GUIDELINES & ADMISSION INSTRUCTIONS:", 14, y);
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(7.5);
   doc.setTextColor(slate[0], slate[1], slate[2]);
   const directives = [
-    "1. All candidates and training centre coordinators are instructed to comply with the terms stipulated herein.",
-    "2. For verified candidate admissions, biometric attendance monitoring commences immediately upon batch start.",
-    "3. Any grievance or clarification regarding this circular may be reported to the National Careline at 1800-200-7890.",
-    "4. This notification supersedes any previous verbal communication and is officially binding under mission guidelines.",
+    "1. All candidates and training centre coordinators are advised to follow the terms outlined herein.",
+    "2. For admitted trainees, biometric attendance monitoring commences upon batch start.",
+    "3. For enquiries regarding this notice, contact MHHDC Head Office, Paona Bazar, Imphal (Tel: 0385-245 1495).",
+    "4. Admissions are conducted by MHHDC under the PM VIKAS Scheme.",
   ];
   directives.forEach((d, i) => {
     doc.text(d, 14, y + 6 + i * 5);
@@ -285,18 +292,18 @@ export function generateOfficialNoticePDF(notice: ProjectNotice) {
   doc.setFont("helvetica", "bold");
   doc.setFontSize(8);
   doc.setTextColor(navy[0], navy[1], navy[2]);
-  doc.text("ISSUED BY ORDER OF THE COMPETENT AUTHORITY:", 14, endorseY + 4);
+  doc.text("ISSUED BY MHHDC ADMISSIONS DESK:", 14, endorseY + 4);
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(7.5);
   doc.setTextColor(slate[0], slate[1], slate[2]);
   doc.text(notice.signedBy, 14, endorseY + 9);
-  doc.text("Directorate of Handloom & Skilled Artisan Development", 14, endorseY + 13);
+  doc.text("Manipur Handloom & Handicrafts Development Corporation Ltd.", 14, endorseY + 13);
 
   doc.setFont("courier", "bold");
   doc.setFontSize(7);
   doc.setTextColor(100, 116, 139);
-  doc.text(`[ DIGITAL SIGNATURE HASH: ${notice.id.toUpperCase()}-SECURE-GOV ]`, pageWidth - 14, endorseY + 13, {
+  doc.text(`[ DIGITAL VERIFICATION REF: ${notice.id.toUpperCase()}-MHHDC ]`, pageWidth - 14, endorseY + 13, {
     align: "right",
   });
 
@@ -304,7 +311,7 @@ export function generateOfficialNoticePDF(notice: ProjectNotice) {
   const footerY = pageHeight - 12;
   doc.setFont("helvetica", "normal");
   doc.setFontSize(6.5);
-  doc.text("Handloom Project • Official Digital Government Circular • System Generated Copy", 14, footerY);
+  doc.text("Manipur Handloom & Handicrafts Development Corp. Ltd. • Admission Circular • System Generated Copy", 14, footerY);
   doc.text("Page 1 of 1", pageWidth - 14, footerY, { align: "right" });
 
   doc.save(`Notice_${notice.refNo.replace(/[^a-zA-Z0-9]/g, "_")}.pdf`);

@@ -55,12 +55,14 @@ export default function RegisterPage() {
   return (
     <div className="max-w-md mx-auto my-8 sm:my-12 bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 space-y-6">
       <div className="text-center space-y-2">
-        <div className="w-14 h-14 bg-blue-50 border border-blue-100 text-blue-700 rounded-2xl flex items-center justify-center mx-auto text-2xl">
-          🪡
-        </div>
+        <img
+          src="/mhhdcl-logo.png"
+          alt="Manipur Handloom &amp; Handicrafts Development Corporation Ltd."
+          className="h-20 w-auto mx-auto object-contain"
+        />
         <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Create Citizen Account</h1>
         <p className="text-sm text-slate-600">
-          Register once with your mobile number to apply for any PM VIKAS training course.
+          Register once with your mobile number to apply for training admissions conducted by Manipur Handloom &amp; Handicrafts Development Corporation Ltd. under its allocated PM VIKAS Scheme quota.
         </p>
       </div>
 

@@ -14,7 +14,7 @@ import (
 
 // Session timeout constants
 const (
-	// IdleTimeout is strictly set to 3 minutes as required by Government Portal security controls
+	// IdleTimeout is strictly set to 3 minutes as required by portal security controls
 	IdleTimeout = 3 * time.Minute
 	// AbsoluteSessionTimeout is the maximum lifetime of a session regardless of activity
 	AbsoluteSessionTimeout = 12 * time.Hour

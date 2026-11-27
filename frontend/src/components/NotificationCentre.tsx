@@ -74,7 +74,7 @@ export const NotificationCentre: React.FC = () => {
               Project Notification & Announcement Centre
             </h2>
             <p className="mt-2 text-sm text-slate-600 max-w-2xl">
-              Official circulars, administrative gazette notices, DBT directives, and real-time field announcements issued by the Directorate of Handloom & Skilled Artisan Development.
+              Admission circulars, training notices, stipend directives, and field announcements issued by Manipur Handloom &amp; Handicrafts Development Corporation Ltd. (MHHDC).
             </p>
           </div>
 
@@ -330,7 +330,7 @@ export const NotificationCentre: React.FC = () => {
                   <X className="w-5 h-5" />
                 </button>
                 <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-400 text-slate-950 uppercase tracking-wider mb-2">
-                  <ShieldCheck className="w-3.5 h-3.5" /> Official Gazette Circular
+                  <ShieldCheck className="w-3.5 h-3.5" /> MHHDC Admission Circular
                 </div>
                 <h3 className="text-lg sm:text-xl font-extrabold pr-8 leading-snug">{selectedNotice.title}</h3>
                 <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-blue-200">
@@ -346,15 +346,15 @@ export const NotificationCentre: React.FC = () => {
               <div className="p-6 space-y-5 text-sm text-slate-700">
                 <div className="bg-blue-50 border border-blue-200 rounded-2xl p-4">
                   <h4 className="text-xs font-bold uppercase tracking-wider text-blue-900 mb-1 flex items-center gap-1.5">
-                    <FileCheck className="w-4 h-4 text-blue-700" /> Executive Directive Summary
+                    <FileCheck className="w-4 h-4 text-blue-700" /> Notice Summary
                   </h4>
                   <p className="text-xs leading-relaxed text-blue-950 font-medium">{selectedNotice.summary}</p>
                 </div>
 
                 <div>
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Administrative Context & Mandate</h4>
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Admission Context &amp; Terms</h4>
                   <p className="text-xs leading-relaxed text-slate-600">
-                    This official notification has been promulgated in accordance with the National Handloom Skill Development Framework and the Ministry of Textiles guidelines. All accredited training centers, district admission committees, and prospective artisan trainees are mandated to comply with the stipulations detailed in the official PDF circular.
+                    This admission circular is issued by Manipur Handloom &amp; Handicrafts Development Corporation Ltd. (MHHDC) for residential skill training programmes conducted under its allocated PM VIKAS Scheme quota. Training centres and applicants are advised to follow the details outlined in the notice PDF.
                   </p>
                 </div>
 

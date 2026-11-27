@@ -302,7 +302,7 @@ func (h *AuthHandler) AdminLogin(c *gin.Context) {
 		}, "DENIED")
 
 		c.JSON(http.StatusForbidden, gin.H{
-			"error": "Access denied: Applicant accounts are not permitted in the Admin Moderation Portal.",
+			"error": "Access denied: Applicant accounts are not permitted in the MHHDC Admin Portal.",
 		})
 		return
 	}

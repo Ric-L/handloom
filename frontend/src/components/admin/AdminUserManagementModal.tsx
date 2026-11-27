@@ -672,7 +672,7 @@ export default function AdminUserManagementModal({
           {activeTab === "permissions" && (
             <div className="space-y-4">
               <div className="p-3.5 bg-blue-50/80 border border-blue-200 rounded-xl text-xs text-blue-900">
-                Configure operational permissions for <strong>{user.full_name || user.mobile_number}</strong>. Permissions dictate which moderation functions this administrator can execute on the national portal.
+                Configure operational permissions for <strong>{user.full_name || user.mobile_number}</strong>. Permissions dictate which moderation functions this administrator can execute on the MHHDC admissions portal.
               </div>
 
               <div className="space-y-2.5">

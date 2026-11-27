@@ -21,7 +21,7 @@ func Auth(secret string, db *pgxpool.Pool, roles ...string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var tokenStr string
 
-		// 1. Check HTTP-only auth_token cookie first (preferred government portal method)
+		// 1. Check HTTP-only auth_token cookie first (preferred session auth method)
 		cookieToken, err := c.Cookie("auth_token")
 		if err == nil && cookieToken != "" {
 			tokenStr = cookieToken
@@ -97,7 +97,7 @@ func Auth(secret string, db *pgxpool.Pool, roles ...string) gin.HandlerFunc {
 					}, "EXPIRED")
 
 					c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-						"error": "Your session has expired due to 3 minutes of inactivity. For your protection on this government portal, please sign in again.",
+						"error": "Your session has expired due to 3 minutes of inactivity. For your protection on this admissions portal, please sign in again.",
 						"code":  "SESSION_IDLE_TIMEOUT",
 					})
 					return
@@ -157,7 +157,7 @@ func Auth(secret string, db *pgxpool.Pool, roles ...string) gin.HandlerFunc {
 				}, "DENIED")
 
 				c.AbortWithStatusJSON(http.StatusForbidden, gin.H{
-					"error": "Access denied: Insufficient privileges for this national portal operation.",
+					"error": "Access denied: Insufficient privileges for this admissions portal operation.",
 					"code":  "FORBIDDEN",
 				})
 				return

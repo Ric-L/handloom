@@ -78,37 +78,37 @@ export default function HomePage() {
   return (
     <div className="w-full flex flex-col font-sans">
       {/* 1. e-Seba Style Light Scenic Hero Banner */}
-      <section className="relative w-full overflow-hidden bg-gradient-to-r from-[#d8efe2] via-[#e4f3ef] to-[#f4ece1] border-b border-slate-200">
+      <section className="relative w-full min-h-[calc(100vh-6.25rem)] flex items-stretch overflow-hidden bg-gradient-to-r from-[#d8efe2] via-[#e4f3ef] to-[#f4ece1] border-b border-slate-200">
         <div className="absolute -top-24 -left-24 w-96 h-96 bg-emerald-200/40 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute top-10 right-1/4 w-96 h-96 bg-sky-200/40 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 right-0 w-96 h-72 bg-amber-200/30 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 sm:pt-12 pb-0">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+        <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 sm:pt-12 pb-0 flex flex-1">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch w-full min-h-full">
             {/* Left Column: Brand Lockup, Headline, Description, 2 CTA Buttons */}
             <div className="lg:col-span-7 pb-10 sm:pb-14 space-y-6 flex flex-col justify-center">
               <div className="flex items-center gap-3.5">
                 <img
-                  src="/favicon.svg"
-                  alt="Handloom Cooperation Imphal"
-                  className="h-14 sm:h-16 w-auto object-contain shrink-0"
+                  src="/mhhdcl-logo.png"
+                  alt="Manipur Handloom and Handicrafts Development Corporation Ltd."
+                  className="h-16 sm:h-20 w-auto object-contain shrink-0 drop-shadow-xs"
                 />
                 <div>
-                  <div className="text-sm sm:text-base font-extrabold text-amber-700 tracking-wide">
-                    Handloom Cooperation Imphal
+                  <div className="text-xs sm:text-sm font-extrabold text-amber-700 tracking-wide uppercase">
+                    MHHDC Registration &amp; Admission Portal
                   </div>
-                  <div className="text-2xl sm:text-3xl font-bold text-emerald-800 font-serif leading-tight">
-                    PM VIKAS Residential Skill Training
+                  <div className="text-xl sm:text-2xl font-bold text-emerald-900 font-serif leading-tight">
+                    Manipur Handloom &amp; Handicrafts Development Corporation Ltd.
                   </div>
                 </div>
               </div>
 
-              <h1 className="text-2xl sm:text-4xl lg:text-[40px] font-extrabold text-[#0f256e] leading-[1.2] tracking-tight max-w-2xl">
-                A Unified Online Platform for Handloom &amp; Artisan Skill Services
+              <h1 className="text-2xl sm:text-4xl lg:text-[38px] font-extrabold text-[#0f256e] leading-[1.2] tracking-tight max-w-2xl">
+                Online Registration &amp; Admissions for Handloom &amp; Artisan Skill Training
               </h1>
 
               <p className="text-sm sm:text-base text-slate-700 leading-relaxed max-w-xl">
-                Apply online for residential skill training across traditional handloom and craft trades across Manipur under the PM VIKAS Scheme, track your application status, and download your approval slip anytime.
+                Apply online for residential skill training across traditional handloom and craft trades in Manipur. Admissions and registrations are conducted by <strong>Manipur Handloom &amp; Handicrafts Development Corporation Ltd. (MHHDC)</strong> under the PM VIKAS Scheme.
               </p>
 
               <div className="flex flex-wrap items-center gap-3.5 pt-1">
@@ -117,7 +117,7 @@ export default function HomePage() {
                   className="inline-flex items-center gap-2.5 px-6 py-3.5 rounded-lg bg-[#0f256e] hover:bg-blue-950 text-white font-bold text-sm shadow-sm transition"
                 >
                   <UserPlus className="w-4 h-4 shrink-0" />
-                  <span>Citizen Services - Register &amp; Apply</span>
+                  <span>Register &amp; Apply Now</span>
                 </Link>
 
                 <button
@@ -135,8 +135,8 @@ export default function HomePage() {
             <div className="lg:col-span-5 flex justify-center lg:justify-end items-end self-stretch">
               <img
                 src="/pm-narendra-modi.png?v=2"
-                alt="PM VIKAS Leadership"
-                className="w-auto max-w-full h-80 sm:h-96 lg:h-[430px] object-contain object-bottom"
+                alt="Hon'ble Prime Minister Narendra Modi"
+                className="w-auto max-w-full h-80 sm:h-[430px] lg:h-[520px] xl:h-[580px] max-h-[82vh] object-contain object-bottom"
               />
             </div>
           </div>
@@ -146,23 +146,7 @@ export default function HomePage() {
       {/* 2. Official Admission Notice Highlights */}
       <section className="bg-[#0f256e] text-white border-b border-blue-950">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm max-w-3xl mx-auto">
-            <div className="flex items-center gap-3 sm:justify-center">
-              <Award className="w-5 h-5 text-amber-300 shrink-0" />
-              <div>
-                <div className="text-[11px] text-blue-200 uppercase font-semibold">Age Limit</div>
-                <div className="font-bold">14 to 45 Years</div>
-              </div>
-            </div>
 
-            <div className="flex items-center gap-3 sm:justify-center">
-              <MapPin className="w-5 h-5 text-amber-300 shrink-0" />
-              <div>
-                <div className="text-[11px] text-blue-200 uppercase font-semibold">Imphal Head Office</div>
-                <div className="font-bold">Paona Bazar • 0385-245 1495</div>
-              </div>
-            </div>
-          </div>
         </div>
       </section>
 
@@ -294,9 +278,8 @@ export default function HomePage() {
                   </div>
                   <div className="flex flex-col items-center gap-1">
                     <span
-                      className={`w-7 h-7 rounded-full text-xs font-bold flex items-center justify-center ${
-                        result.status === "PENDING" ? "bg-amber-500 text-white" : "bg-emerald-600 text-white"
-                      }`}
+                      className={`w-7 h-7 rounded-full text-xs font-bold flex items-center justify-center ${result.status === "PENDING" ? "bg-amber-500 text-white" : "bg-emerald-600 text-white"
+                        }`}
                     >
                       {result.status === "PENDING" ? "2" : "✓"}
                     </span>
@@ -304,13 +287,12 @@ export default function HomePage() {
                   </div>
                   <div className="flex flex-col items-center gap-1">
                     <span
-                      className={`w-7 h-7 rounded-full text-xs font-bold flex items-center justify-center ${
-                        result.status === "APPROVED"
-                          ? "bg-emerald-600 text-white"
-                          : result.status === "REJECTED"
+                      className={`w-7 h-7 rounded-full text-xs font-bold flex items-center justify-center ${result.status === "APPROVED"
+                        ? "bg-emerald-600 text-white"
+                        : result.status === "REJECTED"
                           ? "bg-rose-600 text-white"
                           : "bg-slate-200 text-slate-500"
-                      }`}
+                        }`}
                     >
                       {result.status === "APPROVED" ? "✓" : result.status === "REJECTED" ? "!" : "3"}
                     </span>
@@ -361,18 +343,18 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* 5. Dedicated PM VIKAS Scheme Section (from PM VIKAS Guidelines & Notice) */}
+        {/* 5. Scheme Context Section (PM VIKAS Allocation) */}
         <section id="pm-vikas-scheme" className="scroll-mt-24 bg-white rounded-2xl border border-slate-200 p-6 sm:p-10 shadow-xs space-y-8">
           <div className="max-w-3xl space-y-2">
             <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-800 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
               <Sparkles className="w-3.5 h-3.5" />
-              About the Scheme
+              Allocated Training Quota Context
             </span>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-[#0f256e] tracking-tight">
-              PM VIKAS Scheme (Pradhan Mantri Virasat Ka Samvardhan)
+              About Admissions Under the PM VIKAS Scheme
             </h2>
             <p className="text-sm sm:text-base text-slate-600 leading-relaxed">
-              Implemented locally with <strong>Handloom Cooperation Imphal</strong>, PM VIKAS brings together five artisan welfare programmes—<em>Seekho aur Kamao</em>, <em>USTTAD</em>, <em>Hamari Dharohar</em>, <em>Nai Roshni</em>, and <em>Nai Manzil</em>—into one unified scheme to support artisans, weavers, women, and youth.
+              <strong>Manipur Handloom &amp; Handicrafts Development Corporation Ltd. (MHHDC)</strong> has been allocated a dedicated admission quota under the <strong>PM VIKAS Scheme (Pradhan Mantri Virasat Ka Samvardhan)</strong>. Registrations and admissions on this portal are operated by MHHDC to deliver skill training across traditional craft trades under this scheme, which unites five artisan welfare initiatives—<em>Seekho aur Kamao</em>, <em>USTTAD</em>, <em>Hamari Dharohar</em>, <em>Nai Roshni</em>, and <em>Nai Manzil</em>.
             </p>
           </div>
 
@@ -469,11 +451,10 @@ export default function HomePage() {
             <button
               type="button"
               onClick={() => setOpenOnly(!openOnly)}
-              className={`px-4 py-2.5 rounded-xl text-sm font-semibold border transition cursor-pointer whitespace-nowrap ${
-                openOnly
-                  ? "bg-[#0f256e] text-white border-[#0f256e]"
-                  : "bg-white text-slate-700 border-slate-300 hover:bg-slate-50"
-              }`}
+              className={`px-4 py-2.5 rounded-xl text-sm font-semibold border transition cursor-pointer whitespace-nowrap ${openOnly
+                ? "bg-[#0f256e] text-white border-[#0f256e]"
+                : "bg-white text-slate-700 border-slate-300 hover:bg-slate-50"
+                }`}
             >
               {openOnly ? "Showing: Open Courses Only" : "Show Open Courses Only"}
             </button>
@@ -500,16 +481,14 @@ export default function HomePage() {
                         {cat.code}
                       </span>
                       <span
-                        className={`inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-full ${
-                          cat.is_approval_open
-                            ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
-                            : "bg-rose-50 text-rose-700 border border-rose-200"
-                        }`}
+                        className={`inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-full ${cat.is_approval_open
+                          ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
+                          : "bg-rose-50 text-rose-700 border border-rose-200"
+                          }`}
                       >
                         <span
-                          className={`w-2 h-2 rounded-full ${
-                            cat.is_approval_open ? "bg-emerald-600" : "bg-rose-500"
-                          }`}
+                          className={`w-2 h-2 rounded-full ${cat.is_approval_open ? "bg-emerald-600" : "bg-rose-500"
+                            }`}
                         />
                         {cat.is_approval_open ? "Open" : "Batch Full"}
                       </span>
@@ -561,7 +540,7 @@ export default function HomePage() {
             <div className="space-y-2.5 max-w-2xl">
               <h2 className="text-xl font-extrabold text-slate-900">Documents Required Before You Apply</h2>
               <p className="text-sm text-slate-600">
-                Keep clear photos or PDFs (strictly below 5 MB each) ready. Offline forms are also available at <strong>Handloom Cooperation Imphal (Paona Bazar)</strong> and all <strong>District Handlooms &amp; Textiles Offices</strong>.
+                Keep clear photos or PDFs (strictly below 5 MB each) ready. Offline forms are also available at <strong>MHHDC Head Office (Governor Road, Paona Bazar, Imphal 795001)</strong> and participating training centres.
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1 text-sm text-slate-800">
                 <div className="flex items-center gap-2">
@@ -614,7 +593,7 @@ export default function HomePage() {
           <div className="text-center max-w-2xl mx-auto space-y-2 mb-8">
             <h2 className="text-2xl font-extrabold tracking-tight">Benefits for Every Selected Trainee</h2>
             <p className="text-sm text-slate-300">
-              Financial, training, and market support provided under the PM VIKAS Scheme
+              Financial, training, and market support provided under MHHDC&apos;s allocated PM VIKAS Scheme quota
             </p>
           </div>
 

@@ -1,5 +1,6 @@
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
+import mhhdclLogoPdf from "../assets/mhhdcl-logo-pdf.png?inline";
 import { ApprovedSlipData } from "../types";
 import { formatDate } from "./utils";
 
@@ -42,21 +43,27 @@ export function generateApprovedApplicationPDF(app: ApprovedSlipData) {
   drawCorner(11, pageHeight - 11, 6);
   drawCorner(pageWidth - 11, pageHeight - 11, -6);
 
-  // 2. Top Emblem & Government Mission Header
+  // 2. Top Corporate Header with MHHDCL Logo
+  try {
+    doc.addImage(mhhdclLogoPdf, "PNG", 13.5, 12.2, 8.6, 15.5);
+  } catch {
+    // Continue gracefully if image rendering is unavailable
+  }
+
   doc.setTextColor(navyPrimary[0], navyPrimary[1], navyPrimary[2]);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(13);
-  doc.text("DIRECTORATE OF HANDLOOM & SKILLED ARTISAN DEVELOPMENT", pageWidth / 2, 17, { align: "center" });
+  doc.setFontSize(11);
+  doc.text("MANIPUR HANDLOOM & HANDICRAFTS DEVELOPMENT CORPORATION LTD.", pageWidth / 2, 17, { align: "center" });
 
   doc.setTextColor(slateDark[0], slateDark[1], slateDark[2]);
-  doc.setFontSize(9);
+  doc.setFontSize(8.5);
   doc.setFont("helvetica", "bold");
-  doc.text("HANDLOOM PROJECT • SKILLED ARTISAN ADMISSION & SKILL DEVELOPMENT MISSION", pageWidth / 2, 22, { align: "center" });
+  doc.text("REGISTRATION & ADMISSION PORTAL • SKILL TRAINING UNDER PM VIKAS SCHEME QUOTA", pageWidth / 2, 22, { align: "center" });
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(7.5);
   doc.setTextColor(100, 116, 139);
-  doc.text("Accredited Affirmative Action Vocational Training & Artisan Enrolment Portal", pageWidth / 2, 26, { align: "center" });
+  doc.text("Governor Road, Paona Bazar, Imphal 795001 • Tel: 0385-245 1495", pageWidth / 2, 26, { align: "center" });
 
   // Tricolor subtle horizontal rule
   const ruleY = 28.5;
@@ -334,8 +341,8 @@ export function generateApprovedApplicationPDF(app: ApprovedSlipData) {
         },
         {
           content:
-            "[ OFFICIALLY ENDORSED & DIGITALLY VERIFIED ]\n\nAdmissions Scrutiny Committee\nDirectorate of Handloom & Skilled Artisan Development\nAutonomous Quota Allocation System\nOfficial Enrolment Ref: " +
-            (app.registration_no || "HND-2026-ENR"),
+            "[ ADMISSION APPROVED & DIGITALLY VERIFIED ]\n\nAdmissions Scrutiny Committee\nManipur Handloom & Handicrafts Development Corp. Ltd.\nQuota Allocation System (PM VIKAS Scheme)\nEnrolment Ref: " +
+            (app.registration_no || "MHHDC-2026-ENR"),
           styles: {
             fontSize: 7,
             fontStyle: "bold",
@@ -372,9 +379,9 @@ export function generateApprovedApplicationPDF(app: ApprovedSlipData) {
   doc.setTextColor(120, 53, 15);
   const instructions = [
     "1. Reporting Timeline: Report to the allocated Training Centre within 7 working days from notification of batch schedule.",
-    "2. Document Verification: Carry this original Enrolment Slip along with original Government ID and Bank Passbook for cross-verification.",
+    "2. Document Verification: Carry this original Enrolment Slip along with original Govt-issued ID and Bank Passbook for cross-verification.",
     "3. Stipend Attendance Rule: Monthly DBT stipend disbursement requires a mandatory minimum of 80% biometric attendance.",
-    "4. Official Non-transferability: This admission confirmation is non-transferable and valid solely for the allocated craft trade.",
+    "4. Non-transferability: This admission confirmation is non-transferable and valid solely for the allocated craft trade.",
   ];
   instructions.forEach((inst, i) => {
     doc.text(inst, 17, y + 8 + i * 4.2);
@@ -390,7 +397,7 @@ export function generateApprovedApplicationPDF(app: ApprovedSlipData) {
   doc.setFontSize(6.5);
   doc.setTextColor(100, 116, 139);
   doc.text(
-    "Handloom Project • Official Digital Admissions Confirmation Slip • Computer generated document, requires no physical seal.",
+    "MHHDC Registration & Admission Portal • Digital Admissions Confirmation Slip • System generated copy.",
     14,
     footerY + 1.5
   );
@@ -402,7 +409,7 @@ export function generateApprovedApplicationPDF(app: ApprovedSlipData) {
 
   // Trigger Download
   const cleanName = app.full_name.replace(/[^a-zA-Z0-9]/g, "_");
-  const fileName = `Handloom_Project_Enrolment_${app.registration_no || app.category_code}_${cleanName}.pdf`;
+  const fileName = `MHHDC_Enrolment_${app.registration_no || app.category_code}_${cleanName}.pdf`;
   doc.save(fileName);
 }
 

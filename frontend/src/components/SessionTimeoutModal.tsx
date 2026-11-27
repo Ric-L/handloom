@@ -37,7 +37,7 @@ export default function SessionTimeoutModal({
           <div className="flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping inline-block" />
             <span className="font-semibold text-xs tracking-wider uppercase text-amber-400">
-              Government Portal Security Control
+              MHHDC Portal Security Control
             </span>
           </div>
           <span className="text-[11px] font-mono text-slate-400">Idle Guard</span>
@@ -57,7 +57,7 @@ export default function SessionTimeoutModal({
           </h2>
 
           <p className="text-xs text-slate-600 leading-relaxed mb-5">
-            In compliance with national portal security guidelines, your authenticated session will automatically expire after{" "}
+            In compliance with portal security policies, your authenticated session will automatically expire after{" "}
             <span className="font-semibold text-slate-900">3 minutes of inactivity</span> to protect confidential application data.
           </p>
 
