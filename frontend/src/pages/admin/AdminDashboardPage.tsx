@@ -56,9 +56,9 @@ export default function AdminDashboardPage() {
         <div className="flex items-center justify-between">
           <h2 className="text-base font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
             <TrendingUp className="w-4 h-4 text-blue-700" />
-            Administrative Operations &amp; Workspaces
+            Quick Workspaces
           </h2>
-          <span className="text-xs text-slate-500 font-medium">Click any workspace to proceed</span>
+          <span className="text-xs text-slate-500 font-medium">Select a section to manage</span>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -72,8 +72,8 @@ export default function AdminDashboardPage() {
                 <FileText className="w-5 h-5" />
               </div>
               <h3 className="font-extrabold text-slate-900 text-sm">Applications Queue</h3>
-              <p className="text-xs text-slate-500 mt-1">
-                Review pending registrations, candidate documents, and enforce category quotas.
+              <p className="text-xs text-slate-600 mt-1">
+                Verify submitted forms, check uploaded documents, and approve or return applications.
               </p>
             </div>
             <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-blue-700">

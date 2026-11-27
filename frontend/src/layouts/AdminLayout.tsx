@@ -221,11 +221,11 @@ export default function AdminLayout() {
               </button>
 
               <div className="min-w-0">
-                <h1 className="font-black text-slate-950 text-base sm:text-lg tracking-tight leading-tight truncate">
-                  PM VIKAS Moderation Command Center
+                <h1 className="font-extrabold text-slate-900 text-base sm:text-lg tracking-tight leading-tight truncate">
+                  PM VIKAS Official Portal
                 </h1>
                 <p className="text-xs text-slate-500 font-medium truncate hidden sm:block">
-                  Pradhan Mantri Virasat Ka Samvardhan • Quota Enforcement &amp; Verification Dossier Management
+                  Application Review, Seat Quota Management &amp; Candidate Verification
                 </p>
               </div>
             </div>

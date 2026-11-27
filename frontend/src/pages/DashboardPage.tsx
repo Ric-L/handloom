@@ -5,18 +5,13 @@ import { generateApprovedApplicationPDF } from "../lib/generateApprovedApplicati
 import { formatDate, statusBadgeColor } from "../lib/utils";
 import { Link } from "react-router-dom";
 import {
-  FileCheck2,
   Clock,
-  Building2,
   MapPin,
   User,
   Plus,
   AlertCircle,
-  ShieldCheck,
   CheckCircle2,
   Download,
-  FileText,
-  Edit3,
   Copy,
   Check,
 } from "lucide-react";
@@ -47,7 +42,7 @@ export default function DashboardPage() {
       generateApprovedApplicationPDF(slipData);
     } catch (err: any) {
       setDownloadError(
-        err.response?.data?.error || "Failed to download approved application PDF. Please try again."
+        err.response?.data?.error || "Could not download the approval letter. Please try again."
       );
     } finally {
       setDownloadingId(null);
@@ -56,246 +51,244 @@ export default function DashboardPage() {
 
   if (isLoading) {
     return (
-      <div className="text-center py-24 text-slate-400 space-y-3">
-        <div className="animate-spin w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full mx-auto" />
-        <p className="text-sm font-medium text-slate-500">Retrieving your submitted applications...</p>
+      <div className="text-center py-24 text-slate-500 space-y-3">
+        <div className="animate-spin w-9 h-9 border-4 border-blue-600 border-t-transparent rounded-full mx-auto" />
+        <p className="text-base font-medium">Loading your applications...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="max-w-md mx-auto my-12 p-6 bg-rose-50 border border-rose-200 rounded-2xl text-rose-800 text-center space-y-2">
+      <div className="max-w-md mx-auto my-12 p-6 bg-rose-50 border border-rose-200 rounded-2xl text-rose-900 text-center space-y-3">
         <AlertCircle className="w-8 h-8 text-rose-600 mx-auto" />
-        <h3 className="font-bold text-sm">Error Loading Applications</h3>
-        <p className="text-xs text-rose-600">Please sign in again or check server connectivity.</p>
+        <h3 className="font-bold text-base">Could Not Load Applications</h3>
+        <p className="text-sm text-rose-700">Please sign in again or check your internet connection.</p>
         <button
           onClick={() => refetch()}
-          className="mt-2 px-4 py-1.5 bg-rose-600 text-white text-xs font-bold rounded-lg hover:bg-rose-700 transition"
+          className="px-5 py-2 bg-rose-600 text-white text-sm font-bold rounded-xl hover:bg-rose-700 transition cursor-pointer"
         >
-          Retry
+          Try Again
         </button>
       </div>
     );
   }
 
+  const totalCount = data?.length || 0;
+  const pendingCount = data?.filter((a) => a.status === "PENDING").length || 0;
+  const approvedCount = data?.filter((a) => a.status === "APPROVED").length || 0;
+
   return (
-    <div className="space-y-8">
-      {/* Dashboard Top Header */}
-      <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <span className="text-xs font-bold uppercase tracking-wider text-primary-700 bg-primary-50 px-2.5 py-1 rounded-full border border-primary-200">
-            Trainee Portal
-          </span>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-2 tracking-tight">
-            My Submitted Applications
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+            My Applications
           </h1>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Real-time verification progress for your artisan skill development admissions
+          <p className="text-sm text-slate-600 mt-1">
+            Track your training applications and download your approval letter once selected.
           </p>
         </div>
 
         <Link
-          to="/categories"
-          className="inline-flex items-center gap-1.5 px-4 py-2.5 text-xs font-bold text-white bg-primary-700 hover:bg-primary-800 rounded-xl shadow-xs transition shrink-0"
+          to="/apply"
+          className="inline-flex items-center gap-2 px-5 py-3 text-sm font-bold text-white bg-blue-700 hover:bg-blue-800 rounded-xl shadow-xs transition shrink-0"
         >
-          <Plus className="w-4 h-4" /> Apply for Another Trade
+          <Plus className="w-4 h-4" /> Apply for a New Course
         </Link>
       </div>
 
-      {/* Applications List */}
-      {!data || data.length === 0 ? (
-        <div className="text-center py-20 bg-white rounded-3xl border border-slate-200 p-8 shadow-xs space-y-4">
-          <div className="w-16 h-16 bg-slate-100 text-slate-400 rounded-2xl flex items-center justify-center mx-auto text-3xl">
-            📋
+      {/* Simple Summary Counters */}
+      {totalCount > 0 && (
+        <div className="grid grid-cols-3 gap-3 sm:gap-4">
+          <div className="bg-white rounded-2xl border border-slate-200 p-4 text-center">
+            <div className="text-2xl font-extrabold text-slate-900">{totalCount}</div>
+            <div className="text-xs font-semibold text-slate-600 mt-0.5">Total Applied</div>
           </div>
-          <div className="max-w-md mx-auto space-y-1">
-            <h3 className="text-base font-bold text-slate-800">No Enrolment Applications Found</h3>
-            <p className="text-xs text-slate-500 leading-relaxed">
-              You haven't submitted any artisan training admission forms yet. Browse our accredited trades and register online.
-            </p>
+          <div className="bg-white rounded-2xl border border-amber-200 p-4 text-center">
+            <div className="text-2xl font-extrabold text-amber-700">{pendingCount}</div>
+            <div className="text-xs font-semibold text-amber-800 mt-0.5">Under Review</div>
           </div>
-          <div>
-            <Link
-              to="/categories"
-              className="inline-flex items-center gap-2 bg-primary-700 hover:bg-primary-800 text-white font-bold px-6 py-2.5 rounded-xl text-xs transition"
-            >
-              Browse Accredited Trades
-            </Link>
+          <div className="bg-white rounded-2xl border border-emerald-200 p-4 text-center">
+            <div className="text-2xl font-extrabold text-emerald-700">{approvedCount}</div>
+            <div className="text-xs font-semibold text-emerald-800 mt-0.5">Approved</div>
           </div>
         </div>
+      )}
+
+      {/* Download Error Banner */}
+      {downloadError && downloadingId === null && (
+        <div className="p-4 bg-rose-50 border border-rose-200 rounded-xl text-sm text-rose-900 flex items-center gap-2">
+          <AlertCircle className="w-5 h-5 text-rose-600 shrink-0" />
+          <span>{downloadError}</span>
+        </div>
+      )}
+
+      {/* Applications List */}
+      {!data || data.length === 0 ? (
+        <div className="text-center py-16 bg-white rounded-2xl border border-slate-200 p-8 shadow-xs space-y-4">
+          <div className="w-16 h-16 bg-blue-50 text-blue-700 rounded-2xl flex items-center justify-center mx-auto text-3xl">
+            📋
+          </div>
+          <div className="max-w-md mx-auto space-y-1.5">
+            <h2 className="text-lg font-bold text-slate-900">No Applications Yet</h2>
+            <p className="text-sm text-slate-600 leading-relaxed">
+              You haven&apos;t applied for any training course yet. Browse our open handloom &amp; craft courses to apply online.
+            </p>
+          </div>
+          <Link
+            to="/categories"
+            className="inline-flex items-center gap-2 bg-blue-700 hover:bg-blue-800 text-white font-bold px-6 py-3 rounded-xl text-sm transition"
+          >
+            Browse Training Courses
+          </Link>
+        </div>
       ) : (
-        <div className="space-y-4">
-          {data.map(app => (
+        <div className="space-y-5">
+          {data.map((app) => (
             <div
               key={app.id}
-              className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs hover:shadow-md transition-all space-y-4"
+              className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-5"
             >
-              {/* Card Header */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
-                <div className="space-y-1">
+              {/* Header */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
+                <div className="space-y-1.5">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="font-mono text-xs font-bold text-blue-800 bg-blue-50 px-2.5 py-0.5 rounded border border-blue-200">
-                      {app.category_code || "TRADE"}
+                    <span className="font-mono text-xs font-bold text-blue-800 bg-blue-50 px-2.5 py-0.5 rounded-lg border border-blue-200">
+                      {app.category_code || "COURSE"}
                     </span>
-                    <h2 className="text-base font-extrabold text-slate-900 leading-snug">
-                      {app.category_title || "Artisan Training Programme"}
+                    <h2 className="text-lg font-extrabold text-slate-900">
+                      {app.category_title || "Artisan Training Course"}
                     </h2>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-3 text-xs text-slate-600">
                     {app.registration_no && (
-                      <div className="inline-flex items-center gap-1.5 font-mono text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-800 px-2.5 py-0.5 rounded border border-slate-300">
-                        <span className="text-[10px] text-slate-500 uppercase font-sans font-semibold">Reg ID:</span>
-                        <span>{app.registration_no}</span>
+                      <span className="inline-flex items-center gap-1.5 font-mono font-bold bg-slate-100 text-slate-800 px-2.5 py-1 rounded-lg border border-slate-200">
+                        Reg No: {app.registration_no}
                         <button
                           type="button"
-                          title="Copy Registration ID"
+                          title="Copy Registration Number"
                           onClick={(e) => copyToClipboard(app.registration_no!, app.id, e)}
-                          className="text-slate-400 hover:text-slate-700 p-0.5 rounded transition cursor-pointer"
+                          className="text-slate-500 hover:text-slate-900 cursor-pointer"
                         >
                           {copiedId === app.id ? (
-                            <Check className="w-3.5 h-3.5 text-blue-600" />
+                            <Check className="w-3.5 h-3.5 text-emerald-600" />
                           ) : (
                             <Copy className="w-3.5 h-3.5" />
                           )}
                         </button>
-                      </div>
+                      </span>
                     )}
-                  </div>
-                  <div className="text-xs text-slate-500 flex items-center gap-1.5">
-                    <Clock className="w-3.5 h-3.5 text-slate-400" />
-                    <span>Submitted on: {formatDate(app.submitted_at)}</span>
-                  </div>
-                </div>
-
-                <div className="flex flex-wrap items-center gap-2.5">
-                  <span
-                    className={`inline-block px-3 py-1 rounded-full text-xs font-extrabold ${statusBadgeColor(
-                      app.status
-                    )}`}
-                  >
-                    {app.status === "PENDING"
-                      ? "🟡 IN VERIFICATION"
-                      : app.status === "APPROVED"
-                      ? "🟢 SELECTED FOR ADMISSION"
-                      : "🔴 APPLICATION NOT APPROVED"}
-                  </span>
-
-                  {app.status === "PENDING" && (
-                    <span
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 text-slate-500 text-xs font-semibold rounded-xl border border-slate-200"
-                      title="Application is finalized and locked under official verification."
-                    >
-                      <ShieldCheck className="w-3.5 h-3.5 text-blue-700" />
-                      <span>Finalized &amp; Locked</span>
+                    <span className="inline-flex items-center gap-1">
+                      <Clock className="w-3.5 h-3.5 text-slate-400" />
+                      Applied on {formatDate(app.submitted_at)}
                     </span>
-                  )}
-
-                  {app.status === "APPROVED" && (
-                    <button
-                      type="button"
-                      onClick={() => handleDownloadPDF(app.id)}
-                      disabled={downloadingId === app.id}
-                      className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-primary-700 hover:bg-primary-800 active:translate-y-px text-white text-xs font-bold rounded-xl shadow-xs transition cursor-pointer disabled:opacity-60"
-                      title="Download Official Enrolment Confirmation Slip"
-                    >
-                      {downloadingId === app.id ? (
-                        <>
-                          <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                          <span>Generating PDF...</span>
-                        </>
-                      ) : (
-                        <>
-                          <Download className="w-3.5 h-3.5" />
-                          <span>Download Enrolment PDF</span>
-                        </>
-                      )}
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              {/* Download Error Banner */}
-              {downloadError && downloadingId === null && (
-                <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-800 flex items-center gap-2">
-                  <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
-                  <span>{downloadError}</span>
-                </div>
-              )}
-
-              {/* Candidate Info Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs bg-slate-50 p-4 rounded-xl border border-slate-100">
-                <div className="space-y-1">
-                  <span className="text-slate-400 font-medium block">Candidate Name:</span>
-                  <div className="font-bold text-slate-800 flex items-center gap-1">
-                    <User className="w-3.5 h-3.5 text-primary-700" />
-                    {app.full_name}
                   </div>
                 </div>
 
-                <div className="space-y-1">
-                  <span className="text-slate-400 font-medium block">Father / Guardian:</span>
-                  <div className="font-semibold text-slate-700">{app.guardian_name}</div>
-                </div>
+                <span
+                  className={`self-start sm:self-center px-3.5 py-1.5 rounded-full text-xs font-bold ${statusBadgeColor(
+                    app.status
+                  )}`}
+                >
+                  {app.status === "PENDING"
+                    ? "Under Review"
+                    : app.status === "APPROVED"
+                    ? "Approved for Training"
+                    : "Not Approved"}
+                </span>
+              </div>
 
-                <div className="space-y-1">
-                  <span className="text-slate-400 font-medium block">District & Social Category:</span>
-                  <div className="font-semibold text-slate-700 flex items-center gap-1">
-                    <MapPin className="w-3.5 h-3.5 text-primary-700" />
-                    {app.district_state_pin} ({app.social_category})
-                  </div>
+              {/* Visual 3-Step Progress Tracker */}
+              <div className="grid grid-cols-3 gap-2 bg-slate-50 p-3.5 rounded-xl border border-slate-200/80 text-center">
+                <div className="flex flex-col items-center gap-1">
+                  <span className="w-6 h-6 rounded-full bg-emerald-600 text-white text-xs font-bold flex items-center justify-center">
+                    ✓
+                  </span>
+                  <span className="text-xs font-semibold text-slate-800">Submitted</span>
+                </div>
+                <div className="flex flex-col items-center gap-1">
+                  <span
+                    className={`w-6 h-6 rounded-full text-xs font-bold flex items-center justify-center ${
+                      app.status === "PENDING" ? "bg-amber-500 text-white" : "bg-emerald-600 text-white"
+                    }`}
+                  >
+                    {app.status === "PENDING" ? "2" : "✓"}
+                  </span>
+                  <span className="text-xs font-semibold text-slate-800">Document Check</span>
+                </div>
+                <div className="flex flex-col items-center gap-1">
+                  <span
+                    className={`w-6 h-6 rounded-full text-xs font-bold flex items-center justify-center ${
+                      app.status === "APPROVED"
+                        ? "bg-emerald-600 text-white"
+                        : app.status === "REJECTED"
+                        ? "bg-rose-600 text-white"
+                        : "bg-slate-200 text-slate-500"
+                    }`}
+                  >
+                    {app.status === "APPROVED" ? "✓" : app.status === "REJECTED" ? "!" : "3"}
+                  </span>
+                  <span className="text-xs font-semibold text-slate-800">
+                    {app.status === "REJECTED" ? "Decision" : "Approved"}
+                  </span>
                 </div>
               </div>
 
-              {/* Status Note or Rejection Remarks */}
+              {/* Applicant Details */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
+                <div className="flex items-center gap-2 text-slate-700">
+                  <User className="w-4 h-4 text-blue-700 shrink-0" />
+                  <span><strong>{app.full_name}</strong></span>
+                </div>
+                <div className="text-slate-600">
+                  Guardian: <strong className="text-slate-800">{app.guardian_name}</strong>
+                </div>
+                <div className="flex items-center gap-2 text-slate-600">
+                  <MapPin className="w-4 h-4 text-blue-700 shrink-0" />
+                  <span className="truncate">{app.district_state_pin}</span>
+                </div>
+              </div>
+
+              {/* Status Action / Guidance */}
               {app.status === "PENDING" && (
-                <div className="p-3 bg-amber-50/70 border border-amber-200 rounded-xl text-xs text-amber-900 flex items-center gap-2 font-medium">
+                <div className="p-3.5 bg-amber-50 border border-amber-200 rounded-xl text-sm text-amber-900 flex items-center gap-2.5">
                   <Clock className="w-4 h-4 text-amber-600 shrink-0" />
                   <span>
-                    Your documents and eligibility are currently being vetted by the District Handloom Review Board.
+                    Your application is being reviewed by the department. You do not need to do anything right now.
                   </span>
                 </div>
               )}
 
               {app.status === "APPROVED" && (
-                <div className="p-4 bg-blue-50/90 border border-blue-200 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-xs text-blue-950 font-medium">
-                  <div className="flex items-start sm:items-center gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-blue-100 flex items-center justify-center text-blue-700 shrink-0 border border-blue-200">
-                      <CheckCircle2 className="w-5 h-5 text-blue-600" />
-                    </div>
+                <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                  <div className="flex items-start gap-3">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
                     <div>
-                      <p className="font-extrabold text-blue-950 text-sm">
-                        Admission Sanctioned & Confirmed
-                      </p>
-                      <p className="text-blue-800 text-[11px] mt-0.5">
-                        Congratulations! Your artisan training application has been approved. Download your formal confirmation slip below.
+                      <p className="font-bold text-emerald-950 text-sm">Congratulations! You are selected.</p>
+                      <p className="text-xs text-emerald-800 mt-0.5">
+                        Download and print your official approval letter below.
                       </p>
                     </div>
                   </div>
-
                   <button
                     type="button"
                     onClick={() => handleDownloadPDF(app.id)}
                     disabled={downloadingId === app.id}
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-700 via-blue-800 to-indigo-800 hover:from-blue-800 hover:to-indigo-900 active:translate-y-px text-white text-xs font-bold rounded-xl shadow-md shadow-blue-900/20 transition shrink-0 cursor-pointer disabled:opacity-60"
+                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white text-sm font-bold rounded-xl shadow-xs transition shrink-0 cursor-pointer disabled:opacity-60"
                   >
-                    {downloadingId === app.id ? (
-                      <>
-                        <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        <span>Generating PDF...</span>
-                      </>
-                    ) : (
-                      <>
-                        <FileText className="w-4 h-4" />
-                        <span>Download Enrolment Slip (PDF)</span>
-                      </>
-                    )}
+                    <Download className="w-4 h-4" />
+                    <span>{downloadingId === app.id ? "Downloading..." : "Download Approval Letter (PDF)"}</span>
                   </button>
                 </div>
               )}
 
               {app.status === "REJECTED" && app.rejection_reason && (
-                <div className="p-3.5 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-800 space-y-1">
-                  <span className="font-bold block">Admissions Board Feedback:</span>
-                  <p className="font-mono text-[11px] leading-relaxed">{app.rejection_reason}</p>
+                <div className="p-4 bg-rose-50 border border-rose-200 rounded-xl text-sm text-rose-900 space-y-1">
+                  <span className="font-bold block">Reason for Not Approving:</span>
+                  <p>{app.rejection_reason}</p>
                 </div>
               )}
             </div>

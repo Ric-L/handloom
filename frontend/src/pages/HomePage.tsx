@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { trackApplication, getCategories } from "../api";
 import { formatDate, statusBadgeColor } from "../lib/utils";
@@ -6,22 +6,19 @@ import type { TrackResponse } from "../types";
 import { Link } from "react-router-dom";
 import {
   Search,
-  Sparkles,
   ArrowRight,
   ShieldCheck,
   CheckCircle2,
   GraduationCap,
   Banknote,
   Award,
-  Layers,
-  Video,
   Clock,
-  BookOpen,
-  Store,
-  Users,
-  Palette,
-  Briefcase,
-  Landmark,
+  UserPlus,
+  ClipboardCheck,
+  Download,
+  PhoneCall,
+  AlertCircle,
+  Target,
 } from "lucide-react";
 import { ProjectMediaSection } from "../components/ProjectMediaSection";
 
@@ -32,10 +29,25 @@ export default function HomePage() {
   const [error, setError] = useState("");
   const [searching, setSearching] = useState(false);
 
+  const [courseSearch, setCourseSearch] = useState("");
+  const [openOnly, setOpenOnly] = useState(false);
+
   const { data: categories, isLoading: isCategoriesLoading } = useQuery({
     queryKey: ["categories"],
     queryFn: getCategories,
   });
+
+  const filteredCategories = useMemo(() => {
+    if (!categories) return [];
+    return categories.filter((cat) => {
+      if (openOnly && !cat.is_approval_open) return false;
+      if (courseSearch.trim()) {
+        const q = courseSearch.toLowerCase();
+        return cat.title.toLowerCase().includes(q) || cat.code.toLowerCase().includes(q);
+      }
+      return true;
+    });
+  }, [categories, courseSearch, openOnly]);
 
   const handleTrack = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,542 +59,492 @@ export default function HomePage() {
       setResult(data);
     } catch {
       setError(
-        "No matching application record found. Please verify your Registration ID or 10-digit mobile number along with your Date of Birth."
+        "We could not find an application matching those details. Please check your Registration ID (or 10-digit mobile number) and Date of Birth."
       );
     } finally {
       setSearching(false);
     }
   };
 
+  const scrollToSection = (id: string) => {
+    document.querySelector(id)?.scrollIntoView({ behavior: "smooth" });
+  };
+
   return (
     <div className="w-full flex flex-col font-sans">
-      {/* 1. Full-Width Hero Section - Enriched with PM VIKAS Framework */}
-      <section className="relative w-full overflow-hidden bg-gradient-to-br from-slate-950 via-blue-950 to-indigo-950 text-white shadow-2xl border-b border-blue-900/40">
-        <div className="absolute inset-0 bg-[radial-gradient(#3b82f6_1.2px,transparent_1.2px)] [background-size:24px_24px] opacity-15 pointer-events-none" />
+      {/* 1. e-Seba Style Light Scenic Hero Banner */}
+      <section className="relative w-full overflow-hidden bg-gradient-to-r from-[#d8efe2] via-[#e4f3ef] to-[#f4ece1] border-b border-slate-200">
+        {/* Soft Atmospheric Glows */}
+        <div className="absolute -top-24 -left-24 w-96 h-96 bg-emerald-200/40 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-10 right-1/4 w-96 h-96 bg-sky-200/40 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 right-0 w-96 h-72 bg-amber-200/30 rounded-full blur-3xl pointer-events-none" />
 
-        {/* Ambient Glows */}
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-10 right-1/4 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
-
-        <div className="relative z-10 w-full max-w-7xl 2xl:max-w-[1680px] mx-auto px-4 sm:px-8 lg:px-12 py-10 sm:py-14 lg:py-16">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 xl:gap-14 items-center">
-            {/* Left Content Column */}
-            <div className="lg:col-span-7 xl:col-span-7 space-y-5">
-              {/* Animated "PM Vikas Scheme" Badge */}
-              <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-blue-900/70 backdrop-blur-md border border-amber-400/50 shadow-lg shadow-amber-500/15 animate-pulse-glow">
-                <span className="relative flex h-2.5 w-2.5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-400" />
-                </span>
-                <span className="text-xs sm:text-sm font-black tracking-wider uppercase bg-gradient-to-r from-amber-300 via-yellow-100 to-amber-300 bg-clip-text text-transparent animate-text-shimmer">
-                  PM Vikas Scheme
-                </span>
-                <span className="text-slate-400 text-xs hidden sm:inline">•</span>
-                <span className="text-blue-200 text-xs font-semibold hidden sm:inline">
-                  Pradhan Mantri Virasat Ka Samvardhan
-                </span>
-                <span className="text-slate-400 text-xs hidden xl:inline">•</span>
-                <span className="text-amber-300/90 text-[11px] font-bold hidden xl:inline">
-                  Ministry of Minority Affairs (MoMA)
-                </span>
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 sm:pt-12 pb-0">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+            {/* Left Column: Emblem Lockup, Headline, Description, 2 CTA Buttons */}
+            <div className="lg:col-span-7 pb-10 sm:pb-14 space-y-6 flex flex-col justify-center">
+              {/* Emblem & Portal Title Lockup */}
+              <div className="flex items-center gap-3.5">
+                <img
+                  src="/emblem-india.png"
+                  alt="State Emblem of India"
+                  className="h-14 sm:h-16 w-auto object-contain shrink-0"
+                />
+                <div>
+                  <div className="text-base sm:text-lg font-extrabold text-amber-600 tracking-wide">
+                    प्रधानमंत्री विरासत का संवर्धन
+                  </div>
+                  <div className="text-2xl sm:text-3xl font-bold text-emerald-800 font-serif leading-tight">
+                    PM VIKAS Portal
+                  </div>
+                </div>
               </div>
 
-              {/* Main Headline */}
-              <h1 className="text-3xl sm:text-5xl lg:text-5xl xl:text-6xl font-black tracking-tight leading-[1.12] text-white drop-shadow-sm">
-                Preserving Heritage. <br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-sky-200 to-blue-300">
-                  Mastering Modern Craft.
-                </span>
+              {/* Clean Deep-Navy Headline */}
+              <h1 className="text-2xl sm:text-4xl lg:text-[40px] font-extrabold text-[#0f256e] leading-[1.2] tracking-tight max-w-2xl">
+                A Unified Online Platform for Handloom &amp; Artisan Skill Services
               </h1>
 
-              {/* Comprehensive PM VIKAS Description */}
-              <p className="text-xs sm:text-sm lg:text-base text-slate-200 leading-relaxed font-normal drop-shadow">
-                The <strong>Pradhan Mantri Virasat Ka Samvardhan (PM VIKAS)</strong> is a unified Central Sector initiative by the <strong>Ministry of Minority Affairs (MoMA)</strong> in convergence with the <strong>Skill India Mission</strong>. It empowers traditional master artisans, handloom weavers, craftspersons, women, and youth by integrating heritage craftsmanship with modern technical training, certified qualifications, and sustainable livelihood ecosystems.
+              {/* Plain-Language Description */}
+              <p className="text-sm sm:text-base text-slate-700 leading-relaxed max-w-xl">
+                PM VIKAS provides a secure, transparent, and convenient digital interface for artisans and weavers to apply for free certified training, track applications, and download approval slips online anytime and anywhere.
               </p>
 
-              {/* 5 Converged Erstwhile Schemes Box */}
-              <div className="bg-slate-900/75 backdrop-blur-md rounded-2xl p-4 sm:p-5 border border-white/15 shadow-xl space-y-3">
-                <div className="flex items-center justify-between pb-2 border-b border-white/10">
-                  <div className="flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-amber-300" />
-                    <span className="text-xs font-black uppercase tracking-wider text-amber-300">
-                      Convergence of 5 Flagship Schemes (पंच-उपयोजनाएं)
+              {/* Two Side-by-Side e-Seba Style CTA Buttons */}
+              <div className="flex flex-wrap items-center gap-3.5 pt-2">
+                <Link
+                  to="/apply"
+                  className="inline-flex items-center gap-2.5 px-6 py-3.5 rounded-lg bg-[#0f256e] hover:bg-blue-950 text-white font-bold text-sm shadow-sm transition"
+                >
+                  <UserPlus className="w-4 h-4 shrink-0" />
+                  <span>Citizen Services - Register &amp; Apply</span>
+                </Link>
+
+                <button
+                  type="button"
+                  onClick={() => scrollToSection("#track-status")}
+                  className="inline-flex items-center gap-2.5 px-6 py-3.5 rounded-lg border-2 border-[#0f256e] text-[#0f256e] bg-white/60 hover:bg-white font-bold text-sm transition cursor-pointer"
+                >
+                  <Target className="w-4 h-4 shrink-0" />
+                  <span>Track Application Status</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Right Column: Clean Dignitary Portrait Matching Full Container Height */}
+            <div className="lg:col-span-5 flex justify-center lg:justify-end items-end self-stretch">
+              <img
+                src="/pm-narendra-modi.png?v=2"
+                alt="Shri Narendra Modi - Hon'ble Prime Minister of India"
+                className="w-auto max-w-full h-80 sm:h-96 lg:h-[430px] object-contain object-bottom"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 2. Simple 3-Step Guide ("How It Works") */}
+      <section className="bg-white border-b border-slate-200 py-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+            <div className="flex items-start gap-3.5 p-3.5 rounded-xl bg-slate-50 border border-slate-200/80">
+              <div className="w-9 h-9 rounded-full bg-[#0f256e] text-white font-extrabold text-sm flex items-center justify-center shrink-0">
+                1
+              </div>
+              <div>
+                <h3 className="font-bold text-sm text-slate-900 flex items-center gap-1.5">
+                  <UserPlus className="w-4 h-4 text-[#0f256e]" />
+                  Register with Mobile
+                </h3>
+                <p className="text-xs text-slate-600 mt-0.5">
+                  Create a free account using your 10-digit mobile number.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3.5 p-3.5 rounded-xl bg-slate-50 border border-slate-200/80">
+              <div className="w-9 h-9 rounded-full bg-[#0f256e] text-white font-extrabold text-sm flex items-center justify-center shrink-0">
+                2
+              </div>
+              <div>
+                <h3 className="font-bold text-sm text-slate-900 flex items-center gap-1.5">
+                  <ClipboardCheck className="w-4 h-4 text-[#0f256e]" />
+                  Fill Form &amp; Upload Docs
+                </h3>
+                <p className="text-xs text-slate-600 mt-0.5">
+                  Choose a course, enter your details, and upload your photo &amp; ID.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3.5 p-3.5 rounded-xl bg-slate-50 border border-slate-200/80">
+              <div className="w-9 h-9 rounded-full bg-emerald-700 text-white font-extrabold text-sm flex items-center justify-center shrink-0">
+                3
+              </div>
+              <div>
+                <h3 className="font-bold text-sm text-slate-900 flex items-center gap-1.5">
+                  <Download className="w-4 h-4 text-emerald-700" />
+                  Track &amp; Download Slip
+                </h3>
+                <p className="text-xs text-slate-600 mt-0.5">
+                  Check approval status anytime and download your admission letter.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 3. Main Content Container */}
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-16">
+        {/* Track Application Status Card */}
+        <section id="track-status" className="scroll-mt-24 max-w-4xl mx-auto">
+          <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-10 h-10 rounded-xl bg-blue-50 text-[#0f256e] flex items-center justify-center border border-blue-200">
+                <Search className="w-5 h-5" />
+              </div>
+              <div>
+                <h2 className="text-xl font-extrabold text-slate-900">Check Your Application Status</h2>
+                <p className="text-sm text-slate-600">
+                  No sign-in needed. Enter your Registration Number or Mobile Number and Date of Birth.
+                </p>
+              </div>
+            </div>
+
+            <form onSubmit={handleTrack} className="mt-6 space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="track-id" className="block text-sm font-bold text-slate-800 mb-1.5">
+                    Registration Number or Mobile Number
+                  </label>
+                  <input
+                    id="track-id"
+                    type="text"
+                    value={identifier}
+                    onChange={(e) => setIdentifier(e.target.value)}
+                    required
+                    placeholder="e.g. HND-2026-EMB-AB12CD or 9876543210"
+                    className="w-full border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-900 focus:ring-2 focus:ring-[#0f256e] focus:border-[#0f256e] focus:outline-none bg-slate-50 focus:bg-white"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="track-dob" className="block text-sm font-bold text-slate-800 mb-1.5">
+                    Date of Birth
+                  </label>
+                  <input
+                    id="track-dob"
+                    type="date"
+                    value={dob}
+                    onChange={(e) => setDob(e.target.value)}
+                    required
+                    className="w-full border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-900 focus:ring-2 focus:ring-[#0f256e] focus:border-[#0f256e] focus:outline-none bg-slate-50 focus:bg-white"
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={searching}
+                className="w-full sm:w-auto px-8 py-3 bg-[#0f256e] hover:bg-blue-950 text-white font-bold rounded-xl text-sm transition shadow-xs disabled:opacity-50 cursor-pointer"
+              >
+                {searching ? "Checking Status..." : "Check Status"}
+              </button>
+            </form>
+
+            {error && (
+              <div className="mt-5 p-4 text-sm text-rose-900 bg-rose-50 border border-rose-200 rounded-xl flex items-start gap-2.5">
+                <AlertCircle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
+                <span>{error}</span>
+              </div>
+            )}
+
+            {result && (
+              <div className="mt-6 p-5 sm:p-6 bg-slate-50 rounded-2xl border border-slate-200 space-y-4">
+                {/* Visual 3-Step Progress Timeline */}
+                <div className="grid grid-cols-3 gap-2 pb-4 border-b border-slate-200 text-center">
+                  <div className="flex flex-col items-center gap-1">
+                    <span className="w-7 h-7 rounded-full bg-emerald-600 text-white text-xs font-bold flex items-center justify-center">
+                      ✓
+                    </span>
+                    <span className="text-xs font-bold text-slate-800">Submitted</span>
+                  </div>
+                  <div className="flex flex-col items-center gap-1">
+                    <span
+                      className={`w-7 h-7 rounded-full text-xs font-bold flex items-center justify-center ${
+                        result.status === "PENDING" ? "bg-amber-500 text-white" : "bg-emerald-600 text-white"
+                      }`}
+                    >
+                      {result.status === "PENDING" ? "2" : "✓"}
+                    </span>
+                    <span className="text-xs font-bold text-slate-800">Under Review</span>
+                  </div>
+                  <div className="flex flex-col items-center gap-1">
+                    <span
+                      className={`w-7 h-7 rounded-full text-xs font-bold flex items-center justify-center ${
+                        result.status === "APPROVED"
+                          ? "bg-emerald-600 text-white"
+                          : result.status === "REJECTED"
+                          ? "bg-rose-600 text-white"
+                          : "bg-slate-200 text-slate-500"
+                      }`}
+                    >
+                      {result.status === "APPROVED" ? "✓" : result.status === "REJECTED" ? "!" : "3"}
+                    </span>
+                    <span className="text-xs font-bold text-slate-800">
+                      {result.status === "REJECTED" ? "Needs Attention" : "Approved"}
                     </span>
                   </div>
-                  <span className="text-[10px] text-sky-200 font-semibold px-2 py-0.5 rounded-full bg-blue-900/80 border border-blue-400/30">
-                    Central Sector Scheme
-                  </span>
                 </div>
 
-                {/* 5 Schemes Mini Cards */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
-                  <div className="bg-white/5 hover:bg-white/10 rounded-xl p-2.5 border border-white/10 transition">
-                    <div className="flex items-center gap-1.5 mb-1">
-                      <Palette className="w-3.5 h-3.5 text-amber-300 shrink-0" />
-                      <span className="text-xs font-bold text-white">USTTAD (उस्ताद)</span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                  {result.registration_no && (
+                    <div>
+                      <span className="text-xs text-slate-500 block">Registration Number</span>
+                      <span className="font-mono font-bold text-slate-900">{result.registration_no}</span>
                     </div>
-                    <p className="text-[11px] text-slate-300 leading-snug">
-                      Upgrading traditional craft skills, master weaver mentorship, design innovation & GI tagging.
-                    </p>
+                  )}
+                  <div>
+                    <span className="text-xs text-slate-500 block">Applicant Name</span>
+                    <span className="font-bold text-slate-900">{result.full_name}</span>
                   </div>
-
-                  <div className="bg-white/5 hover:bg-white/10 rounded-xl p-2.5 border border-white/10 transition">
-                    <div className="flex items-center gap-1.5 mb-1">
-                      <Briefcase className="w-3.5 h-3.5 text-sky-300 shrink-0" />
-                      <span className="text-xs font-bold text-white">Seekho Aur Kamao</span>
-                    </div>
-                    <p className="text-[11px] text-slate-300 leading-snug">
-                      Learn & Earn: Demand-driven technical skilling with wage & self-employment placement linkages.
-                    </p>
-                  </div>
-
-                  <div className="bg-white/5 hover:bg-white/10 rounded-xl p-2.5 border border-white/10 transition">
-                    <div className="flex items-center gap-1.5 mb-1">
-                      <Landmark className="w-3.5 h-3.5 text-indigo-300 shrink-0" />
-                      <span className="text-xs font-bold text-white">Hamari Dharohar</span>
-                    </div>
-                    <p className="text-[11px] text-slate-300 leading-snug">
-                      Preserving, curating, and promoting India’s rich craft traditions and cultural heritage.
-                    </p>
-                  </div>
-
-                  <div className="bg-white/5 hover:bg-white/10 rounded-xl p-2.5 border border-white/10 transition">
-                    <div className="flex items-center gap-1.5 mb-1">
-                      <Users className="w-3.5 h-3.5 text-emerald-300 shrink-0" />
-                      <span className="text-xs font-bold text-white">Nai Roshni (नई रोशनी)</span>
-                    </div>
-                    <p className="text-[11px] text-slate-300 leading-snug">
-                      Leadership, digital literacy, and entrepreneurship development for minority women artisans.
-                    </p>
-                  </div>
-
-                  <div className="bg-white/5 hover:bg-white/10 rounded-xl p-2.5 border border-white/10 transition sm:col-span-2 lg:col-span-2">
-                    <div className="flex items-center gap-1.5 mb-1">
-                      <BookOpen className="w-3.5 h-3.5 text-yellow-300 shrink-0" />
-                      <span className="text-xs font-bold text-white">Nai Manzil (नई मंज़िल)</span>
-                    </div>
-                    <p className="text-[11px] text-slate-300 leading-snug">
-                      Educational qualification & open schooling bridge (Class 8th/10th/12th via NIOS) for youth & school dropouts.
-                    </p>
-                  </div>
-                </div>
-
-                {/* Key Institutional Ecosystem Pillars */}
-                <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-white/10 text-[11px]">
-                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-blue-950/80 border border-blue-500/30 text-sky-200">
-                    <Banknote className="w-3 h-3 text-amber-300" />
-                    <strong>Credit Linkage:</strong> NMDFC Concessional Financing
-                  </span>
-                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-blue-950/80 border border-blue-500/30 text-sky-200">
-                    <Store className="w-3 h-3 text-emerald-300" />
-                    <strong>Exhibitions:</strong> Hunar Haat & Lok Samvardhan Parv
-                  </span>
-                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-blue-950/80 border border-blue-500/30 text-sky-200">
-                    <ShieldCheck className="w-3 h-3 text-purple-300" />
-                    <strong>Standards:</strong> NSQF & TSC Accredited
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Right Column: Prime Minister Narendra Modi Showcase */}
-            <div className="lg:col-span-5 xl:col-span-5 flex justify-center lg:justify-end">
-              <div className="relative w-full max-w-sm sm:max-w-md lg:max-w-none">
-                {/* Ambient Backlight Glow */}
-                <div className="absolute -inset-4 bg-gradient-to-tr from-amber-500/20 via-sky-500/20 to-indigo-500/30 rounded-3xl blur-2xl opacity-70 pointer-events-none" />
-
-                {/* Glassmorphic Executive Card */}
-                <div className="relative rounded-3xl p-5 sm:p-6 bg-gradient-to-b from-white/15 via-white/10 to-slate-950/80 backdrop-blur-xl border border-white/25 shadow-2xl overflow-hidden group">
-                  {/* Top Card Strip: Animated Scheme Pill */}
-                  <div className="flex items-center justify-between gap-2 mb-3">
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900/90 border border-amber-400/60 shadow-xs">
-                      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping inline-block" />
-                      <span className="text-[11px] font-black uppercase tracking-wider text-amber-300 animate-text-shimmer bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-300 bg-clip-text text-transparent">
-                        PM Vikas Scheme
-                      </span>
-                    </div>
-                    <span className="text-[10px] font-bold text-sky-200 uppercase tracking-widest px-2.5 py-0.5 rounded-full bg-blue-900/70 border border-blue-400/30">
-                      Government of India
+                  <div>
+                    <span className="text-xs text-slate-500 block">Course Applied</span>
+                    <span className="font-semibold text-slate-900">
+                      {result.category_code ? `${result.category_code} - ` : ""}
+                      {result.category}
                     </span>
                   </div>
-
-                  {/* Clean Dignitary Portrait Frame */}
-                  <div className="relative rounded-2xl overflow-hidden bg-gradient-to-b from-slate-50 to-white shadow-inner border border-amber-400/30 p-2 flex items-center justify-center">
-                    <img
-                      src="/pm-narendra-modi.png"
-                      alt="Shri Narendra Modi - Hon'ble Prime Minister of India"
-                      className="w-full max-h-[280px] sm:max-h-[320px] xl:max-h-[360px] object-contain object-bottom drop-shadow-md transition-transform duration-500 group-hover:scale-102"
-                    />
-                  </div>
-
-                  {/* Dignitary Nameplate & Quote */}
-                  <div className="mt-3 pt-3 border-t border-white/15 bg-slate-950/80 -mx-5 -mb-5 sm:-mx-6 sm:-mb-6 p-4 sm:p-5 rounded-b-3xl space-y-2">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h3 className="text-base sm:text-lg font-black text-white tracking-tight flex items-center gap-1.5">
-                          <span>Shri Narendra Modi</span>
-                        </h3>
-                        <p className="text-xs font-semibold text-amber-300">
-                          Hon'ble Prime Minister of India
-                        </p>
-                      </div>
-                      <img src="/emblem-india.png" alt="State Emblem" className="h-8 w-auto object-contain opacity-90 brightness-110" />
-                    </div>
-                    <p className="text-[11px] text-slate-300 italic leading-relaxed pt-1">
-                      &ldquo;Our traditional artisans, weavers, and craftspersons are the guardians of India's cultural heritage. Through the <strong>PM Vikas Scheme</strong>, we are integrating traditional craftsmanship with modern skilling, direct financial security, and global market access.&rdquo;
-                    </p>
-                    <div className="flex flex-wrap items-center gap-1.5 pt-1">
-                      <span className="text-[10px] font-bold text-slate-300 bg-white/10 px-2 py-0.5 rounded-md border border-white/10">Skilling</span>
-                      <span className="text-[10px] font-bold text-slate-300 bg-white/10 px-2 py-0.5 rounded-md border border-white/10">Leadership</span>
-                      <span className="text-[10px] font-bold text-slate-300 bg-white/10 px-2 py-0.5 rounded-md border border-white/10">Education</span>
-                      <span className="text-[10px] font-bold text-slate-300 bg-white/10 px-2 py-0.5 rounded-md border border-white/10">Market Linkage</span>
-                    </div>
+                  <div>
+                    <span className="text-xs text-slate-500 block">Submitted On</span>
+                    <span className="font-medium text-slate-800">{formatDate(result.submitted_at)}</span>
                   </div>
                 </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
 
-      {/* Tricolor Accent Separation Strip */}
-      <div className="h-1.5 w-full bg-gradient-to-r from-amber-500 via-white/90 to-emerald-600 shadow-sm" />
-
-      {/* 2. Dedicated "Apply Now" Admissions Banner */}
-      <section className="relative w-full bg-gradient-to-r from-slate-900 via-blue-950 to-indigo-950 text-white border-b border-blue-900/60 py-8 sm:py-10 shadow-xl overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(#38bdf8_1px,transparent_1px)] [background-size:24px_24px] opacity-10 pointer-events-none" />
-        
-        <div className="relative z-10 max-w-7xl 2xl:max-w-[1680px] mx-auto px-4 sm:px-8 lg:px-12">
-          <div className="bg-gradient-to-r from-blue-900/90 via-indigo-950/80 to-slate-900/90 rounded-3xl p-6 sm:p-8 lg:p-10 border border-amber-400/40 shadow-2xl backdrop-blur-xl flex flex-col xl:flex-row items-center justify-between gap-8">
-            
-            {/* Left: Call to Action Details */}
-            <div className="space-y-4 max-w-3xl text-center xl:text-left">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-400/15 border border-amber-400/50 shadow-inner">
-                <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping inline-block" />
-                <span className="text-xs font-black uppercase tracking-wider text-amber-300">
-                  Admissions Open • 2026-27 Batch
-                </span>
-                <span className="text-slate-400 text-xs hidden sm:inline">•</span>
-                <span className="text-slate-200 text-xs font-semibold hidden sm:inline">
-                  PM VIKAS Accredited Centres
-                </span>
-              </div>
-
-              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white tracking-tight">
-                Apply Now for PM VIKAS Accredited Handloom & Craft Courses
-              </h2>
-
-              <p className="text-xs sm:text-sm text-slate-200 leading-relaxed font-normal">
-                Direct admission into government-sponsored artisan training programmes. Gain hands-on mastery in Traditional Handloom, Jacquard Weaving, Loin Loom, Embroidery, and Allied Crafts under master mentorship.
-              </p>
-
-              {/* Key Entitlements Checklist */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1 text-left">
-                <div className="flex items-center gap-2 bg-white/5 rounded-xl px-3 py-2 border border-white/10">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                  <span className="text-[11px] font-semibold text-slate-200">100% Free Training</span>
-                </div>
-                <div className="flex items-center gap-2 bg-white/5 rounded-xl px-3 py-2 border border-white/10">
-                  <Banknote className="w-4 h-4 text-amber-300 shrink-0" />
-                  <span className="text-[11px] font-semibold text-slate-200">Monthly DBT Stipend</span>
-                </div>
-                <div className="flex items-center gap-2 bg-white/5 rounded-xl px-3 py-2 border border-white/10">
-                  <Award className="w-4 h-4 text-sky-300 shrink-0" />
-                  <span className="text-[11px] font-semibold text-slate-200">Govt. NSQF Certificate</span>
-                </div>
-                <div className="flex items-center gap-2 bg-white/5 rounded-xl px-3 py-2 border border-white/10">
-                  <Store className="w-4 h-4 text-purple-300 shrink-0" />
-                  <span className="text-[11px] font-semibold text-slate-200">Market & Credit Links</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Right: Prominent Admission Action Buttons */}
-            <div className="flex flex-col sm:flex-row xl:flex-col gap-3.5 w-full sm:w-auto shrink-0 justify-center">
-              <Link
-                to="/apply"
-                className="inline-flex items-center justify-center gap-2.5 bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 hover:from-amber-500 hover:to-amber-700 text-slate-950 font-black px-8 py-4 rounded-2xl text-sm sm:text-base shadow-xl shadow-amber-500/30 transition-all transform hover:-translate-y-0.5 cursor-pointer text-center"
-              >
-                <span>Apply Online Now</span>
-                <ArrowRight className="w-5 h-5" />
-              </Link>
-              <a
-                href="#trades"
-                className="inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 text-white font-bold px-6 py-3.5 rounded-2xl text-xs sm:text-sm backdrop-blur-md border border-white/25 transition shadow-sm text-center"
-              >
-                <Layers className="w-4 h-4 text-sky-300" />
-                <span>Browse 9 Accredited Trades</span>
-              </a>
-              <a
-                href="#project-media"
-                className="inline-flex items-center justify-center gap-2 bg-transparent hover:bg-white/5 text-slate-300 hover:text-white font-semibold px-4 py-2 rounded-xl text-xs transition text-center"
-              >
-                <Video className="w-3.5 h-3.5 text-amber-300" />
-                <span>Watch Documentaries & Films</span>
-              </a>
-            </div>
-
-          </div>
-        </div>
-      </section>
-
-      {/* 3. Public Application Tracking Widget */}
-      <section className="w-full max-w-4xl 2xl:max-w-5xl mx-auto px-4 mt-10 sm:mt-12 relative z-20">
-        <div className="bg-white rounded-3xl shadow-2xl border border-slate-200/90 p-6 sm:p-8">
-          <div className="flex items-center gap-2.5 mb-1.5">
-            <div className="w-9 h-9 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center font-bold border border-blue-200 shadow-xs">
-              <Search className="w-4 h-4" />
-            </div>
-            <h2 className="text-lg font-extrabold text-slate-900">Track Application & Admission Status</h2>
-          </div>
-          <p className="text-xs text-slate-500 mb-6">
-            Candidates can verify admission scrutiny status using their <strong>Registration ID</strong> (e.g. HND-2026-EMB-...) or registered mobile number and Date of Birth without signing in.
-          </p>
-
-          <form onSubmit={handleTrack} className="space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                  Registration ID or Mobile Number
-                </label>
-                <input
-                  type="text"
-                  value={identifier}
-                  onChange={(e) => setIdentifier(e.target.value)}
-                  required
-                  placeholder="e.g. HND-2026-EMB-AB12CD or 9876543210"
-                  className="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:ring-2 focus:ring-blue-600 focus:border-blue-600 focus:outline-none transition font-medium bg-slate-50 focus:bg-white"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                  Date of Birth
-                </label>
-                <input
-                  type="date"
-                  value={dob}
-                  onChange={(e) => setDob(e.target.value)}
-                  required
-                  className="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:ring-2 focus:ring-blue-600 focus:border-blue-600 focus:outline-none transition font-medium bg-slate-50 focus:bg-white"
-                />
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              disabled={searching}
-              className="w-full bg-gradient-to-r from-blue-700 via-blue-800 to-indigo-800 hover:from-blue-800 hover:to-indigo-900 text-white font-bold py-3 rounded-xl text-xs uppercase tracking-wider transition shadow-md shadow-blue-900/10 disabled:opacity-50 cursor-pointer"
-            >
-              {searching ? "Searching National Database..." : "Verify Application Status"}
-            </button>
-          </form>
-
-          {error && (
-            <div className="mt-4 p-3.5 text-xs text-rose-700 bg-rose-50 border border-rose-200 rounded-xl font-medium leading-relaxed">
-              {error}
-            </div>
-          )}
-
-          {result && (
-            <div className="mt-6 p-5 bg-blue-50/50 rounded-2xl border border-blue-200 space-y-3 text-xs">
-              {result.registration_no && (
-                <div className="flex items-center justify-between pb-2 border-b border-blue-200/60 bg-blue-100/60 -mx-5 -mt-5 p-3.5 rounded-t-2xl">
-                  <span className="text-slate-600 font-bold uppercase tracking-wide text-[10px]">
-                    Registration ID / Tracking Ref:
-                  </span>
-                  <span className="font-mono font-black text-slate-950 text-xs sm:text-sm">
-                    {result.registration_no}
+                <div className="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-slate-200">
+                  <span className="text-sm font-bold text-slate-700">Current Status:</span>
+                  <span className={`px-3.5 py-1 rounded-full text-xs font-bold ${statusBadgeColor(result.status)}`}>
+                    {result.status}
                   </span>
                 </div>
-              )}
-              <div className="flex items-center justify-between pb-2 border-b border-blue-200/60">
-                <span className="text-slate-500 font-medium">Candidate Name:</span>
-                <span className="font-bold text-slate-900 text-sm">{result.full_name}</span>
-              </div>
-              <div className="flex items-center justify-between pb-2 border-b border-blue-200/60">
-                <span className="text-slate-500 font-medium">Applied Trade:</span>
-                <span className="font-semibold text-slate-900">
-                  {result.category_code ? `${result.category_code} - ` : ""}
-                  {result.category}
-                </span>
-              </div>
-              <div className="flex items-center justify-between pb-2 border-b border-blue-200/60">
-                <span className="text-slate-500 font-medium">Submission Timestamp:</span>
-                <span className="text-slate-700 font-mono">{formatDate(result.submitted_at)}</span>
-              </div>
-              <div className="flex items-center justify-between pt-1">
-                <span className="text-slate-500 font-bold uppercase tracking-wider">Current Admission Status:</span>
-                <span className={`px-3 py-1 rounded-full text-xs font-bold ${statusBadgeColor(result.status)}`}>
-                  {result.status}
-                </span>
-              </div>
-              {result.rejection_reason && (
-                <div className="mt-3 p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-800">
-                  <span className="font-bold">Official Remarks:</span> {result.rejection_reason}
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-      </section>
 
-      {/* 3. Main Body Sections Container */}
-      <div className="w-full max-w-7xl 2xl:max-w-[1680px] mx-auto px-4 sm:px-6 lg:px-8 py-14 space-y-20">
-        {/* Trades Section */}
-        <section id="trades" className="scroll-mt-24 space-y-8">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-6 border-b border-slate-200">
+                {result.rejection_reason && (
+                  <div className="p-3.5 bg-rose-50 border border-rose-200 rounded-xl text-sm text-rose-900">
+                    <strong>Reason / Remarks:</strong> {result.rejection_reason}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* 4. Available Training Courses */}
+        <section id="trades" className="scroll-mt-24 space-y-6">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-blue-50 text-blue-800 border border-blue-200 mb-3">
-                <Layers className="w-3.5 h-3.5 text-blue-700" />
-                Accredited Artisan Courses
-              </div>
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-                Select Your Craft Training Trade
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-[#0f256e] tracking-tight">
+                Available Handloom &amp; Craft Courses
               </h2>
-              <p className="mt-2 text-sm text-slate-600 max-w-2xl">
-                Certified curricula structured by the Textile Sector Skill Council (TSC) under the <strong>PM Vikas Scheme</strong>. Maximum 1 application per artisan per category. Select a trade below to apply directly.
+              <p className="mt-1 text-sm text-slate-600 max-w-2xl">
+                Select any open course below to start your online application. You can apply for one course per admission cycle.
               </p>
             </div>
-
             <Link
               to="/categories"
-              className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-700 hover:text-blue-900 bg-blue-50 hover:bg-blue-100 px-4 py-2 rounded-xl border border-blue-200 transition shrink-0 self-start md:self-auto"
+              className="inline-flex items-center gap-1.5 text-sm font-bold text-[#0f256e] hover:underline shrink-0"
             >
-              <span>Full Curriculum & Syllabus</span>
-              <ArrowRight className="w-3.5 h-3.5" />
+              <span>View All Courses</span>
+              <ArrowRight className="w-4 h-4" />
             </Link>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-3">
+            <div className="relative flex-1">
+              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                value={courseSearch}
+                onChange={(e) => setCourseSearch(e.target.value)}
+                placeholder="Search courses (e.g. Weaving, Embroidery, Bamboo)..."
+                className="w-full pl-10 pr-4 py-2.5 text-sm border border-slate-300 rounded-xl bg-white focus:ring-2 focus:ring-[#0f256e] focus:outline-none"
+              />
+            </div>
+            <button
+              type="button"
+              onClick={() => setOpenOnly(!openOnly)}
+              className={`px-4 py-2.5 rounded-xl text-sm font-semibold border transition cursor-pointer whitespace-nowrap ${
+                openOnly
+                  ? "bg-[#0f256e] text-white border-[#0f256e]"
+                  : "bg-white text-slate-700 border-slate-300 hover:bg-slate-50"
+              }`}
+            >
+              {openOnly ? "Showing: Open Courses Only" : "Show Open Courses Only"}
+            </button>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {isCategoriesLoading ? (
-              <div className="col-span-full text-center py-12 text-slate-400 font-medium">
-                Loading accredited artisan trades...
+              <div className="col-span-full text-center py-12 text-slate-500 text-sm font-medium">
+                Loading training courses...
+              </div>
+            ) : filteredCategories.length === 0 ? (
+              <div className="col-span-full text-center py-12 bg-white rounded-2xl border border-slate-200 text-slate-600 text-sm">
+                No courses match your search. Try clearing the search box.
               </div>
             ) : (
-              categories?.map((cat) => (
+              filteredCategories.map((cat) => (
                 <div
                   key={cat.id}
-                  className="bg-white rounded-3xl border border-slate-200/90 hover:border-blue-300 hover:shadow-xl hover:shadow-blue-900/5 transition-all duration-300 p-6 flex flex-col justify-between group"
+                  className="bg-white rounded-2xl border border-slate-200 hover:border-blue-300 hover:shadow-md transition-all p-6 flex flex-col justify-between"
                 >
                   <div>
                     <div className="flex items-center justify-between gap-2 mb-3">
-                      <span className="text-xs font-mono font-bold px-2.5 py-1 rounded-lg bg-blue-50 text-blue-800 border border-blue-200">
+                      <span className="text-xs font-mono font-bold px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 border border-slate-200">
                         {cat.code}
                       </span>
                       <span
-                        className={`inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-0.5 rounded-full ${
+                        className={`inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-full ${
                           cat.is_approval_open
-                            ? "bg-blue-50 text-blue-800 border border-blue-200"
+                            ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
                             : "bg-rose-50 text-rose-700 border border-rose-200"
                         }`}
                       >
                         <span
-                          className={`w-1.5 h-1.5 rounded-full ${
-                            cat.is_approval_open ? "bg-blue-600 animate-pulse" : "bg-rose-500"
+                          className={`w-2 h-2 rounded-full ${
+                            cat.is_approval_open ? "bg-emerald-600" : "bg-rose-500"
                           }`}
                         />
-                        {cat.is_approval_open ? "Admissions Open" : "Batch Full"}
+                        {cat.is_approval_open ? "Open" : "Batch Full"}
                       </span>
                     </div>
 
-                    <h3 className="font-extrabold text-slate-900 text-lg leading-snug mb-3 group-hover:text-blue-700 transition">
-                      {cat.title}
-                    </h3>
+                    <h3 className="font-bold text-slate-900 text-lg leading-snug mb-4">{cat.title}</h3>
 
-                    <div className="space-y-2.5 text-xs text-slate-600 py-3 border-y border-slate-100 mb-6">
+                    <div className="space-y-2 text-sm text-slate-600 py-3 border-y border-slate-100 mb-5">
                       <div className="flex items-center gap-2">
-                        <Clock className="w-3.5 h-3.5 text-blue-700 shrink-0" />
-                        <span>Duration: <strong>6 Months (Full-Time Hands-on)</strong></span>
+                        <Clock className="w-4 h-4 text-[#0f256e] shrink-0" />
+                        <span>6 Months Full-Time Training</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Award className="w-3.5 h-3.5 text-blue-700 shrink-0" />
-                        <span>Certification: <strong>NSQF Aligned Govt. Credential</strong></span>
+                        <Award className="w-4 h-4 text-[#0f256e] shrink-0" />
+                        <span>Government NSQF Certificate</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-blue-700 shrink-0" />
-                        <span>Allowance: <strong>Monthly DBT Stipend Backed</strong></span>
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                        <span>Free Training + Monthly Stipend</span>
                       </div>
                     </div>
                   </div>
 
-                  <div>
-                    {cat.is_approval_open ? (
-                      <Link
-                        to={`/apply?category=${cat.id}`}
-                        className="w-full inline-flex items-center justify-center gap-2 bg-gradient-to-r from-blue-700 via-blue-800 to-indigo-800 hover:from-blue-800 hover:to-indigo-900 text-white font-extrabold py-3 rounded-xl text-xs shadow-md shadow-blue-900/20 hover:shadow-lg transition-all transform hover:-translate-y-0.5"
-                      >
-                        <span>Apply for this Trade</span>
-                        <ArrowRight className="w-3.5 h-3.5" />
-                      </Link>
-                    ) : (
-                      <button
-                        disabled
-                        className="w-full bg-slate-100 text-slate-400 font-bold py-3 rounded-xl text-xs cursor-not-allowed border border-slate-200"
-                      >
-                        Admissions Locked (Batch Full)
-                      </button>
-                    )}
-                  </div>
+                  {cat.is_approval_open ? (
+                    <Link
+                      to={`/apply?category=${cat.id}`}
+                      className="w-full inline-flex items-center justify-center gap-2 bg-[#0f256e] hover:bg-blue-950 text-white font-bold py-3 rounded-xl text-sm transition"
+                    >
+                      <span>Apply Now</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </Link>
+                  ) : (
+                    <button
+                      disabled
+                      className="w-full bg-slate-100 text-slate-500 font-semibold py-3 rounded-xl text-sm cursor-not-allowed border border-slate-200"
+                    >
+                      Admissions Closed
+                    </button>
+                  )}
                 </div>
               ))
             )}
           </div>
         </section>
 
-        {/* 4. Project Media Section (Videos, Documentaries & Live Photographs) */}
+        {/* 5. Keep These Ready Before You Apply */}
+        <section className="bg-blue-50/70 border border-blue-200 rounded-2xl p-6 sm:p-8">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div className="space-y-2 max-w-2xl">
+              <h2 className="text-xl font-extrabold text-slate-900">Keep These Ready Before You Apply</h2>
+              <p className="text-sm text-slate-600">
+                You can upload clear photos or PDFs (under 5 MB each) from your phone or computer.
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2 text-sm text-slate-800">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-[#0f256e] shrink-0" />
+                  <span>Passport-size Photo</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-[#0f256e] shrink-0" />
+                  <span>Aadhaar / Government ID Proof</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-[#0f256e] shrink-0" />
+                  <span>Bank Passbook (for Stipend)</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-[#0f256e] shrink-0" />
+                  <span>Address &amp; Education Proof</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-2.5 shrink-0">
+              <Link
+                to="/apply"
+                className="inline-flex items-center justify-center gap-2 bg-[#0f256e] hover:bg-blue-950 text-white font-bold px-6 py-3.5 rounded-xl text-sm shadow-sm transition"
+              >
+                <span>Start Application</span>
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+              <a
+                href="tel:18002007890"
+                className="inline-flex items-center justify-center gap-2 text-xs font-semibold text-[#0f256e] hover:underline"
+              >
+                <PhoneCall className="w-3.5 h-3.5" />
+                Helpdesk: 1800 200 7890
+              </a>
+            </div>
+          </div>
+        </section>
+
+        {/* 6. Project Media Section */}
         <ProjectMediaSection />
 
-        {/* 5. Trainee Benefits / Institutional Features */}
-        <section className="bg-gradient-to-br from-slate-950 via-blue-950 to-indigo-950 text-white rounded-3xl p-8 sm:p-12 border border-blue-900/50 shadow-xl">
-          <div className="text-center max-w-2xl mx-auto space-y-2 mb-10">
-            <span className="text-xs font-bold uppercase tracking-widest text-blue-300 bg-blue-900/80 px-3 py-1 rounded-full border border-blue-500/30">
-              Government Backing
-            </span>
-            <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight">Artisan Trainee Entitlements</h2>
-            <p className="text-xs text-blue-200">
-              Comprehensive institutional backing provided under the PM VIKAS (Pradhan Mantri Virasat Ka Samvardhan) Scheme
+        {/* 7. Trainee Benefits */}
+        <section className="bg-slate-900 text-white rounded-2xl p-6 sm:p-10">
+          <div className="text-center max-w-2xl mx-auto space-y-2 mb-8">
+            <h2 className="text-2xl font-extrabold tracking-tight">Benefits for Every Selected Trainee</h2>
+            <p className="text-sm text-slate-300">
+              Provided under the PM VIKAS Scheme by the Ministry of Minority Affairs
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="bg-white/5 backdrop-blur-md p-5 rounded-2xl border border-white/10 space-y-2 hover:border-amber-400/40 transition">
-              <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-300 flex items-center justify-center font-bold">
-                <Banknote className="w-5 h-5" />
-              </div>
-              <h3 className="font-bold text-sm text-white">Direct DBT Stipend</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            <div className="bg-white/5 p-5 rounded-xl border border-white/10 space-y-2">
+              <Banknote className="w-6 h-6 text-amber-300" />
+              <h3 className="font-bold text-base">Monthly Stipend</h3>
               <p className="text-xs text-slate-300 leading-relaxed">
-                Monthly sustenance allowance disbursed directly into verified trainee bank accounts via Aadhaar DBT.
+                Sent directly to your bank account during the training period.
               </p>
             </div>
-
-            <div className="bg-white/5 backdrop-blur-md p-5 rounded-2xl border border-white/10 space-y-2 hover:border-blue-400/40 transition">
-              <div className="w-10 h-10 rounded-xl bg-blue-500/20 text-blue-300 flex items-center justify-center font-bold">
-                <GraduationCap className="w-5 h-5" />
-              </div>
-              <h3 className="font-bold text-sm text-white">Master Weaver Mentorship</h3>
+            <div className="bg-white/5 p-5 rounded-xl border border-white/10 space-y-2">
+              <GraduationCap className="w-6 h-6 text-sky-300" />
+              <h3 className="font-bold text-base">Expert Trainers</h3>
               <p className="text-xs text-slate-300 leading-relaxed">
-                Rigorous practical training conducted by National Award-winning weavers on modern loom equipment.
+                Learn hands-on weaving and craft skills from master artisans.
               </p>
             </div>
-
-            <div className="bg-white/5 backdrop-blur-md p-5 rounded-2xl border border-white/10 space-y-2 hover:border-sky-400/40 transition">
-              <div className="w-10 h-10 rounded-xl bg-sky-500/20 text-sky-300 flex items-center justify-center font-bold">
-                <ShieldCheck className="w-5 h-5" />
-              </div>
-              <h3 className="font-bold text-sm text-white">National Skill Credential</h3>
+            <div className="bg-white/5 p-5 rounded-xl border border-white/10 space-y-2">
+              <ShieldCheck className="w-6 h-6 text-emerald-300" />
+              <h3 className="font-bold text-base">Govt. Certificate</h3>
               <p className="text-xs text-slate-300 leading-relaxed">
-                Official assessment and qualification certification recognized across public textile cooperatives and export houses.
+                Receive an official NSQF certificate after completing training.
               </p>
             </div>
-
-            <div className="bg-white/5 backdrop-blur-md p-5 rounded-2xl border border-white/10 space-y-2 hover:border-purple-400/40 transition">
-              <div className="w-10 h-10 rounded-xl bg-purple-500/20 text-purple-300 flex items-center justify-center font-bold">
-                <CheckCircle2 className="w-5 h-5" />
-              </div>
-              <h3 className="font-bold text-sm text-white">Cooperative Market Access</h3>
+            <div className="bg-white/5 p-5 rounded-xl border border-white/10 space-y-2">
+              <CheckCircle2 className="w-6 h-6 text-purple-300" />
+              <h3 className="font-bold text-base">Work &amp; Market Support</h3>
               <p className="text-xs text-slate-300 leading-relaxed">
-                Direct linkage with Handloom Weavers' Cooperative Societies, state emporiums, and e-commerce platforms.
+                Connect with weavers&apos; cooperatives, exhibitions, and loan schemes.
               </p>
             </div>
           </div>

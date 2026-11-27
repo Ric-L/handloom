@@ -1,10 +1,12 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { register } from "../api";
-import { Smartphone, Lock, Mail, ArrowRight, AlertCircle, Shield } from "lucide-react";
+import { Smartphone, Lock, Mail, ArrowRight, AlertCircle, Eye, EyeOff, CheckCircle2 } from "lucide-react";
 
 export default function RegisterPage() {
+  const [searchParams] = useSearchParams();
   const [form, setForm] = useState({ mobile_number: "", password: "", email: "" });
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -14,12 +16,12 @@ export default function RegisterPage() {
     setError("");
 
     if (!/^\d{10}$/.test(form.mobile_number.trim())) {
-      setError("Mobile number must be exactly 10 digits.");
+      setError("Please enter a valid 10-digit mobile number.");
       return;
     }
 
     if (form.password.length < 8) {
-      setError("Password must be at least 8 characters long.");
+      setError("Please choose a password that is at least 8 characters long.");
       return;
     }
 
@@ -32,7 +34,7 @@ export default function RegisterPage() {
       });
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
-      const redirectParam = new URLSearchParams(window.location.search).get("redirect");
+      const redirectParam = searchParams.get("redirect");
       if (redirectParam) {
         navigate(decodeURIComponent(redirectParam));
       } else {
@@ -41,120 +43,128 @@ export default function RegisterPage() {
     } catch (err: any) {
       setError(
         err.response?.data?.error ||
-          "Registration failed. This mobile number may already be registered."
+          "Could not create account. This mobile number may already be registered—try signing in instead."
       );
     } finally {
       setLoading(false);
     }
   };
 
+  const redirectQuery = searchParams.get("redirect");
+
   return (
-    <div className="max-w-md mx-auto my-12 bg-white rounded-3xl shadow-xl border border-slate-200 p-8 sm:p-10 space-y-6">
+    <div className="max-w-md mx-auto my-8 sm:my-12 bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 space-y-6">
       <div className="text-center space-y-2">
-        <div className="w-14 h-14 bg-primary-100 text-primary-800 rounded-2xl flex items-center justify-center mx-auto text-2xl shadow-inner">
+        <div className="w-14 h-14 bg-blue-50 border border-blue-100 text-blue-700 rounded-2xl flex items-center justify-center mx-auto text-2xl">
           🪡
         </div>
-        <h1 className="text-2xl font-black text-slate-900 tracking-tight">Create Artisan Account</h1>
-        <p className="text-xs text-slate-500">Register once to apply for certified handloom trades</p>
+        <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Create Citizen Account</h1>
+        <p className="text-sm text-slate-600">
+          Register once with your mobile number to apply for any PM VIKAS training course.
+        </p>
       </div>
 
       {error && (
-        <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-medium flex items-start gap-2.5">
-          <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+        <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-900 text-sm flex items-start gap-3">
+          <AlertCircle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
           <div>{error}</div>
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-5">
         <div>
-          <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-            Primary Mobile Number *
+          <label htmlFor="reg-mobile" className="block text-sm font-bold text-slate-800 mb-1.5">
+            Mobile Number <span className="text-rose-600">*</span>
           </label>
           <div className="relative">
-            <Smartphone className="w-4 h-4 absolute left-3.5 top-3 text-slate-400" />
+            <Smartphone className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
+              id="reg-mobile"
               type="tel"
+              inputMode="numeric"
               value={form.mobile_number}
-              onChange={e => setForm(f => ({ ...f, mobile_number: e.target.value }))}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, mobile_number: e.target.value.replace(/\D/g, "").slice(0, 10) }))
+              }
               required
               maxLength={10}
-              placeholder="10-digit mobile number"
-              className="w-full pl-10 pr-3.5 py-2.5 text-xs border border-slate-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:outline-none font-medium text-slate-900"
+              placeholder="Enter 10-digit mobile number"
+              className="w-full pl-10 pr-4 py-3 text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-blue-600 focus:outline-none text-slate-900"
             />
           </div>
-          <span className="text-[11px] text-slate-400 mt-1 block">
-            This number will be used for DBT stipend notifications and admission tracking.
-          </span>
+          <p className="text-xs text-slate-500 mt-1">
+            You will use this number to sign in and track your application.
+          </p>
         </div>
 
         <div>
-          <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-            Email Address (Optional)
+          <label htmlFor="reg-email" className="block text-sm font-bold text-slate-800 mb-1.5">
+            Email Address <span className="text-slate-400 font-normal">(Optional)</span>
           </label>
           <div className="relative">
-            <Mail className="w-4 h-4 absolute left-3.5 top-3 text-slate-400" />
+            <Mail className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
+              id="reg-email"
               type="email"
               value={form.email}
-              onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
-              placeholder="name@example.com"
-              className="w-full pl-10 pr-3.5 py-2.5 text-xs border border-slate-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:outline-none font-medium text-slate-900"
+              onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
+              placeholder="e.g., name@example.com"
+              className="w-full pl-10 pr-4 py-3 text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-blue-600 focus:outline-none text-slate-900"
             />
           </div>
         </div>
 
         <div>
-          <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-            Create Account Password *
+          <label htmlFor="reg-password" className="block text-sm font-bold text-slate-800 mb-1.5">
+            Create a Password <span className="text-rose-600">*</span>
           </label>
           <div className="relative">
-            <Lock className="w-4 h-4 absolute left-3.5 top-3 text-slate-400" />
+            <Lock className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
-              type="password"
+              id="reg-password"
+              type={showPassword ? "text" : "password"}
               value={form.password}
-              onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
+              onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
               required
               minLength={8}
-              placeholder="Minimum 8 characters"
-              className="w-full pl-10 pr-3.5 py-2.5 text-xs border border-slate-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:outline-none font-medium text-slate-900"
+              placeholder="At least 8 characters"
+              className="w-full pl-10 pr-11 py-3 text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-blue-600 focus:outline-none text-slate-900"
             />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              aria-label={showPassword ? "Hide password" : "Show password"}
+              className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-500 hover:text-slate-800 cursor-pointer"
+            >
+              {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            </button>
           </div>
+          <p className="text-xs text-slate-500 mt-1 flex items-center gap-1">
+            <CheckCircle2 className={`w-3.5 h-3.5 ${form.password.length >= 8 ? "text-emerald-600" : "text-slate-300"}`} />
+            Must be at least 8 characters
+          </p>
         </div>
 
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-primary-700 hover:bg-primary-800 text-white font-bold py-3 rounded-xl text-xs uppercase tracking-wider transition shadow-md shadow-primary-900/20 disabled:opacity-50 cursor-pointer flex items-center justify-center gap-1.5"
+          className="w-full bg-blue-700 hover:bg-blue-800 text-white font-bold py-3.5 rounded-xl text-sm transition shadow-sm disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2"
         >
-          {loading ? "Registering Candidate Account..." : "Complete Registration"} <ArrowRight className="w-4 h-4" />
+          <span>{loading ? "Creating Account..." : "Create Account & Continue"}</span>
+          <ArrowRight className="w-4 h-4" />
         </button>
       </form>
 
-      <div className="pt-4 border-t border-slate-100 text-center space-y-3">
-        <p className="text-xs text-slate-500">
-          Already registered?{" "}
+      <div className="pt-5 border-t border-slate-200 text-center">
+        <p className="text-sm text-slate-600">
+          Already have an account?{" "}
           <Link
-            to={
-              new URLSearchParams(window.location.search).get("redirect")
-                ? `/login?redirect=${encodeURIComponent(
-                    new URLSearchParams(window.location.search).get("redirect")!
-                  )}`
-                : "/login"
-            }
-            className="font-bold text-primary-700 hover:underline"
+            to={redirectQuery ? `/login?redirect=${encodeURIComponent(redirectQuery)}` : "/login"}
+            className="font-bold text-blue-700 hover:underline"
           >
             Sign In Here
           </Link>
         </p>
-
-        <div className="pt-2">
-          <Link
-            to="/admin/login"
-            className="inline-flex items-center gap-1 text-[11px] text-slate-400 hover:text-slate-700 transition"
-          >
-            <Shield className="w-3 h-3 text-slate-400" /> Administrative Moderation Portal
-          </Link>
-        </div>
       </div>
     </div>
   );
