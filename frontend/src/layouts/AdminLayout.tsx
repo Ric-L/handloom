@@ -3,7 +3,6 @@ import { Link, Outlet, useNavigate, useLocation } from "react-router-dom";
 import type { User } from "../types";
 import { logoutUser } from "../api";
 import {
-  ShieldCheck,
   LogOut,
   ExternalLink,
   LayoutDashboard,
@@ -83,12 +82,12 @@ export default function AdminLayout() {
           {/* Logo & Portal Identity */}
           <div className="px-5 py-4 border-b border-slate-800/80 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-700 via-blue-800 to-slate-950 rounded-xl flex items-center justify-center text-white shadow-md shadow-blue-950/40 border border-blue-600/30 shrink-0">
-                <ShieldCheck className="w-5 h-5 text-sky-300" />
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0">
+                <img src="/favicon.svg" alt="PM VIKAS" className="w-9 h-9 object-contain drop-shadow" />
               </div>
               <div className="min-w-0">
                 <h2 className="font-black text-white text-sm tracking-tight leading-tight truncate">
-                  Handloom Portal
+                  PM VIKAS Portal
                 </h2>
                 <div className="flex items-center gap-1.5 mt-0.5">
                   <span
@@ -189,7 +188,7 @@ export default function AdminLayout() {
             </span>
             <span className="text-slate-600 hidden sm:inline">|</span>
             <span className="text-slate-400 hidden sm:inline">
-              Ministry of Textiles • Directorate of Handloom &amp; Skilled Artisan Development
+              Ministry of Minority Affairs • Pradhan Mantri Virasat Ka Samvardhan (PM VIKAS)
             </span>
           </div>
 
@@ -223,10 +222,10 @@ export default function AdminLayout() {
 
               <div className="min-w-0">
                 <h1 className="font-black text-slate-950 text-base sm:text-lg tracking-tight leading-tight truncate">
-                  Handloom Moderation Command Center
+                  PM VIKAS Moderation Command Center
                 </h1>
                 <p className="text-xs text-slate-500 font-medium truncate hidden sm:block">
-                  Autonomous Atomic Quota Enforcement &amp; Verification Dossier Management
+                  Pradhan Mantri Virasat Ka Samvardhan • Quota Enforcement &amp; Verification Dossier Management
                 </p>
               </div>
             </div>
