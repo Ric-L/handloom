@@ -92,7 +92,10 @@ export default function RegistrationUpdatePage() {
         alt_mobile: initialData.alt_mobile || "",
         gov_id_type: initialData.gov_id_type || "Aadhaar",
         gov_id_last4: initialData.gov_id_last4 || "",
-        social_category: initialData.social_category && initialData.social_category !== "GENERAL" ? initialData.social_category : "ST",
+        social_category:
+          initialData.social_category && String(initialData.social_category) !== "GENERAL"
+            ? initialData.social_category
+            : "ST",
         address_full: initialData.address_full || "",
         district_state_pin: initialData.district_state_pin || "",
         highest_qual: initialData.highest_qual || "CLASS_X",
