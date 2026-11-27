@@ -1,10 +1,8 @@
 package handlers
 
 import (
-	"context"
 	"net/http"
 	"strconv"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 	"handloom-portal/internal/audit"
@@ -27,8 +25,8 @@ func (h *AdminHandler) CreateCategory(c *gin.Context) {
 		return
 	}
 
-	req.Code = strings.TrimSpace(req.Code)
-	req.Title = strings.TrimSpace(req.Title)
+	req.Code = sanitizeInputMax(req.Code, 20)
+	req.Title = sanitizeInputMax(req.Title, 150)
 
 	if req.Code == "" || req.Title == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "code and title are required"})
@@ -39,7 +37,7 @@ func (h *AdminHandler) CreateCategory(c *gin.Context) {
 		return
 	}
 
-	ctx := context.Background()
+	ctx := c.Request.Context()
 
 	// Check code uniqueness
 	var exists bool
@@ -115,7 +113,7 @@ func (h *AdminHandler) UpdateCategory(c *gin.Context) {
 		return
 	}
 
-	ctx := context.Background()
+	ctx := c.Request.Context()
 
 	// Fetch existing
 	var (
@@ -135,7 +133,7 @@ func (h *AdminHandler) UpdateCategory(c *gin.Context) {
 
 	// Apply updates
 	if req.Title != nil {
-		trimmed := strings.TrimSpace(*req.Title)
+		trimmed := sanitizeInputMax(*req.Title, 150)
 		if trimmed != "" {
 			title = trimmed
 		}
@@ -201,7 +199,7 @@ func (h *AdminHandler) ToggleCategory(c *gin.Context) {
 		return
 	}
 
-	ctx := context.Background()
+	ctx := c.Request.Context()
 
 	var id int
 	var code, title string
@@ -252,7 +250,7 @@ func (h *AdminHandler) DeleteCategory(c *gin.Context) {
 		return
 	}
 
-	ctx := context.Background()
+	ctx := c.Request.Context()
 
 	// Check for existing applications
 	var appCount int

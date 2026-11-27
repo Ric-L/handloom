@@ -93,15 +93,15 @@ export default function AppLayout() {
       <div className="bg-slate-900 text-slate-200 text-[11px] px-4 sm:px-6 lg:px-8 py-1 border-b border-slate-800">
         <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2">
-            <span className="font-semibold text-amber-300">Government of India</span>
+            <span className="font-semibold text-amber-300">Handloom Cooperation Imphal</span>
             <span className="text-slate-600 hidden sm:inline">|</span>
-            <span className="text-slate-300 hidden sm:inline">Ministry of Minority Affairs • PM VIKAS</span>
+            <span className="text-slate-300 hidden sm:inline">Paona Bazar, Imphal 795001 • PM VIKAS</span>
           </div>
 
           <div className="flex items-center gap-3">
-            <a href="tel:18002007890" className="flex items-center gap-1 text-slate-200 hover:text-amber-300 transition">
+            <a href="tel:03852451495" className="flex items-center gap-1 text-slate-200 hover:text-amber-300 transition">
               <PhoneCall className="w-3 h-3 text-amber-400" />
-              <span>Helpline: <strong>1800 200 7890</strong></span>
+              <span>Office: <strong>0385-245 1495</strong></span>
             </a>
 
             <span className="text-slate-700 hidden sm:inline">|</span>
@@ -297,10 +297,10 @@ export default function AppLayout() {
             <div className="space-y-3">
               <div className="flex items-center gap-2.5 text-white font-bold text-lg">
                 <img src="/favicon.svg" alt="PM VIKAS" className="w-8 h-8 object-contain" />
-                <span>PM VIKAS Citizen Portal</span>
+                <span>Handloom Cooperation Imphal</span>
               </div>
               <p className="text-slate-400 text-sm leading-relaxed">
-                An initiative of the Ministry of Minority Affairs, Government of India, providing free skill training, monthly stipend, and toolkits to traditional artisans and weavers.
+                PM VIKAS Residential Skill Training Portal by Handloom Cooperation Imphal—providing free craft training, monthly stipend, and certification to artisans and weavers across Manipur.
               </p>
             </div>
 
@@ -320,10 +320,12 @@ export default function AppLayout() {
                 Need Help?
               </h4>
               <p className="text-sm text-slate-300 mb-2">
-                Toll-Free Helpline:
-                <strong className="block text-amber-300 text-base mt-0.5">1800 200 7890</strong>
+                Imphal Head Office:
+                <strong className="block text-amber-300 text-base mt-0.5">0385-245 1495</strong>
               </p>
               <p className="text-xs text-slate-400 leading-relaxed">
+                Governor Road, Paona Bazar, Imphal 795001
+                <br />
                 Email: helpdesk@handloomproject.gov.in
                 <br />
                 Hours: 9:30 AM to 6:00 PM (Monday – Saturday)
@@ -332,7 +334,7 @@ export default function AppLayout() {
           </div>
 
           <div className="pt-6 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-400 gap-3">
-            <div>© 2026 Ministry of Minority Affairs, Government of India (PM VIKAS). All Rights Reserved.</div>
+            <div>© 2026 Handloom Cooperation Imphal (PM VIKAS). All Rights Reserved.</div>
             <div className="flex gap-5">
               <Link to="/categories" className="hover:text-white">Courses</Link>
               <Link to="/apply" className="hover:text-white">Apply</Link>

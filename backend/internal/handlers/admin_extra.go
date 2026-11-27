@@ -1,9 +1,9 @@
 package handlers
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -17,7 +17,11 @@ import (
 
 // ListCandidates lists all users with role='APPLICANT', paginated, with candidate names, rich status/category info, and multi-type filters
 func (h *AdminHandler) ListCandidates(c *gin.Context) {
-	ctx := context.Background()
+	if !checkAdminPermission(c.Request.Context(), h.DB, c.GetString("user_id"), c.GetString("role"), "can_review") {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Your administrator account does not have permission to view candidates."})
+		return
+	}
+	ctx := c.Request.Context()
 
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
@@ -114,12 +118,20 @@ func (h *AdminHandler) ListCandidates(c *gin.Context) {
 
 	// 6. Date range: Dates (created_at)
 	if dateFromStr != "" {
+		if _, err := time.Parse("2006-01-02", dateFromStr); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid date_from format. Expected YYYY-MM-DD."})
+			return
+		}
 		whereClauses = append(whereClauses, fmt.Sprintf("created_at >= $%d::timestamptz", argIdx))
 		args = append(args, dateFromStr)
 		argIdx++
 	}
 
 	if dateToStr != "" {
+		if _, err := time.Parse("2006-01-02", dateToStr); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid date_to format. Expected YYYY-MM-DD."})
+			return
+		}
 		whereClauses = append(whereClauses, fmt.Sprintf("created_at <= ($%d::date + INTERVAL '1 day')", argIdx))
 		args = append(args, dateToStr)
 		argIdx++
@@ -156,7 +168,8 @@ func (h *AdminHandler) ListCandidates(c *gin.Context) {
 	countQuery := cteSQL + " SELECT COUNT(*) FROM candidate_summary " + whereSQL
 	var total int
 	if err := h.DB.QueryRow(ctx, countQuery, args...).Scan(&total); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to count candidates: " + err.Error()})
+		log.Printf("[CANDIDATES COUNT ERROR] %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to count candidates"})
 		return
 	}
 
@@ -174,7 +187,8 @@ func (h *AdminHandler) ListCandidates(c *gin.Context) {
 	queryArgs := append(args, pageSize, offset)
 	rows, err := h.DB.Query(ctx, dataQuery, queryArgs...)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to query candidates: " + err.Error()})
+		log.Printf("[CANDIDATES QUERY ERROR] %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to query candidates"})
 		return
 	}
 	defer rows.Close()
@@ -261,7 +275,7 @@ func (h *AdminHandler) ListUsers(c *gin.Context) {
 		return
 	}
 
-	ctx := context.Background()
+	ctx := c.Request.Context()
 
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
@@ -357,7 +371,8 @@ func (h *AdminHandler) ListUsers(c *gin.Context) {
 	countQuery := "SELECT COUNT(*) " + fromJoinSQL + whereSQL
 	var total int
 	if err := h.DB.QueryRow(ctx, countQuery, args...).Scan(&total); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to count users: " + err.Error()})
+		log.Printf("[USERS COUNT ERROR] %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to count users"})
 		return
 	}
 
@@ -381,7 +396,8 @@ func (h *AdminHandler) ListUsers(c *gin.Context) {
 	queryArgs := append(args, pageSize, offset)
 	rows, err := h.DB.Query(ctx, selectQuery, queryArgs...)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to query users: " + err.Error()})
+		log.Printf("[USERS QUERY ERROR] %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to query users"})
 		return
 	}
 	defer rows.Close()
@@ -471,6 +487,10 @@ func (h *AdminHandler) UpdateUserRole(c *gin.Context) {
 	}
 
 	userID := c.Param("id")
+	if !isValidUUID(userID) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+		return
+	}
 
 	var req struct {
 		Role string `json:"role" binding:"required"`
@@ -494,13 +514,17 @@ func (h *AdminHandler) UpdateUserRole(c *gin.Context) {
 		return
 	}
 
-	ctx := context.Background()
+	ctx := c.Request.Context()
 
 	// Capture previous role for audit ledger
 	var oldRole string
 	err := h.DB.QueryRow(ctx, `SELECT role FROM users WHERE id = $1`, userID).Scan(&oldRole)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		return
+	}
+	if oldRole == "SUPER_ADMIN" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Root SUPER_ADMIN role cannot be modified"})
 		return
 	}
 
@@ -565,10 +589,19 @@ func (h *AdminHandler) CreateAdminUser(c *gin.Context) {
 		return
 	}
 
-	fullName := strings.TrimSpace(req.FullName)
+	fullName := sanitizeInputMax(req.FullName, 150)
 	mobile := strings.TrimSpace(req.MobileNumber)
-	email := strings.TrimSpace(req.Email)
+	email := strings.ToLower(strings.TrimSpace(req.Email))
 	password := req.Password
+
+	if fullName == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Full name is required"})
+		return
+	}
+	if email != "" && !isValidEmail(email) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid email address format"})
+		return
+	}
 
 	// Validate mobile number: exactly 10 digits
 	if len(mobile) != 10 {
@@ -597,12 +630,12 @@ func (h *AdminHandler) CreateAdminUser(c *gin.Context) {
 		return
 	}
 
-	if len(password) < 8 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Password must be at least 8 characters long"})
+	if len(password) < 8 || len(password) > 72 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Password must be between 8 and 72 characters long"})
 		return
 	}
 
-	ctx := context.Background()
+	ctx := c.Request.Context()
 
 	// Check for existing mobile number
 	var existingID string
@@ -626,7 +659,8 @@ func (h *AdminHandler) CreateAdminUser(c *gin.Context) {
 		RETURNING id, created_at
 	`, mobile, email, string(hash), role, fullName).Scan(&newUserID, &createdAt)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create administrator: " + err.Error()})
+		log.Printf("[CREATE ADMIN ERROR] %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create administrator"})
 		return
 	}
 
@@ -681,7 +715,15 @@ func (h *AdminHandler) DeleteAdminUser(c *gin.Context) {
 	}
 
 	userID := c.Param("id")
-	ctx := context.Background()
+	if !isValidUUID(userID) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+		return
+	}
+	if userID == c.GetString("user_id") {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "You cannot revoke your own Super Administrator account"})
+		return
+	}
+	ctx := c.Request.Context()
 
 	var targetRole, mobile, fullName string
 	err := h.DB.QueryRow(ctx, `SELECT role, mobile_number, COALESCE(full_name, '') FROM users WHERE id = $1`, userID).Scan(&targetRole, &mobile, &fullName)
@@ -711,7 +753,8 @@ func (h *AdminHandler) DeleteAdminUser(c *gin.Context) {
 			WHERE id = $1
 		`, userID)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to revoke administrator: " + err.Error()})
+			log.Printf("[REVOKE ADMIN ERROR] user=%s err=%v", userID, err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to revoke administrator"})
 			return
 		}
 	}
@@ -748,13 +791,21 @@ func (h *AdminHandler) DisableUser(c *gin.Context) {
 	}
 
 	userID := c.Param("id")
-	ctx := context.Background()
+	if !isValidUUID(userID) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+		return
+	}
+	if userID == c.GetString("user_id") {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "You cannot disable your own active administrator account"})
+		return
+	}
+	ctx := c.Request.Context()
 
 	var req struct {
 		Reason string `json:"reason"`
 	}
 	_ = c.ShouldBindJSON(&req)
-	reason := strings.TrimSpace(req.Reason)
+	reason := sanitizeInputMax(req.Reason, 255)
 	if reason == "" {
 		reason = "Temporarily disabled by Super Administrator"
 	}
@@ -777,7 +828,8 @@ func (h *AdminHandler) DisableUser(c *gin.Context) {
 	// 2. Mark account disabled
 	_, err = h.DB.Exec(ctx, `UPDATE users SET is_disabled = TRUE, disabled_reason = $1, disabled_at = NOW() WHERE id = $2`, reason, userID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to disable account: " + err.Error()})
+		log.Printf("[DISABLE USER ERROR] user=%s err=%v", userID, err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to disable account"})
 		return
 	}
 
@@ -813,7 +865,11 @@ func (h *AdminHandler) EnableUser(c *gin.Context) {
 	}
 
 	userID := c.Param("id")
-	ctx := context.Background()
+	if !isValidUUID(userID) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+		return
+	}
+	ctx := c.Request.Context()
 
 	var targetRole, mobile, fullName string
 	err := h.DB.QueryRow(ctx, `SELECT role, mobile_number, COALESCE(full_name, '') FROM users WHERE id = $1`, userID).Scan(&targetRole, &mobile, &fullName)
@@ -824,7 +880,8 @@ func (h *AdminHandler) EnableUser(c *gin.Context) {
 
 	_, err = h.DB.Exec(ctx, `UPDATE users SET is_disabled = FALSE, disabled_reason = NULL, disabled_at = NULL WHERE id = $1`, userID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to reactivate account: " + err.Error()})
+		log.Printf("[ENABLE USER ERROR] user=%s err=%v", userID, err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to reactivate account"})
 		return
 	}
 
@@ -860,7 +917,11 @@ func (h *AdminHandler) ResetUserPassword(c *gin.Context) {
 	}
 
 	userID := c.Param("id")
-	ctx := context.Background()
+	if !isValidUUID(userID) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+		return
+	}
+	ctx := c.Request.Context()
 
 	var req struct {
 		NewPassword string `json:"new_password" binding:"required"`
@@ -870,8 +931,8 @@ func (h *AdminHandler) ResetUserPassword(c *gin.Context) {
 		return
 	}
 
-	if len(req.NewPassword) < 8 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "New password must be at least 8 characters long"})
+	if len(req.NewPassword) < 8 || len(req.NewPassword) > 72 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "New password must be between 8 and 72 characters long"})
 		return
 	}
 
@@ -895,7 +956,8 @@ func (h *AdminHandler) ResetUserPassword(c *gin.Context) {
 
 	_, err = h.DB.Exec(ctx, `UPDATE users SET password_hash = $1 WHERE id = $2`, string(hash), userID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update password: " + err.Error()})
+		log.Printf("[RESET PASSWORD ERROR] user=%s err=%v", userID, err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update password"})
 		return
 	}
 
@@ -934,7 +996,11 @@ func (h *AdminHandler) ForceLogoutUser(c *gin.Context) {
 	}
 
 	userID := c.Param("id")
-	ctx := context.Background()
+	if !isValidUUID(userID) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+		return
+	}
+	ctx := c.Request.Context()
 
 	var targetRole, mobile, fullName string
 	err := h.DB.QueryRow(ctx, `SELECT role, mobile_number, COALESCE(full_name, '') FROM users WHERE id = $1`, userID).Scan(&targetRole, &mobile, &fullName)
@@ -945,7 +1011,8 @@ func (h *AdminHandler) ForceLogoutUser(c *gin.Context) {
 
 	err = session.RevokeAllUserSessions(ctx, h.DB, userID, "FORCE_LOGOUT_BY_SUPER_ADMIN")
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to terminate sessions: " + err.Error()})
+		log.Printf("[FORCE LOGOUT ERROR] user=%s err=%v", userID, err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to terminate sessions"})
 		return
 	}
 
@@ -981,13 +1048,22 @@ func (h *AdminHandler) UpdateUserPermissions(c *gin.Context) {
 	}
 
 	userID := c.Param("id")
-	ctx := context.Background()
+	if !isValidUUID(userID) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+		return
+	}
+	ctx := c.Request.Context()
 
 	var req struct {
-		Permissions map[string]any `json:"permissions" binding:"required"`
+		Permissions struct {
+			CanReview  bool `json:"can_review"`
+			CanApprove bool `json:"can_approve"`
+			CanReject  bool `json:"can_reject"`
+			CanExport  bool `json:"can_export"`
+		} `json:"permissions" binding:"required"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "permissions object is required"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Valid permissions object with boolean fields is required"})
 		return
 	}
 
@@ -996,6 +1072,10 @@ func (h *AdminHandler) UpdateUserPermissions(c *gin.Context) {
 	err := h.DB.QueryRow(ctx, `SELECT role, mobile_number, COALESCE(full_name, ''), COALESCE(permissions, '{}'::jsonb) FROM users WHERE id = $1`, userID).Scan(&targetRole, &mobile, &fullName, &oldPermBytes)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		return
+	}
+	if targetRole == "SUPER_ADMIN" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Root SUPER_ADMIN permissions cannot be altered"})
 		return
 	}
 
@@ -1007,7 +1087,8 @@ func (h *AdminHandler) UpdateUserPermissions(c *gin.Context) {
 
 	_, err = h.DB.Exec(ctx, `UPDATE users SET permissions = $1 WHERE id = $2`, newBytes, userID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update permissions: " + err.Error()})
+		log.Printf("[UPDATE PERMISSIONS ERROR] user=%s err=%v", userID, err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update permissions"})
 		return
 	}
 
@@ -1043,7 +1124,11 @@ func (h *AdminHandler) GetUserActivity(c *gin.Context) {
 	}
 
 	userID := c.Param("id")
-	ctx := context.Background()
+	if !isValidUUID(userID) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+		return
+	}
+	ctx := c.Request.Context()
 
 	rows, err := h.DB.Query(ctx, `
 		SELECT id, action, COALESCE(ip_address, '') AS ip_address, status,
@@ -1054,7 +1139,8 @@ func (h *AdminHandler) GetUserActivity(c *gin.Context) {
 		LIMIT 50
 	`, userID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to query activity logs: " + err.Error()})
+		log.Printf("[USER ACTIVITY ERROR] user=%s err=%v", userID, err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to query activity logs"})
 		return
 	}
 	defer rows.Close()

@@ -11,6 +11,9 @@ import (
 )
 
 func Register(r *gin.Engine, pool *pgxpool.Pool, cfg *config.Config) {
+	// Cap request body sizes for JSON API endpoints (2 MB) while /upload handles up to 5 MB files
+	r.Use(middleware.RequestBodyLimit(2 << 20))
+
 	v1 := r.Group("/api/v1")
 
 	// Global CSRF Protection on API group
@@ -18,6 +21,12 @@ func Register(r *gin.Engine, pool *pgxpool.Pool, cfg *config.Config) {
 
 	// Login Rate Limiter (5 attempts per 5 minutes lockout)
 	loginRateLimiter := middleware.NewLoginRateLimiter(pool, 5, 5*time.Minute, 5*time.Minute)
+
+	// General Endpoint Rate Limiters (DoS & enumeration protection)
+	trackRateLimiter := middleware.NewEndpointRateLimiter(20, 1*time.Minute)
+	registerRateLimiter := middleware.NewEndpointRateLimiter(10, 15*time.Minute)
+	uploadRateLimiter := middleware.NewEndpointRateLimiter(30, 5*time.Minute)
+	submitRateLimiter := middleware.NewEndpointRateLimiter(10, 5*time.Minute)
 
 	// Handlers
 	authH := &handlers.AuthHandler{DB: pool, JWTSecret: cfg.JWTSecret, RateLimiter: loginRateLimiter}
@@ -30,16 +39,17 @@ func Register(r *gin.Engine, pool *pgxpool.Pool, cfg *config.Config) {
 	adminM := middleware.Auth(cfg.JWTSecret, pool, "REVIEWER_ADMIN", "SUPER_ADMIN")
 	superAdminM := middleware.Auth(cfg.JWTSecret, pool, "SUPER_ADMIN")
 
-	// Static uploads directory serving
-	r.Static("/uploads", cfg.UploadDir)
+	// Authenticated, ownership-checked uploaded file access (replaces unauthenticated static serving)
+	r.GET("/uploads/:filename", authM, appH.ServeUploadedFile)
+	v1.GET("/uploads/:filename", authM, appH.ServeUploadedFile)
 
 	// 1. Public Endpoints
 	v1.GET("/categories", catH.List)
-	v1.GET("/applications/track", appH.Track)
+	v1.GET("/applications/track", trackRateLimiter.Middleware(), appH.Track)
 	v1.GET("/auth/csrf-token", authH.GetCSRFToken)
 
 	// 2. Auth Endpoints (With Brute-force Login Rate Limiter)
-	v1.POST("/auth/register", authH.Register)
+	v1.POST("/auth/register", registerRateLimiter.Middleware(), authH.Register)
 	v1.POST("/auth/login", loginRateLimiter.Middleware(), authH.Login)
 	v1.POST("/auth/admin-login", loginRateLimiter.Middleware(), authH.AdminLogin)
 	v1.POST("/admin/auth/login", loginRateLimiter.Middleware(), authH.AdminLogin)
@@ -51,12 +61,12 @@ func Register(r *gin.Engine, pool *pgxpool.Pool, cfg *config.Config) {
 	v1.GET("/auth/me", authM, authH.Me)
 
 	// 3. Applicant Endpoints (Authenticated Applicant / Reviewer / Super Admin)
-	v1.POST("/applications", authM, appH.Submit)
+	v1.POST("/applications", authM, submitRateLimiter.Middleware(), appH.Submit)
 	v1.GET("/applications/my", authM, appH.MyApplications)
 	v1.GET("/applications/:id/dossier", authM, appH.GetApplicationDossier)
 	v1.PUT("/applications/:id", authM, appH.UpdateApplication)
 	v1.GET("/applications/:id/approved-slip", authM, appH.GetApprovedSlip)
-	v1.POST("/upload", authM, appH.UploadFile)
+	v1.POST("/upload", authM, uploadRateLimiter.Middleware(), appH.UploadFile)
 
 	// 4. Admin Moderation & Atomic Quota API (Authenticated Reviewer / Super Admin)
 	admin := v1.Group("/admin", adminM)

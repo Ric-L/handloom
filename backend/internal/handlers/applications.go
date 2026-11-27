@@ -1,13 +1,12 @@
 package handlers
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"path/filepath"
-	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -17,14 +16,6 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"handloom-portal/internal/audit"
 )
-
-var htmlTagRegex = regexp.MustCompile(`<[^>]*>`)
-
-func sanitizeInput(s string) string {
-	trimmed := strings.TrimSpace(s)
-	clean := htmlTagRegex.ReplaceAllString(trimmed, "")
-	return strings.TrimSpace(clean)
-}
 
 type ApplicationHandler struct {
 	DB        *pgxpool.Pool
@@ -74,17 +65,21 @@ type SubmitApplicationPayload struct {
 // Track allows applicants to check their admission progress via Mobile Number and Date of Birth
 func (h *ApplicationHandler) Track(c *gin.Context) {
 	// Support both identifier (mobile or reg_no) and reg_no
-	identifier := c.Query("identifier")
+	identifier := sanitizeInputMax(c.Query("identifier"), 40)
 	if identifier == "" {
-		identifier = c.Query("reg_no")
+		identifier = sanitizeInputMax(c.Query("reg_no"), 40)
 	}
 	if identifier == "" {
-		identifier = c.Query("mobile_number")
+		identifier = sanitizeInputMax(c.Query("mobile_number"), 20)
 	}
-	dobStr := c.Query("dob")
+	dobStr := strings.TrimSpace(c.Query("dob"))
 
 	if identifier == "" || dobStr == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Registered mobile number and Date of Birth are required"})
+		return
+	}
+	if _, err := time.Parse("2006-01-02", dobStr); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Date of Birth format. Please use YYYY-MM-DD."})
 		return
 	}
 
@@ -99,7 +94,7 @@ func (h *ApplicationHandler) Track(c *gin.Context) {
 	}
 
 	var submittedAt time.Time
-	err := h.DB.QueryRow(context.Background(), `
+	err := h.DB.QueryRow(c.Request.Context(), `
 		SELECT a.registration_no, a.full_name, jc.title, jc.code, a.submitted_at, a.status, a.rejection_reason
 		FROM applications a
 		JOIN job_categories jc ON jc.id = a.category_id
@@ -131,9 +126,11 @@ func (h *ApplicationHandler) Submit(c *gin.Context) {
 	var req SubmitApplicationPayload
 	// Bind JSON or Multipart
 	if err := c.ShouldBind(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("Invalid application data: %v", err)})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid application data. Please check required fields and formatting."})
 		return
 	}
+
+	ctx := c.Request.Context()
 
 	if req.CategoryID <= 0 {
 		// Fallback check query/form string
@@ -151,7 +148,7 @@ func (h *ApplicationHandler) Submit(c *gin.Context) {
 	// Verify category exists and admissions are open
 	var catCode string
 	var isOpen bool
-	err := h.DB.QueryRow(context.Background(),
+	err := h.DB.QueryRow(ctx,
 		`SELECT code, is_approval_open FROM job_categories WHERE id = $1`, req.CategoryID,
 	).Scan(&catCode, &isOpen)
 	if err != nil {
@@ -166,7 +163,7 @@ func (h *ApplicationHandler) Submit(c *gin.Context) {
 
 	// Verify candidate hasn't already submitted for this trade
 	var existingCount int
-	_ = h.DB.QueryRow(context.Background(),
+	_ = h.DB.QueryRow(ctx,
 		`SELECT COUNT(*) FROM applications WHERE user_id = $1 AND category_id = $2`,
 		userID, req.CategoryID,
 	).Scan(&existingCount)
@@ -185,19 +182,37 @@ func (h *ApplicationHandler) Submit(c *gin.Context) {
 	// Generate system tamper-proof registration number for administrators
 	regNo := generateRegistrationNo(catCode)
 
-	// Defaults for flexible Apply Online form
+	// Defaults & strict enum allowlists
+	req.Gender = strings.ToUpper(strings.TrimSpace(req.Gender))
 	if req.Gender == "" {
 		req.Gender = "MALE"
 	}
+	if !isAllowedValue(req.Gender, "MALE", "FEMALE", "OTHER") {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid gender selection."})
+		return
+	}
+
 	if req.GovIDType == "" {
 		req.GovIDType = "Aadhaar"
 	}
+	req.GovIDType = sanitizeInputMax(req.GovIDType, 50)
 	if req.GovIDLast4 == "" {
 		req.GovIDLast4 = "0000"
 	}
+
+	req.SocialCategory = strings.ToUpper(strings.TrimSpace(req.SocialCategory))
 	if req.SocialCategory == "" {
-		req.SocialCategory = "GENERAL"
+		req.SocialCategory = "ST"
 	}
+	if strings.EqualFold(req.SocialCategory, "GENERAL") {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "General category is not eligible under this scheme."})
+		return
+	}
+	if !isAllowedValue(req.SocialCategory, "ST", "SC", "OBC", "OTHER") {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid social category selection."})
+		return
+	}
+
 	if req.DistrictStatePin == "" {
 		req.DistrictStatePin = "Handloom Training Cluster"
 	}
@@ -207,13 +222,72 @@ func (h *ApplicationHandler) Submit(c *gin.Context) {
 	if req.TrainingMode == "" {
 		req.TrainingMode = "CLASSROOM"
 	}
+	if !isAllowedValue(strings.ToUpper(req.TrainingMode), "CLASSROOM", "RESIDENTIAL", "APPRENTICESHIP", "HYBRID") {
+		req.TrainingMode = "CLASSROOM"
+	}
+	if req.IFSCCode != "" {
+		req.IFSCCode = strings.ToUpper(strings.TrimSpace(req.IFSCCode))
+		if !ifscRegex.MatchString(req.IFSCCode) {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid IFSC code format (expected 11 characters, e.g., SBIN0000123)."})
+			return
+		}
+	}
 
-	// Prepare Documents & Photograph
+	// Prepare & validate Documents (prevent stored XSS URLs or path injection)
 	if req.Documents == nil {
 		req.Documents = make(map[string]string)
 	}
 	if req.PhotographURL != "" {
 		req.Documents["photograph"] = req.PhotographURL
+	}
+	allowedDocKeys := map[string]bool{
+		"photograph":               true,
+		"id_proof":                 true,
+		"address_proof":            true,
+		"edu_cert":                 true,
+		"bank_passbook":            true,
+		"category_disability_cert": true,
+		"signature_thumb":          true,
+		"other_doc":                true,
+		"other_doc_label":          true,
+	}
+	sanitizedDocs := make(map[string]string)
+	for k, v := range req.Documents {
+		if !allowedDocKeys[k] {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Unsupported document field supplied."})
+			return
+		}
+		trimmedVal := strings.TrimSpace(v)
+		if trimmedVal == "" {
+			continue
+		}
+		if k == "other_doc_label" {
+			sanitizedDocs[k] = sanitizeInputMax(trimmedVal, 100)
+			continue
+		}
+		if !safeUploadURLRegex.MatchString(trimmedVal) {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid document URL format. Please re-upload your document."})
+			return
+		}
+		sanitizedDocs[k] = trimmedVal
+	}
+	req.Documents = sanitizedDocs
+
+	requiredDocs := []struct {
+		Key   string
+		Label string
+	}{
+		{"photograph", "Passport-size Photograph"},
+		{"id_proof", "Aadhaar Card"},
+		{"address_proof", "Address Proof"},
+		{"edu_cert", "Education Certificate"},
+		{"category_disability_cert", "ST / Minority Certificate"},
+	}
+	for _, doc := range requiredDocs {
+		if strings.TrimSpace(req.Documents[doc.Key]) == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": doc.Label + " upload is mandatory."})
+			return
+		}
 	}
 	docBytes, _ := json.Marshal(req.Documents)
 
@@ -221,7 +295,7 @@ func (h *ApplicationHandler) Submit(c *gin.Context) {
 	expData := map[string]interface{}{}
 	if req.RelevantExp != "" {
 		expData["has_experience"] = true
-		expData["details"] = req.RelevantExp
+		expData["details"] = sanitizeInputMax(req.RelevantExp, 300)
 	}
 	expBytes, _ := json.Marshal(expData)
 
@@ -229,7 +303,7 @@ func (h *ApplicationHandler) Submit(c *gin.Context) {
 	var status string
 	var submittedAt time.Time
 
-	err = h.DB.QueryRow(context.Background(), `
+	err = h.DB.QueryRow(ctx, `
 		INSERT INTO applications (
 			registration_no, user_id, category_id, full_name, guardian_name, dob, gender,
 			alt_mobile, gov_id_type, gov_id_last4, social_category, address_full, district_state_pin,
@@ -242,24 +316,25 @@ func (h *ApplicationHandler) Submit(c *gin.Context) {
 			NULLIF($21, ''), NULLIF($22, ''), NULLIF($23, ''), NULLIF($24, ''), $25, 'PENDING'
 		) RETURNING id, status, submitted_at`,
 		regNo, userID, req.CategoryID,
-		sanitizeInput(req.FullName), sanitizeInput(req.GuardianName), parsedDOB, req.Gender,
-		sanitizeInput(req.AltMobile), req.GovIDType, sanitizeInput(req.GovIDLast4), req.SocialCategory,
-		sanitizeInput(req.AddressFull), sanitizeInput(req.DistrictStatePin),
-		req.HighestQual, sanitizeInput(req.InstitutionName), req.Occupation,
-		sanitizeInput(req.PrevTraining), expBytes, sanitizeInput(req.PreferredCentre), req.TrainingMode,
-		sanitizeInput(req.BankHolderName), sanitizeInput(req.BankNameBranch),
-		sanitizeInput(req.AccountNumber), sanitizeInput(req.IFSCCode),
+		sanitizeInputMax(req.FullName, 150), sanitizeInputMax(req.GuardianName, 150), parsedDOB, req.Gender,
+		sanitizeInputMax(req.AltMobile, 15), req.GovIDType, sanitizeInputMax(req.GovIDLast4, 4), req.SocialCategory,
+		sanitizeInputMax(req.AddressFull, 500), sanitizeInputMax(req.DistrictStatePin, 150),
+		sanitizeInputMax(req.HighestQual, 20), sanitizeInputMax(req.InstitutionName, 200), sanitizeInputMax(req.Occupation, 20),
+		sanitizeInputMax(req.PrevTraining, 300), expBytes, sanitizeInputMax(req.PreferredCentre, 150), sanitizeInputMax(req.TrainingMode, 30),
+		sanitizeInputMax(req.BankHolderName, 150), sanitizeInputMax(req.BankNameBranch, 200),
+		sanitizeInputMax(req.AccountNumber, 40), sanitizeInputMax(req.IFSCCode, 20),
 		docBytes,
 	).Scan(&appID, &status, &submittedAt)
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to save application: %v", err)})
+		log.Printf("[SUBMIT ERROR] user=%s category=%d err=%v", userID, req.CategoryID, err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save application. Please verify all fields and try again."})
 		return
 	}
 
 	// Sync full_name back to user record if empty or updated
 	if strings.TrimSpace(req.FullName) != "" {
-		_, _ = h.DB.Exec(context.Background(), `UPDATE users SET full_name = $1 WHERE id = $2`, sanitizeInput(req.FullName), userID)
+		_, _ = h.DB.Exec(ctx, `UPDATE users SET full_name = $1 WHERE id = $2`, sanitizeInputMax(req.FullName, 150), userID)
 	}
 
 	userRole := c.GetString("role")
@@ -281,7 +356,7 @@ func (h *ApplicationHandler) Submit(c *gin.Context) {
 func (h *ApplicationHandler) MyApplications(c *gin.Context) {
 	userID := c.GetString("user_id")
 
-	rows, err := h.DB.Query(context.Background(), `
+	rows, err := h.DB.Query(c.Request.Context(), `
 		SELECT a.id, a.registration_no, a.user_id, a.category_id, jc.code, jc.title,
 		       a.full_name, a.guardian_name, a.dob, a.gender, a.social_category,
 		       a.district_state_pin, a.status, a.rejection_reason, a.submitted_at
@@ -342,8 +417,12 @@ func (h *ApplicationHandler) MyApplications(c *gin.Context) {
 
 // GetApprovedSlip returns full verified details for an approved application for PDF generation
 func (h *ApplicationHandler) GetApprovedSlip(c *gin.Context) {
-	ctx := context.Background()
+	ctx := c.Request.Context()
 	appID := c.Param("id")
+	if !isValidUUID(appID) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid application ID"})
+		return
+	}
 	userID := c.GetString("user_id")
 	userRole := c.GetString("role")
 	if userRole == "" {
@@ -431,7 +510,7 @@ func (h *ApplicationHandler) GetApprovedSlip(c *gin.Context) {
 		"training_mode":      trainingMode,
 		"bank_holder_name":   bankHolderName,
 		"bank_name_branch":   bankNameBranch,
-		"account_number":     accountNumber,
+		"account_number":     maskAccountNumber(accountNumber),
 		"ifsc_code":          ifscCode,
 		"status":             status,
 		"submitted_at":       submittedAt.Format(time.RFC3339),
@@ -455,10 +534,10 @@ func (h *ApplicationHandler) UploadFile(c *gin.Context) {
 		return
 	}
 
-	// 1. Enforce 5MB limit
+	// 1. Enforce strictly below 5MB limit and reject empty files
 	const maxFileSize = 5 * 1024 * 1024
-	if file.Size > maxFileSize {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "File size exceeds 5MB limit. Please compress or choose a smaller file."})
+	if file.Size <= 0 || file.Size >= maxFileSize {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "File size must be greater than 0 bytes and below 5MB. Please compress or choose a smaller file."})
 		return
 	}
 
@@ -527,9 +606,9 @@ func (h *ApplicationHandler) UploadFile(c *gin.Context) {
 		return
 	}
 
-	// 4. Safe filename: random UUID prefix, clean extension, prevent directory traversal
+	// 4. Safe filename: full random UUID (128-bit entropy), clean extension, prevent directory traversal
 	cleanExt := filepath.Clean(ext)
-	safeName := fmt.Sprintf("%s%s", uuid.New().String()[:12], cleanExt)
+	safeName := fmt.Sprintf("%s%s", strings.ReplaceAll(uuid.New().String(), "-", ""), cleanExt)
 	dstPath := filepath.Join(uploadDir, safeName)
 
 	if err := c.SaveUploadedFile(file, dstPath); err != nil {
@@ -539,6 +618,16 @@ func (h *ApplicationHandler) UploadFile(c *gin.Context) {
 
 	userID := c.GetString("user_id")
 	userRole := c.GetString("role")
+
+	// Track file ownership in PostgreSQL for IDOR protection on retrieval
+	if h.DB != nil && userID != "" {
+		_, _ = h.DB.Exec(c.Request.Context(), `
+			INSERT INTO uploaded_files (filename, user_id, content_type, size_bytes)
+			VALUES ($1, $2, $3, $4)
+			ON CONFLICT (filename) DO NOTHING
+		`, safeName, userID, detectedType, file.Size)
+	}
+
 	var uID *string
 	if userID != "" {
 		uID = &userID
@@ -559,10 +648,98 @@ func (h *ApplicationHandler) UploadFile(c *gin.Context) {
 	})
 }
 
+// ServeUploadedFile serves uploaded documents ONLY to the file owner or authorized Administrators (prevents IDOR & XSS).
+func (h *ApplicationHandler) ServeUploadedFile(c *gin.Context) {
+	filename := filepath.Base(c.Param("filename"))
+	if !safeUploadFileRegex.MatchString(filename) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid file identifier"})
+		return
+	}
+
+	userID := c.GetString("user_id")
+	userRole := c.GetString("role")
+	isAdmin := userRole == "SUPER_ADMIN" || userRole == "REVIEWER_ADMIN"
+
+	if userID == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Authentication required to access uploaded documents"})
+		return
+	}
+
+	if !isAdmin && h.DB != nil {
+		ctx := c.Request.Context()
+		var ownerID string
+		err := h.DB.QueryRow(ctx, `SELECT user_id FROM uploaded_files WHERE filename = $1`, filename).Scan(&ownerID)
+		authorized := err == nil && ownerID == userID
+
+		if !authorized {
+			// Fallback check: verify whether the file URL belongs to an application owned by this user
+			var count int
+			_ = h.DB.QueryRow(ctx, `
+				SELECT COUNT(*) FROM applications
+				WHERE user_id = $1 AND documents::text LIKE $2
+			`, userID, "%/uploads/"+filename+"%").Scan(&count)
+			authorized = count > 0
+		}
+
+		if !authorized {
+			audit.Log(ctx, h.DB, &userID, userRole, audit.ActionAccessDenied, nil, c.ClientIP(), nil, nil, map[string]any{
+				"attempted_file": filename,
+				"reason":         "IDOR attempt on uploaded PII document",
+			}, "DENIED")
+			c.JSON(http.StatusForbidden, gin.H{"error": "You do not have permission to access this document."})
+			return
+		}
+	}
+
+	uploadDir := h.UploadDir
+	if uploadDir == "" {
+		uploadDir = "./uploads"
+	}
+	absDir, err := filepath.Abs(uploadDir)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Storage configuration error"})
+		return
+	}
+	targetPath := filepath.Join(absDir, filename)
+	absTarget, err := filepath.Abs(targetPath)
+	if err != nil || !strings.HasPrefix(absTarget, absDir+string(os.PathSeparator)) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid file path"})
+		return
+	}
+
+	if _, err := os.Stat(absTarget); err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Uploaded document not found"})
+		return
+	}
+
+	ext := strings.ToLower(filepath.Ext(filename))
+	contentType := "application/octet-stream"
+	switch ext {
+	case ".jpg", ".jpeg":
+		contentType = "image/jpeg"
+	case ".png":
+		contentType = "image/png"
+	case ".webp":
+		contentType = "image/webp"
+	case ".pdf":
+		contentType = "application/pdf"
+	}
+
+	c.Header("X-Content-Type-Options", "nosniff")
+	c.Header("Cache-Control", "no-store, no-cache, must-revalidate")
+	c.Header("Content-Disposition", fmt.Sprintf("inline; filename=%q", filename))
+	c.Header("Content-Type", contentType)
+	c.File(absTarget)
+}
+
 // GetApplicationDossier returns full editable candidate dossier for the Registration Update Form
 func (h *ApplicationHandler) GetApplicationDossier(c *gin.Context) {
-	ctx := context.Background()
+	ctx := c.Request.Context()
 	appID := c.Param("id")
+	if !isValidUUID(appID) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid application ID"})
+		return
+	}
 	userID := c.GetString("user_id")
 	userRole := c.GetString("role")
 	isAdmin := (userRole == "SUPER_ADMIN" || userRole == "REVIEWER_ADMIN")
@@ -643,7 +820,7 @@ func (h *ApplicationHandler) GetApplicationDossier(c *gin.Context) {
 		"training_mode":      trainingMode,
 		"bank_holder_name":   bankHolderName,
 		"bank_name_branch":   bankNameBranch,
-		"account_number":     accountNumber,
+		"account_number":     maskAccountNumber(accountNumber),
 		"ifsc_code":          ifscCode,
 		"documents":          docs,
 		"status":             status,
@@ -657,8 +834,12 @@ func (h *ApplicationHandler) GetApplicationDossier(c *gin.Context) {
 
 // UpdateApplication allows candidate to update their pending admission enrolment dossier
 func (h *ApplicationHandler) UpdateApplication(c *gin.Context) {
-	ctx := context.Background()
+	ctx := c.Request.Context()
 	appID := c.Param("id")
+	if !isValidUUID(appID) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid application ID"})
+		return
+	}
 	userID := c.GetString("user_id")
 	userRole := c.GetString("role")
 	isAdmin := (userRole == "SUPER_ADMIN" || userRole == "REVIEWER_ADMIN")
@@ -686,7 +867,7 @@ func (h *ApplicationHandler) UpdateApplication(c *gin.Context) {
 
 	var req SubmitApplicationPayload
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("Invalid data: %v", err)})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid application update data."})
 		return
 	}
 
@@ -753,7 +934,8 @@ func (h *ApplicationHandler) UpdateApplication(c *gin.Context) {
 	)
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to update application: %v", err)})
+		log.Printf("[UPDATE APPLICATION ERROR] app=%s err=%v", appID, err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update application."})
 		return
 	}
 

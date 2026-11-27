@@ -200,6 +200,7 @@ export default function AdminLayout() {
             <Link
               to="/"
               target="_blank"
+              rel="noopener noreferrer"
               className="text-slate-400 hover:text-white flex items-center gap-1 transition"
             >
               <ExternalLink className="w-3 h-3 text-sky-400" /> Public Portal

@@ -106,6 +106,18 @@ CREATE TABLE IF NOT EXISTS login_attempts (
     success      BOOLEAN NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS uploaded_files (
+    id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    filename     VARCHAR(255) UNIQUE NOT NULL,
+    user_id      UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    content_type VARCHAR(100) NOT NULL,
+    size_bytes   BIGINT NOT NULL,
+    created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_uploaded_files_filename ON uploaded_files(filename);
+CREATE INDEX IF NOT EXISTS idx_uploaded_files_user_id ON uploaded_files(user_id);
+
 CREATE INDEX IF NOT EXISTS idx_applications_registration_no ON applications(registration_no);
 CREATE INDEX IF NOT EXISTS idx_applications_user_id ON applications(user_id);
 CREATE INDEX IF NOT EXISTS idx_applications_status ON applications(status);

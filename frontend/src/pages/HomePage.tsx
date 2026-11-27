@@ -19,6 +19,11 @@ import {
   PhoneCall,
   AlertCircle,
   Target,
+  MapPin,
+  Users,
+  BookOpen,
+  Store,
+  Sparkles,
 } from "lucide-react";
 import { ProjectMediaSection } from "../components/ProjectMediaSection";
 
@@ -74,44 +79,39 @@ export default function HomePage() {
     <div className="w-full flex flex-col font-sans">
       {/* 1. e-Seba Style Light Scenic Hero Banner */}
       <section className="relative w-full overflow-hidden bg-gradient-to-r from-[#d8efe2] via-[#e4f3ef] to-[#f4ece1] border-b border-slate-200">
-        {/* Soft Atmospheric Glows */}
         <div className="absolute -top-24 -left-24 w-96 h-96 bg-emerald-200/40 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute top-10 right-1/4 w-96 h-96 bg-sky-200/40 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 right-0 w-96 h-72 bg-amber-200/30 rounded-full blur-3xl pointer-events-none" />
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 sm:pt-12 pb-0">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
-            {/* Left Column: Emblem Lockup, Headline, Description, 2 CTA Buttons */}
+            {/* Left Column: Brand Lockup, Headline, Description, 2 CTA Buttons */}
             <div className="lg:col-span-7 pb-10 sm:pb-14 space-y-6 flex flex-col justify-center">
-              {/* Emblem & Portal Title Lockup */}
               <div className="flex items-center gap-3.5">
                 <img
-                  src="/emblem-india.png"
-                  alt="State Emblem of India"
+                  src="/favicon.svg"
+                  alt="Handloom Cooperation Imphal"
                   className="h-14 sm:h-16 w-auto object-contain shrink-0"
                 />
                 <div>
-                  <div className="text-base sm:text-lg font-extrabold text-amber-600 tracking-wide">
-                    प्रधानमंत्री विरासत का संवर्धन
+                  <div className="text-sm sm:text-base font-extrabold text-amber-700 tracking-wide">
+                    Handloom Cooperation Imphal
                   </div>
                   <div className="text-2xl sm:text-3xl font-bold text-emerald-800 font-serif leading-tight">
-                    PM VIKAS Portal
+                    PM VIKAS Residential Skill Training
                   </div>
                 </div>
               </div>
 
-              {/* Clean Deep-Navy Headline */}
               <h1 className="text-2xl sm:text-4xl lg:text-[40px] font-extrabold text-[#0f256e] leading-[1.2] tracking-tight max-w-2xl">
                 A Unified Online Platform for Handloom &amp; Artisan Skill Services
               </h1>
 
-              {/* Plain-Language Description */}
               <p className="text-sm sm:text-base text-slate-700 leading-relaxed max-w-xl">
-                PM VIKAS provides a secure, transparent, and convenient digital interface for artisans and weavers to apply for free certified training, track applications, and download approval slips online anytime and anywhere.
+                Apply online for residential skill training across traditional handloom and craft trades across Manipur under the PM VIKAS Scheme, track your application status, and download your approval slip anytime.
               </p>
 
-              {/* Two Side-by-Side e-Seba Style CTA Buttons */}
-              <div className="flex flex-wrap items-center gap-3.5 pt-2">
+              <div className="flex flex-wrap items-center gap-3.5 pt-1">
                 <Link
                   to="/apply"
                   className="inline-flex items-center gap-2.5 px-6 py-3.5 rounded-lg bg-[#0f256e] hover:bg-blue-950 text-white font-bold text-sm shadow-sm transition"
@@ -131,11 +131,11 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Right Column: Clean Dignitary Portrait Matching Full Container Height */}
+            {/* Right Column: Clean Transparent Portrait */}
             <div className="lg:col-span-5 flex justify-center lg:justify-end items-end self-stretch">
               <img
                 src="/pm-narendra-modi.png?v=2"
-                alt="Shri Narendra Modi - Hon'ble Prime Minister of India"
+                alt="PM VIKAS Leadership"
                 className="w-auto max-w-full h-80 sm:h-96 lg:h-[430px] object-contain object-bottom"
               />
             </div>
@@ -143,7 +143,30 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 2. Simple 3-Step Guide ("How It Works") */}
+      {/* 2. Official Admission Notice Highlights */}
+      <section className="bg-[#0f256e] text-white border-b border-blue-950">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm max-w-3xl mx-auto">
+            <div className="flex items-center gap-3 sm:justify-center">
+              <Award className="w-5 h-5 text-amber-300 shrink-0" />
+              <div>
+                <div className="text-[11px] text-blue-200 uppercase font-semibold">Age Limit</div>
+                <div className="font-bold">14 to 45 Years</div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 sm:justify-center">
+              <MapPin className="w-5 h-5 text-amber-300 shrink-0" />
+              <div>
+                <div className="text-[11px] text-blue-200 uppercase font-semibold">Imphal Head Office</div>
+                <div className="font-bold">Paona Bazar • 0385-245 1495</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 3. Simple 3-Step Guide ("How It Works") */}
       <section className="bg-white border-b border-slate-200 py-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
@@ -172,7 +195,7 @@ export default function HomePage() {
                   Fill Form &amp; Upload Docs
                 </h3>
                 <p className="text-xs text-slate-600 mt-0.5">
-                  Choose a course, enter your details, and upload your photo &amp; ID.
+                  Choose a trade, enter your details, and upload your photo &amp; ID.
                 </p>
               </div>
             </div>
@@ -195,7 +218,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 3. Main Content Container */}
+      {/* 4. Main Content Container */}
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-16">
         {/* Track Application Status Card */}
         <section id="track-status" className="scroll-mt-24 max-w-4xl mx-auto">
@@ -262,7 +285,6 @@ export default function HomePage() {
 
             {result && (
               <div className="mt-6 p-5 sm:p-6 bg-slate-50 rounded-2xl border border-slate-200 space-y-4">
-                {/* Visual 3-Step Progress Timeline */}
                 <div className="grid grid-cols-3 gap-2 pb-4 border-b border-slate-200 text-center">
                   <div className="flex flex-col items-center gap-1">
                     <span className="w-7 h-7 rounded-full bg-emerald-600 text-white text-xs font-bold flex items-center justify-center">
@@ -339,7 +361,81 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* 4. Available Training Courses */}
+        {/* 5. Dedicated PM VIKAS Scheme Section (from PM VIKAS Guidelines & Notice) */}
+        <section id="pm-vikas-scheme" className="scroll-mt-24 bg-white rounded-2xl border border-slate-200 p-6 sm:p-10 shadow-xs space-y-8">
+          <div className="max-w-3xl space-y-2">
+            <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-800 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
+              <Sparkles className="w-3.5 h-3.5" />
+              About the Scheme
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-[#0f256e] tracking-tight">
+              PM VIKAS Scheme (Pradhan Mantri Virasat Ka Samvardhan)
+            </h2>
+            <p className="text-sm sm:text-base text-slate-600 leading-relaxed">
+              Implemented locally with <strong>Handloom Cooperation Imphal</strong>, PM VIKAS brings together five artisan welfare programmes—<em>Seekho aur Kamao</em>, <em>USTTAD</em>, <em>Hamari Dharohar</em>, <em>Nai Roshni</em>, and <em>Nai Manzil</em>—into one unified scheme to support artisans, weavers, women, and youth.
+            </p>
+          </div>
+
+          {/* 4 Core Components of PM VIKAS */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+              <GraduationCap className="w-6 h-6 text-[#0f256e]" />
+              <h3 className="font-bold text-base text-slate-900">1. Skill &amp; Craft Training</h3>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Hands-on traditional training under master artisans (<em>Guru-Shishya Parampara</em>) and NSQF-aligned job courses.
+              </p>
+            </div>
+
+            <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+              <Users className="w-6 h-6 text-emerald-700" />
+              <h3 className="font-bold text-base text-slate-900">2. Leadership &amp; Biz Sakhis</h3>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Leadership and entrepreneurship training for youth and women, including trained <em>Biz Sakhi</em> business mentors.
+              </p>
+            </div>
+
+            <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+              <BookOpen className="w-6 h-6 text-amber-700" />
+              <h3 className="font-bold text-base text-slate-900">3. Open Schooling Bridge</h3>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Education support for school dropouts from artisan families to complete Class 8th, 10th, or 12th via NIOS.
+              </p>
+            </div>
+
+            <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+              <Store className="w-6 h-6 text-purple-700" />
+              <h3 className="font-bold text-base text-slate-900">4. Craft Villages &amp; Markets</h3>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                <em>Vishwakarma Villages</em> with common training halls, display centres, trade fairs, and <em>Hunar Haat</em> market access.
+              </p>
+            </div>
+          </div>
+
+          {/* Who Can Apply (Eligibility & Reservations) */}
+          <div className="bg-blue-50/70 border border-blue-200 rounded-2xl p-5 sm:p-6 space-y-3">
+            <h3 className="font-extrabold text-base text-[#0f256e]">Who Can Apply (Eligibility &amp; Seat Reservation)</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-slate-700">
+              <div className="flex items-start gap-2">
+                <CheckCircle2 className="w-4 h-4 text-[#0f256e] shrink-0 mt-0.5" />
+                <span><strong>Age:</strong> 14 to 45 years for Skill Training &amp; Education (18–45 years for Leadership).</span>
+              </div>
+              <div className="flex items-start gap-2">
+                <CheckCircle2 className="w-4 h-4 text-[#0f256e] shrink-0 mt-0.5" />
+                <span><strong>Communities:</strong> Notified minority communities (Muslims, Christians, Sikhs, Buddhists, Jains, Parsis) and eligible EWS / state-notified categories.</span>
+              </div>
+              <div className="flex items-start gap-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-700 shrink-0 mt-0.5" />
+                <span><strong>Reserved Seats:</strong> At least <strong>33% seats reserved for women</strong> and <strong>3% for Persons with Disability (PwDs)</strong>.</span>
+              </div>
+              <div className="flex items-start gap-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-700 shrink-0 mt-0.5" />
+                <span><strong>Attendance &amp; Bank:</strong> Aadhaar-linked bank account for stipend; 70% attendance required for certification.</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* 6. Available Training Courses */}
         <section id="trades" className="scroll-mt-24 space-y-6">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div>
@@ -347,7 +443,7 @@ export default function HomePage() {
                 Available Handloom &amp; Craft Courses
               </h2>
               <p className="mt-1 text-sm text-slate-600 max-w-2xl">
-                Select any open course below to start your online application. You can apply for one course per admission cycle.
+                Select any open course below to apply online. You can apply for one course per admission cycle.
               </p>
             </div>
             <Link
@@ -424,11 +520,11 @@ export default function HomePage() {
                     <div className="space-y-2 text-sm text-slate-600 py-3 border-y border-slate-100 mb-5">
                       <div className="flex items-center gap-2">
                         <Clock className="w-4 h-4 text-[#0f256e] shrink-0" />
-                        <span>6 Months Full-Time Training</span>
+                        <span>Residential Skill Training</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <Award className="w-4 h-4 text-[#0f256e] shrink-0" />
-                        <span>Government NSQF Certificate</span>
+                        <span>NSQF / SSC Certificate</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
@@ -459,30 +555,34 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* 5. Keep These Ready Before You Apply */}
+        {/* 7. Documents Required Before Applying (from MHHDC Notice) */}
         <section className="bg-blue-50/70 border border-blue-200 rounded-2xl p-6 sm:p-8">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <div className="space-y-2 max-w-2xl">
-              <h2 className="text-xl font-extrabold text-slate-900">Keep These Ready Before You Apply</h2>
+            <div className="space-y-2.5 max-w-2xl">
+              <h2 className="text-xl font-extrabold text-slate-900">Documents Required Before You Apply</h2>
               <p className="text-sm text-slate-600">
-                You can upload clear photos or PDFs (under 5 MB each) from your phone or computer.
+                Keep clear photos or PDFs (strictly below 5 MB each) ready. Offline forms are also available at <strong>Handloom Cooperation Imphal (Paona Bazar)</strong> and all <strong>District Handlooms &amp; Textiles Offices</strong>.
               </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2 text-sm text-slate-800">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1 text-sm text-slate-800">
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-[#0f256e] shrink-0" />
-                  <span>Passport-size Photo</span>
+                  <span>Aadhaar Card (self-attested)</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-[#0f256e] shrink-0" />
-                  <span>Aadhaar / Government ID Proof</span>
+                  <span>Minority / Community or EWS Certificate</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-[#0f256e] shrink-0" />
-                  <span>Bank Passbook (for Stipend)</span>
+                  <span>Education &amp; Age Proof Certificate</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-[#0f256e] shrink-0" />
-                  <span>Address &amp; Education Proof</span>
+                  <span>Aadhaar-linked Bank Passbook Copy</span>
+                </div>
+                <div className="flex items-center gap-2 sm:col-span-2">
+                  <CheckCircle2 className="w-4 h-4 text-[#0f256e] shrink-0" />
+                  <span>Recent Passport-Size Photographs</span>
                 </div>
               </div>
             </div>
@@ -496,25 +596,25 @@ export default function HomePage() {
                 <ArrowRight className="w-4 h-4" />
               </Link>
               <a
-                href="tel:18002007890"
+                href="tel:03852451495"
                 className="inline-flex items-center justify-center gap-2 text-xs font-semibold text-[#0f256e] hover:underline"
               >
                 <PhoneCall className="w-3.5 h-3.5" />
-                Helpdesk: 1800 200 7890
+                Imphal Office: 0385-245 1495
               </a>
             </div>
           </div>
         </section>
 
-        {/* 6. Project Media Section */}
+        {/* 8. Project Media Section */}
         <ProjectMediaSection />
 
-        {/* 7. Trainee Benefits */}
+        {/* 9. Trainee Benefits */}
         <section className="bg-slate-900 text-white rounded-2xl p-6 sm:p-10">
           <div className="text-center max-w-2xl mx-auto space-y-2 mb-8">
             <h2 className="text-2xl font-extrabold tracking-tight">Benefits for Every Selected Trainee</h2>
             <p className="text-sm text-slate-300">
-              Provided under the PM VIKAS Scheme by the Ministry of Minority Affairs
+              Financial, training, and market support provided under the PM VIKAS Scheme
             </p>
           </div>
 
@@ -523,28 +623,28 @@ export default function HomePage() {
               <Banknote className="w-6 h-6 text-amber-300" />
               <h3 className="font-bold text-base">Monthly Stipend</h3>
               <p className="text-xs text-slate-300 leading-relaxed">
-                Sent directly to your bank account during the training period.
+                Up to ₹3,000/month for traditional craft training, plus ₹2,000/month residential support for outstation trainees.
               </p>
             </div>
             <div className="bg-white/5 p-5 rounded-xl border border-white/10 space-y-2">
               <GraduationCap className="w-6 h-6 text-sky-300" />
-              <h3 className="font-bold text-base">Expert Trainers</h3>
+              <h3 className="font-bold text-base">Master Artisan Trainers</h3>
               <p className="text-xs text-slate-300 leading-relaxed">
-                Learn hands-on weaving and craft skills from master artisans.
+                Learn hands-on weaving and craft skills under experienced local master trainers in batches of up to 30.
               </p>
             </div>
             <div className="bg-white/5 p-5 rounded-xl border border-white/10 space-y-2">
               <ShieldCheck className="w-6 h-6 text-emerald-300" />
-              <h3 className="font-bold text-base">Govt. Certificate</h3>
+              <h3 className="font-bold text-base">NSQF / SSC Certificate</h3>
               <p className="text-xs text-slate-300 leading-relaxed">
-                Receive an official NSQF certificate after completing training.
+                Receive an accredited assessment certificate upon completing training with at least 70% attendance.
               </p>
             </div>
             <div className="bg-white/5 p-5 rounded-xl border border-white/10 space-y-2">
               <CheckCircle2 className="w-6 h-6 text-purple-300" />
-              <h3 className="font-bold text-base">Work &amp; Market Support</h3>
+              <h3 className="font-bold text-base">Credit &amp; Market Access</h3>
               <p className="text-xs text-slate-300 leading-relaxed">
-                Connect with weavers&apos; cooperatives, exhibitions, and loan schemes.
+                Support for Self-Help Groups, NMDFC/bank loans, trade fairs, and e-commerce product catalogues.
               </p>
             </div>
           </div>

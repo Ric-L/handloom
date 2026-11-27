@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { uploadDocument } from "../api";
+import { uploadDocument, fetchAuthenticatedDocument } from "../api";
 import { Upload, CheckCircle2, AlertCircle, FileText, X, Eye, Loader2 } from "lucide-react";
 
 interface FileUploadFieldProps {
@@ -21,9 +21,10 @@ export default function FileUploadField({
   compact = false,
   buttonText = "Choose File",
   accept = "image/jpeg,image/png,image/webp,application/pdf",
-  helperText = "Photo (JPG, PNG) or PDF, under 5 MB",
+  helperText = "Photo (JPG, PNG, WEBP) or PDF, strictly below 5 MB",
 }: FileUploadFieldProps) {
   const [isUploading, setIsUploading] = useState(false);
+  const [isOpening, setIsOpening] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -35,8 +36,8 @@ export default function FileUploadField({
     setError(null);
 
     const maxBytes = 5 * 1024 * 1024;
-    if (file.size > maxBytes) {
-      setError("This file is larger than 5 MB. Please choose a smaller photo or PDF.");
+    if (file.size <= 0 || file.size >= maxBytes) {
+      setError("File size must be strictly below 5 MB. Please choose a smaller photo or PDF.");
       if (fileInputRef.current) fileInputRef.current.value = "";
       return;
     }
@@ -67,6 +68,22 @@ export default function FileUploadField({
     setFileName(null);
     setError(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const handlePreview = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!value || isOpening) return;
+    setError(null);
+    try {
+      setIsOpening(true);
+      const { objectUrl } = await fetchAuthenticatedDocument(value);
+      window.open(objectUrl, "_blank", "noopener,noreferrer");
+      setTimeout(() => URL.revokeObjectURL(objectUrl), 60_000);
+    } catch {
+      setError("Could not open uploaded document. Please re-sign in or re-upload.");
+    } finally {
+      setIsOpening(false);
+    }
   };
 
   if (compact) {
@@ -113,16 +130,15 @@ export default function FileUploadField({
               <Loader2 className="w-4 h-4 text-blue-600 animate-spin" />
             ) : value ? (
               <div className="flex items-center gap-1">
-                <a
-                  href={value}
-                  target="_blank"
-                  rel="noreferrer"
-                  onClick={(e) => e.stopPropagation()}
-                  className="p-1.5 text-blue-700 hover:bg-blue-50 rounded-lg transition"
+                <button
+                  type="button"
+                  onClick={handlePreview}
+                  disabled={isOpening}
+                  className="p-1.5 text-blue-700 hover:bg-blue-50 rounded-lg transition cursor-pointer"
                   title="View uploaded file"
                 >
-                  <Eye className="w-4 h-4" />
-                </a>
+                  {isOpening ? <Loader2 className="w-4 h-4 animate-spin" /> : <Eye className="w-4 h-4" />}
+                </button>
                 <button
                   type="button"
                   onClick={(e) => {
@@ -163,6 +179,10 @@ export default function FileUploadField({
           <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
             <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> Uploaded
           </span>
+        ) : required ? (
+          <span className="text-xs font-bold text-rose-700 bg-rose-50 px-2.5 py-0.5 rounded-full border border-rose-200">
+            Required
+          </span>
         ) : (
           <span className="text-xs text-slate-500">Optional</span>
         )}
@@ -186,14 +206,15 @@ export default function FileUploadField({
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
-            <a
-              href={value}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-bold text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition"
+            <button
+              type="button"
+              onClick={handlePreview}
+              disabled={isOpening}
+              className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-bold text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition cursor-pointer"
             >
-              <Eye className="w-3.5 h-3.5" /> View
-            </a>
+              {isOpening ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Eye className="w-3.5 h-3.5" />}
+              <span>View</span>
+            </button>
             <button
               type="button"
               onClick={handleClear}

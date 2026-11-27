@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"context"
 	"net/http"
 	"strings"
 
@@ -9,6 +8,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"handloom-portal/internal/models"
+	"handloom-portal/internal/session"
 )
 
 type CategoryHandler struct {
@@ -24,25 +24,51 @@ type PublicCategory struct {
 }
 
 func (h *CategoryHandler) List(c *gin.Context) {
-	// Check if the caller is an authenticated Admin
+	ctx := c.Request.Context()
+
+	// Check if the caller is an authenticated, active Admin (validates HMAC algo, session, and disabled state)
 	isAdmin := false
-	authHeader := c.GetHeader("Authorization")
-	if strings.HasPrefix(authHeader, "Bearer ") {
-		tokenStr := strings.TrimPrefix(authHeader, "Bearer ")
+	tokenStr, err := c.Cookie("auth_token")
+	if err != nil || tokenStr == "" {
+		authHeader := c.GetHeader("Authorization")
+		if strings.HasPrefix(authHeader, "Bearer ") {
+			tokenStr = strings.TrimPrefix(authHeader, "Bearer ")
+		}
+	}
+
+	if tokenStr != "" {
 		token, err := jwt.Parse(tokenStr, func(t *jwt.Token) (interface{}, error) {
+			if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
+				return nil, jwt.ErrSignatureInvalid
+			}
 			return []byte(h.JWTSecret), nil
 		})
 		if err == nil && token.Valid {
 			if claims, ok := token.Claims.(jwt.MapClaims); ok {
+				userID, _ := claims["user_id"].(string)
 				role, _ := claims["role"].(string)
-				if role == "SUPER_ADMIN" || role == "REVIEWER_ADMIN" {
-					isAdmin = true
+				sessTok, _ := claims["session_token"].(string)
+				if (role == "SUPER_ADMIN" || role == "REVIEWER_ADMIN") && userID != "" {
+					sessionValid := sessTok == ""
+					if sessTok != "" && h.DB != nil {
+						if _, sErr := session.ValidateAndTouch(ctx, h.DB, sessTok); sErr == nil {
+							sessionValid = true
+						}
+					}
+					if sessionValid && h.DB != nil {
+						var isDisabled bool
+						if dErr := h.DB.QueryRow(ctx, `SELECT COALESCE(is_disabled, FALSE) FROM users WHERE id = $1`, userID).Scan(&isDisabled); dErr == nil && !isDisabled {
+							isAdmin = true
+						}
+					} else if sessionValid && h.DB == nil {
+						isAdmin = true
+					}
 				}
 			}
 		}
 	}
 
-	rows, err := h.DB.Query(context.Background(),
+	rows, err := h.DB.Query(ctx,
 		`SELECT id, code, title, approval_limit, approved_count, is_approval_open 
 		 FROM job_categories ORDER BY id ASC`)
 	if err != nil {

@@ -1,7 +1,7 @@
 export type UserRole = "APPLICANT" | "REVIEWER_ADMIN" | "SUPER_ADMIN";
 export type ApplicationStatus = "PENDING" | "APPROVED" | "REJECTED";
 export type Gender = "MALE" | "FEMALE" | "OTHER";
-export type SocialCategory = "GENERAL" | "SC" | "ST" | "OBC" | "OTHER";
+export type SocialCategory = "SC" | "ST" | "OBC" | "OTHER";
 export type HighestQual = "NO_FORMAL" | "CLASS_V" | "CLASS_VIII" | "CLASS_X" | "CLASS_XII" | "GRADUATE" | "OTHER";
 export type Occupation = "STUDENT" | "UNEMPLOYED" | "EMPLOYED" | "SELF_EMPLOYED" | "OTHER";
 export type TrainingMode = "CLASSROOM" | "PRACTICAL_WORKSHOP" | "OTHER";

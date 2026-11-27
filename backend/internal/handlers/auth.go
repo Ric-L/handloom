@@ -42,6 +42,11 @@ func (h *AuthHandler) Register(c *gin.Context) {
 		return
 	}
 
+	if len(req.Password) < 8 || len(req.Password) > 72 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Password must be between 8 and 72 characters long."})
+		return
+	}
+
 	cleanMobile := strings.TrimSpace(req.MobileNumber)
 	if !mobileRegex.MatchString(cleanMobile) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid mobile number. Please enter a valid 10 to 15-digit number."})
@@ -51,6 +56,10 @@ func (h *AuthHandler) Register(c *gin.Context) {
 	var cleanEmail *string
 	if req.Email != nil && strings.TrimSpace(*req.Email) != "" {
 		trimmed := strings.ToLower(strings.TrimSpace(*req.Email))
+		if !isValidEmail(trimmed) {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Please enter a valid email address."})
+			return
+		}
 		cleanEmail = &trimmed
 	}
 
@@ -235,10 +244,11 @@ func (h *AuthHandler) AdminLogin(c *gin.Context) {
 	}
 
 	var user models.User
+	var isDisabled bool
 	err := h.DB.QueryRow(ctx,
-		`SELECT id, mobile_number, email, password_hash, role, created_at FROM users WHERE mobile_number = $1`,
+		`SELECT id, mobile_number, email, password_hash, role, created_at, COALESCE(is_disabled, FALSE) FROM users WHERE mobile_number = $1`,
 		cleanMobile,
-	).Scan(&user.ID, &user.MobileNumber, &user.Email, &user.PasswordHash, &user.Role, &user.CreatedAt)
+	).Scan(&user.ID, &user.MobileNumber, &user.Email, &user.PasswordHash, &user.Role, &user.CreatedAt, &isDisabled)
 
 	if err != nil {
 		if h.RateLimiter != nil {
@@ -251,6 +261,19 @@ func (h *AuthHandler) AdminLogin(c *gin.Context) {
 		}, "FAILED")
 
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid administrator credentials"})
+		return
+	}
+
+	if isDisabled {
+		audit.Log(ctx, h.DB, &user.ID, user.Role, "LOGIN_BLOCKED_DISABLED", &user.ID, ip, nil, nil, map[string]any{
+			"portal": "ADMIN",
+			"mobile": cleanMobile,
+			"reason": "Account is disabled by Super Administrator",
+		}, "BLOCKED")
+		c.JSON(http.StatusForbidden, gin.H{
+			"error": "This administrator account has been disabled by a Super Administrator.",
+			"code":  "ACCOUNT_DISABLED",
+		})
 		return
 	}
 
@@ -445,16 +468,14 @@ func (h *AuthHandler) generateToken(userID, role, sessionToken string) (string, 
 }
 
 func (h *AuthHandler) setAuthCookies(c *gin.Context, token string) {
-	isSecure := c.Request.TLS != nil || c.GetHeader("X-Forwarded-Proto") == "https"
-	// Set auth_token as HTTP-Only, SameSite=Lax cookie
-	c.SetSameSite(http.SameSiteLaxMode)
+	sameSite, isSecure := middleware.CookieSameSiteMode(c)
+	c.SetSameSite(sameSite)
 	c.SetCookie("auth_token", token, int(session.AbsoluteSessionTimeout.Seconds()), "/", "", isSecure, true)
-	// Set CSRF token cookie as well
 	middleware.SetCSRFCookie(c)
 }
 
 func (h *AuthHandler) clearAuthCookies(c *gin.Context) {
-	isSecure := c.Request.TLS != nil || c.GetHeader("X-Forwarded-Proto") == "https"
-	c.SetSameSite(http.SameSiteLaxMode)
+	sameSite, isSecure := middleware.CookieSameSiteMode(c)
+	c.SetSameSite(sameSite)
 	c.SetCookie("auth_token", "", -1, "/", "", isSecure, true)
 }

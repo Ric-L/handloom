@@ -70,7 +70,11 @@ func (h *AdminHandler) Metrics(c *gin.Context) {
 
 // ListApplications provides a paginated, filtered list of candidate registrations
 func (h *AdminHandler) ListApplications(c *gin.Context) {
-	ctx := context.Background()
+	if !checkAdminPermission(c.Request.Context(), h.DB, c.GetString("user_id"), c.GetString("role"), "can_review") {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Your administrator account does not have permission to view applications."})
+		return
+	}
+	ctx := c.Request.Context()
 
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
@@ -249,8 +253,16 @@ func (h *AdminHandler) ListApplications(c *gin.Context) {
 
 // GetApplication returns full applicant dossier and documents for review drawer
 func (h *AdminHandler) GetApplication(c *gin.Context) {
-	ctx := context.Background()
+	if !checkAdminPermission(c.Request.Context(), h.DB, c.GetString("user_id"), c.GetString("role"), "can_review") {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Your administrator account does not have permission to inspect application dossiers."})
+		return
+	}
+	ctx := c.Request.Context()
 	appID := c.Param("id")
+	if !isValidUUID(appID) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid application ID"})
+		return
+	}
 
 	query := `
 		SELECT a.id, a.registration_no, a.user_id, a.category_id, jc.code, jc.title,
@@ -358,7 +370,7 @@ func (h *AdminHandler) GetApplication(c *gin.Context) {
 		"training_mode":      trainingMode,
 		"bank_holder_name":   bankHolderName,
 		"bank_name_branch":   bankNameBranch,
-		"account_number":     accountNumber,
+		"account_number":     maskAccountNumber(accountNumber),
 		"ifsc_code":          ifscCode,
 		"documents":          documents,
 		"status":             status,
@@ -371,9 +383,17 @@ func (h *AdminHandler) GetApplication(c *gin.Context) {
 
 // Approve atomically enforces the category quota using PostgreSQL Row-Level Lock (SELECT FOR UPDATE)
 func (h *AdminHandler) Approve(c *gin.Context) {
-	ctx := context.Background()
-	appID := c.Param("id")
+	ctx := c.Request.Context()
 	adminID := c.GetString("user_id")
+	if !checkAdminPermission(ctx, h.DB, adminID, c.GetString("role"), "can_approve") {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Your administrator account does not have permission to approve applications."})
+		return
+	}
+	appID := c.Param("id")
+	if !isValidUUID(appID) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid application ID"})
+		return
+	}
 	clientIP := c.ClientIP()
 
 	tx, err := h.DB.Begin(ctx)
@@ -507,21 +527,35 @@ func (h *AdminHandler) Approve(c *gin.Context) {
 
 // Reject updates an application with a mandatory reason within an ACID transaction
 func (h *AdminHandler) Reject(c *gin.Context) {
-	ctx := context.Background()
-	appID := c.Param("id")
+	ctx := c.Request.Context()
 	adminID := c.GetString("user_id")
+	if !checkAdminPermission(ctx, h.DB, adminID, c.GetString("role"), "can_reject") {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Your administrator account does not have permission to reject applications."})
+		return
+	}
+	appID := c.Param("id")
+	if !isValidUUID(appID) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid application ID"})
+		return
+	}
 	clientIP := c.ClientIP()
 
 	var req struct {
 		Reason string `json:"reason" binding:"required"`
 	}
-	if err := c.ShouldBindJSON(&req); err != nil || len(strings.TrimSpace(req.Reason)) < 10 {
+	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": "A detailed rejection reason of at least 10 characters is required for audit trails.",
 		})
 		return
 	}
-	trimmedReason := strings.TrimSpace(req.Reason)
+	trimmedReason := sanitizeInputMax(req.Reason, 1000)
+	if len(trimmedReason) < 10 {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "A detailed rejection reason of at least 10 characters is required for audit trails.",
+		})
+		return
+	}
 
 	tx, err := h.DB.Begin(ctx)
 	if err != nil {
@@ -596,10 +630,18 @@ func (h *AdminHandler) Reject(c *gin.Context) {
 
 // ExportCSV streams a CSV file of verified and approved trainees for training centers
 func (h *AdminHandler) ExportCSV(c *gin.Context) {
-	ctx := context.Background()
+	ctx := c.Request.Context()
+	if !checkAdminPermission(ctx, h.DB, c.GetString("user_id"), c.GetString("role"), "can_export") {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Your administrator account does not have permission to export trainee records."})
+		return
+	}
 
 	categoryIDStr := c.Query("category_id")
-	status := strings.ToUpper(c.DefaultQuery("status", "APPROVED"))
+	status := strings.ToUpper(strings.TrimSpace(c.DefaultQuery("status", "APPROVED")))
+	if !isAllowedValue(status, "APPROVED", "PENDING", "REJECTED") {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid export status filter. Allowed: APPROVED, PENDING, REJECTED."})
+		return
+	}
 
 	whereClause := "WHERE a.status = $1"
 	args := []interface{}{status}
@@ -716,25 +758,30 @@ func (h *AdminHandler) ExportCSV(c *gin.Context) {
 			reviewedAtStr = reviewedAt.Format("2006-01-02 15:04:05")
 		}
 
+		maskedAcct := ""
+		if masked := maskAccountNumber(&accountNum); masked != nil {
+			maskedAcct = *masked
+		}
+
 		row := []string{
-			regNo,
-			fullName,
-			guardian,
-			catCode,
-			catTitle,
-			gender,
+			sanitizeCSVCell(regNo),
+			sanitizeCSVCell(fullName),
+			sanitizeCSVCell(guardian),
+			sanitizeCSVCell(catCode),
+			sanitizeCSVCell(catTitle),
+			sanitizeCSVCell(gender),
 			dob.Format("2006-01-02"),
-			socialCat,
-			districtState,
-			govIDType,
-			govIDLast4,
-			highestQual,
-			trainingMode,
-			bankHolder,
-			bankBranch,
-			accountNum,
-			ifsc,
-			appStatus,
+			sanitizeCSVCell(socialCat),
+			sanitizeCSVCell(districtState),
+			sanitizeCSVCell(govIDType),
+			sanitizeCSVCell(govIDLast4),
+			sanitizeCSVCell(highestQual),
+			sanitizeCSVCell(trainingMode),
+			sanitizeCSVCell(bankHolder),
+			sanitizeCSVCell(bankBranch),
+			sanitizeCSVCell(maskedAcct),
+			sanitizeCSVCell(ifsc),
+			sanitizeCSVCell(appStatus),
 			submittedAt.Format("2006-01-02 15:04:05"),
 			reviewedAtStr,
 		}

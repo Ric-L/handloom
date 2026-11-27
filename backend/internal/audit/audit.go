@@ -113,6 +113,7 @@ var sensitiveKeys = []string{
 	"password", "passwd", "secret", "token", "auth", "jwt",
 	"credential", "bearer", "cookie", "csrf", "hash", "salt",
 	"account_number", "bank_account", "card_number", "cvv", "pin",
+	"ifsc", "aadhaar", "private_key", "passbook",
 }
 
 func isSensitiveKey(key string) bool {

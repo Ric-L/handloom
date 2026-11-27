@@ -172,7 +172,7 @@ func Auth(secret string, db *pgxpool.Pool, roles ...string) gin.HandlerFunc {
 }
 
 func clearAuthCookie(c *gin.Context) {
-	isSecure := c.Request.TLS != nil || c.GetHeader("X-Forwarded-Proto") == "https"
-	c.SetSameSite(http.SameSiteLaxMode)
+	sameSite, isSecure := CookieSameSiteMode(c)
+	c.SetSameSite(sameSite)
 	c.SetCookie("auth_token", "", -1, "/", "", isSecure, true)
 }

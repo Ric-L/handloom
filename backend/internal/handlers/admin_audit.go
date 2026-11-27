@@ -38,7 +38,7 @@ func (h *AdminHandler) ListAuditLogs(c *gin.Context) {
 
 	result, err := audit.ListLogs(c.Request.Context(), h.DB, filter)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve audit log records: " + err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve audit log records."})
 		return
 	}
 
@@ -84,7 +84,7 @@ func (h *AdminHandler) ListAuditFiles(c *gin.Context) {
 
 	files, err := audit.ListLogFiles()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to enumerate daily audit log files: " + err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to enumerate daily audit log files."})
 		return
 	}
 

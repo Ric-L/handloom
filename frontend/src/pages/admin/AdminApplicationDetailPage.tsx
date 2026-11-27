@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getAdminApplication, approveApplication, rejectApplication } from "../../api";
+import { getAdminApplication, approveApplication, rejectApplication, fetchAuthenticatedDocument } from "../../api";
 import { generateApprovedApplicationPDF } from "../../lib/generateApprovedApplicationPDF";
 import { formatDate, statusBadgeColor } from "../../lib/utils";
 import {
@@ -57,8 +57,45 @@ export default function AdminApplicationDetailPage() {
   const [rejectReason, setRejectReason] = useState("");
   const [rejectError, setRejectError] = useState("");
   const [actionError, setActionError] = useState<string | null>(null);
-  const [previewDoc, setPreviewDoc] = useState<{ title: string; url: string } | null>(null);
+  const [previewDoc, setPreviewDoc] = useState<{ title: string; url: string; mimeType?: string } | null>(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const [previewError, setPreviewError] = useState<string | null>(null);
   const [copiedRegNo, setCopiedRegNo] = useState(false);
+
+  const closePreview = () => {
+    if (previewDoc?.url.startsWith("blob:")) {
+      URL.revokeObjectURL(previewDoc.url);
+    }
+    setPreviewDoc(null);
+    setPreviewError(null);
+  };
+
+  const openDocumentPreview = async (title: string, docUrl?: string) => {
+    if (!docUrl) {
+      setPreviewError("This document was not uploaded by the applicant.");
+      setPreviewDoc({ title, url: "" });
+      return;
+    }
+    setPreviewError(null);
+    setPreviewLoading(true);
+    setPreviewDoc({ title, url: "" });
+    try {
+      const { objectUrl, mimeType } = await fetchAuthenticatedDocument(docUrl);
+      setPreviewDoc({ title, url: objectUrl, mimeType });
+    } catch {
+      setPreviewError("Failed to load document securely. Please verify your session.");
+    } finally {
+      setPreviewLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      if (previewDoc?.url.startsWith("blob:")) {
+        URL.revokeObjectURL(previewDoc.url);
+      }
+    };
+  }, [previewDoc]);
 
   const { data: app, isLoading, error } = useQuery({
     queryKey: ["adminAppDetail", id],
@@ -80,7 +117,7 @@ export default function AdminApplicationDetailPage() {
       if (err.response?.status === 409) {
         setActionError(
           err.response?.data?.error ||
-            "Conflict: The category quota was filled concurrently by another administrator. Approvals are now locked."
+          "Conflict: The category quota was filled concurrently by another administrator. Approvals are now locked."
         );
       } else {
         setActionError(err.response?.data?.error || "Failed to approve application.");
@@ -201,8 +238,8 @@ export default function AdminApplicationDetailPage() {
                   {app.status === "PENDING"
                     ? "🟡 PENDING VERIFICATION"
                     : app.status === "APPROVED"
-                    ? "🟢 APPROVED FOR INDUCTION"
-                    : "🔴 REJECTED"}
+                      ? "🟢 APPROVED FOR INDUCTION"
+                      : "🔴 REJECTED"}
                 </span>
               </div>
 
@@ -288,17 +325,15 @@ export default function AdminApplicationDetailPage() {
 
         {/* Trade Allocation & Quota Guard Banner */}
         <div
-          className={`p-4.5 rounded-2xl border flex flex-col md:flex-row md:items-center justify-between gap-4 ${
-            isCategoryLocked
+          className={`p-4.5 rounded-2xl border flex flex-col md:flex-row md:items-center justify-between gap-4 ${isCategoryLocked
               ? "bg-rose-50/70 border-rose-200 text-rose-950"
               : "bg-blue-50/70 border-blue-200 text-blue-950"
-          }`}
+            }`}
         >
           <div className="flex items-center gap-3">
             <div
-              className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 ${
-                isCategoryLocked ? "bg-rose-200 text-rose-900" : "bg-blue-200 text-blue-900"
-              }`}
+              className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 ${isCategoryLocked ? "bg-rose-200 text-rose-900" : "bg-blue-200 text-blue-900"
+                }`}
             >
               {app.category_code}
             </div>
@@ -518,13 +553,9 @@ export default function AdminApplicationDetailPage() {
                 return (
                   <div
                     key={doc.key}
-                    onClick={() =>
-                      setPreviewDoc({
-                        title: doc.label,
-                        url: docUrl || "https://images.unsplash.com/photo-1544816155-12df9643f363?w=800",
-                      })
-                    }
-                    className="p-3.5 rounded-2xl border border-slate-200/90 hover:border-primary-400 hover:bg-primary-50/20 transition-all flex items-center justify-between group cursor-pointer"
+                    onClick={() => docUrl && openDocumentPreview(doc.label, docUrl)}
+                    className={`p-3.5 rounded-2xl border border-slate-200/90 transition-all flex items-center justify-between group ${docUrl ? "hover:border-primary-400 hover:bg-primary-50/20 cursor-pointer" : "opacity-75"
+                      }`}
                   >
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-xl bg-slate-100 text-xl flex items-center justify-center border border-slate-200 group-hover:scale-105 transition-transform">
@@ -539,10 +570,18 @@ export default function AdminApplicationDetailPage() {
                     </div>
 
                     <div className="flex items-center gap-2">
-                      <span className="text-[11px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200">
-                        ✓ Loaded
-                      </span>
-                      <ZoomIn className="w-4 h-4 text-slate-400 group-hover:text-primary-700 transition" />
+                      {docUrl ? (
+                        <>
+                          <span className="text-[11px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200">
+                            ✓ Uploaded
+                          </span>
+                          <ZoomIn className="w-4 h-4 text-slate-400 group-hover:text-primary-700 transition" />
+                        </>
+                      ) : (
+                        <span className="text-[11px] font-semibold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">
+                          Not Uploaded
+                        </span>
+                      )}
                     </div>
                   </div>
                 );
@@ -714,9 +753,8 @@ export default function AdminApplicationDetailPage() {
                 }}
                 rows={3}
                 placeholder="Enter specific audit remarks for rejection..."
-                className={`w-full p-3.5 border rounded-2xl text-xs focus:outline-none focus:ring-2 focus:ring-rose-500 transition font-medium ${
-                  rejectError ? "border-rose-500 ring-1 ring-rose-500" : "border-slate-300"
-                }`}
+                className={`w-full p-3.5 border rounded-2xl text-xs focus:outline-none focus:ring-2 focus:ring-rose-500 transition font-medium ${rejectError ? "border-rose-500 ring-1 ring-rose-500" : "border-slate-300"
+                  }`}
               />
               <div className="flex justify-between items-center mt-1.5 text-[11px]">
                 <span className={rejectReason.trim().length < 10 ? "text-amber-600 font-bold" : "text-blue-600 font-bold"}>
@@ -751,24 +789,29 @@ export default function AdminApplicationDetailPage() {
           <div className="bg-white rounded-3xl max-w-3xl w-full p-5 shadow-2xl space-y-4">
             <div className="flex justify-between items-center border-b border-slate-100 pb-3">
               <h4 className="font-extrabold text-sm text-slate-900">{previewDoc.title}</h4>
-              <button onClick={() => setPreviewDoc(null)} className="text-slate-400 hover:text-slate-700">
+              <button onClick={closePreview} className="text-slate-400 hover:text-slate-700 cursor-pointer">
                 <X className="w-5 h-5" />
               </button>
             </div>
             <div className="h-96 sm:h-[480px] bg-slate-100 rounded-2xl overflow-hidden flex items-center justify-center border border-slate-200">
-              <img
-                src={previewDoc.url}
-                alt={previewDoc.title}
-                className="max-h-full max-w-full object-contain"
-                onError={e => {
-                  (e.target as any).src = "https://images.unsplash.com/photo-1544816155-12df9643f363?w=800";
-                }}
-              />
+              {previewLoading ? (
+                <div className="text-xs font-semibold text-slate-500">Loading document securely...</div>
+              ) : previewError ? (
+                <div className="text-xs font-semibold text-rose-700 px-4 text-center">{previewError}</div>
+              ) : previewDoc.mimeType === "application/pdf" ? (
+                <iframe src={previewDoc.url} title={previewDoc.title} className="w-full h-full border-0" />
+              ) : (
+                <img
+                  src={previewDoc.url}
+                  alt={previewDoc.title}
+                  className="max-h-full max-w-full object-contain"
+                />
+              )}
             </div>
             <div className="text-right">
               <button
-                onClick={() => setPreviewDoc(null)}
-                className="px-4 py-2 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl"
+                onClick={closePreview}
+                className="px-4 py-2 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl cursor-pointer"
               >
                 Close Lightbox
               </button>

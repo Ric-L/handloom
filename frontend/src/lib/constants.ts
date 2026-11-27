@@ -11,5 +11,5 @@ export const JOB_CATEGORIES = [
 ] as const;
 
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080/api/v1";
-export const MAX_FILE_SIZE_MB = 2;
-export const ALLOWED_FILE_TYPES = ["image/jpeg", "image/png", "application/pdf"];
+export const MAX_FILE_SIZE_MB = 5;
+export const ALLOWED_FILE_TYPES = ["image/jpeg", "image/png", "image/webp", "application/pdf"];

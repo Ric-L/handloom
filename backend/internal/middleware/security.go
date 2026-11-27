@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"crypto/rand"
+	"crypto/subtle"
 	"encoding/hex"
 	"net/http"
 	"strings"
@@ -9,31 +10,35 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// SecurityHeaders attaches standard government-portal defensive HTTP security headers to all responses.
+// IsHTTPSRequest reports whether the current request arrived over TLS or an HTTPS reverse proxy.
+func IsHTTPSRequest(c *gin.Context) bool {
+	return c.Request.TLS != nil || strings.EqualFold(c.GetHeader("X-Forwarded-Proto"), "https")
+}
+
+// SecurityHeaders attaches defensive HTTP security headers (OWASP ASVS / Top 10) to all responses.
 func SecurityHeaders() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// Prevent MIME-sniffing
 		c.Header("X-Content-Type-Options", "nosniff")
-
-		// Prevent clickjacking / frame embedding
 		c.Header("X-Frame-Options", "DENY")
-
-		// Cross-Site Scripting Filter
 		c.Header("X-XSS-Protection", "1; mode=block")
-
-		// Referrer privacy
 		c.Header("Referrer-Policy", "strict-origin-when-cross-origin")
-
-		// Content Security Policy
-		c.Header("Content-Security-Policy", "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: http: https:; connect-src 'self' http://localhost:8080 http://localhost:5173;")
-
-		// Restrict unneeded browser features
+		c.Header("X-Permitted-Cross-Domain-Policies", "none")
 		c.Header("Permissions-Policy", "geolocation=(), microphone=(), camera=(), payment=()")
 
-		// For sensitive API paths, enforce strict no-cache to prevent browser history leakage
-		if strings.HasPrefix(c.Request.URL.Path, "/api/v1/admin") ||
-			strings.HasPrefix(c.Request.URL.Path, "/api/v1/applications") ||
-			strings.HasPrefix(c.Request.URL.Path, "/api/v1/auth") {
+		// Strict API Content Security Policy (mitigates inline script execution if an endpoint returns HTML/SVG)
+		c.Header("Content-Security-Policy", "default-src 'none'; img-src 'self' data: blob:; style-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'")
+
+		if IsHTTPSRequest(c) {
+			c.Header("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
+		}
+
+		// Prevent caching of sensitive API or uploaded PII responses
+		path := c.Request.URL.Path
+		if strings.HasPrefix(path, "/api/v1/admin") ||
+			strings.HasPrefix(path, "/api/v1/applications") ||
+			strings.HasPrefix(path, "/api/v1/auth") ||
+			strings.HasPrefix(path, "/api/v1/uploads") ||
+			strings.HasPrefix(path, "/uploads") {
 			c.Header("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate")
 			c.Header("Pragma", "no-cache")
 			c.Header("Expires", "0")
@@ -43,15 +48,47 @@ func SecurityHeaders() gin.HandlerFunc {
 	}
 }
 
-// GenerateCSRFToken generates a 32-character hexadecimal CSRF token.
+// EnforceHTTPS redirects plain HTTP requests to HTTPS when enabled behind a proxy in production.
+func EnforceHTTPS(enabled bool) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		if enabled && !IsHTTPSRequest(c) {
+			target := "https://" + c.Request.Host + c.Request.URL.RequestURI()
+			c.Redirect(http.StatusPermanentRedirect, target)
+			c.Abort()
+			return
+		}
+		c.Next()
+	}
+}
+
+// RequestBodyLimit caps incoming request body bytes to protect against memory exhaustion / DoS.
+func RequestBodyLimit(maxBytes int64) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		if c.Request.Body != nil && !strings.HasPrefix(c.Request.URL.Path, "/api/v1/upload") {
+			c.Request.Body = http.MaxBytesReader(c.Writer, c.Request.Body, maxBytes)
+		}
+		c.Next()
+	}
+}
+
+// GenerateCSRFToken generates a cryptographically random 32-character hexadecimal CSRF token.
 func GenerateCSRFToken() string {
 	bytes := make([]byte, 16)
 	_, _ = rand.Read(bytes)
 	return hex.EncodeToString(bytes)
 }
 
+// CookieSameSiteMode returns SameSite=None on HTTPS (required for cross-subdomain deployments) and SameSite=Lax on local HTTP.
+func CookieSameSiteMode(c *gin.Context) (http.SameSite, bool) {
+	isSecure := IsHTTPSRequest(c)
+	if isSecure {
+		return http.SameSiteNoneMode, true
+	}
+	return http.SameSiteLaxMode, false
+}
+
 // SetCSRFCookie sets the CSRF token cookie on the response if not already present.
-// Note: csrf_token cookie has HttpOnly=false so JavaScript can read it and send X-CSRF-Token header.
+// Note: csrf_token cookie has HttpOnly=false so the SPA can read it and send X-CSRF-Token.
 func SetCSRFCookie(c *gin.Context) string {
 	existing, err := c.Cookie("csrf_token")
 	if err == nil && existing != "" {
@@ -59,32 +96,27 @@ func SetCSRFCookie(c *gin.Context) string {
 	}
 
 	token := GenerateCSRFToken()
-	isSecure := c.Request.TLS != nil || c.GetHeader("X-Forwarded-Proto") == "https"
-
-	// SameSite=Lax, HttpOnly=false (required for double-submit cookie pattern)
-	c.SetSameSite(http.SameSiteLaxMode)
+	sameSite, isSecure := CookieSameSiteMode(c)
+	c.SetSameSite(sameSite)
 	c.SetCookie("csrf_token", token, 86400, "/", "", isSecure, false)
 	return token
 }
 
-// CSRFProtection implements the Double Submit Cookie pattern for cross-site request forgery prevention.
-// When cookies are used for authentication, state-changing requests must provide a matching X-CSRF-Token header.
+// CSRFProtection implements the Double Submit Cookie pattern with constant-time comparison.
 func CSRFProtection() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// Always ensure CSRF cookie is present
 		csrfCookie, err := c.Cookie("csrf_token")
 		if err != nil || csrfCookie == "" {
 			csrfCookie = SetCSRFCookie(c)
 		}
 
 		method := c.Request.Method
-		// Safe methods (GET, HEAD, OPTIONS) do not require CSRF validation
 		if method == http.MethodGet || method == http.MethodHead || method == http.MethodOptions {
 			c.Next()
 			return
 		}
 
-		// Public authentication routes (login, register) are exempt from CSRF token enforcement
+		// Public auth endpoints that establish initial session/credentials are exempt
 		path := c.Request.URL.Path
 		if path == "/api/v1/auth/login" ||
 			path == "/api/v1/auth/register" ||
@@ -95,15 +127,14 @@ func CSRFProtection() gin.HandlerFunc {
 			return
 		}
 
-		// If the request uses cookie-based authentication, CSRF token header must match the cookie
 		_, authCookieErr := c.Cookie("auth_token")
 		isCookieAuth := authCookieErr == nil
-
-		// Even if Authorization header is used, if X-CSRF-Token is provided, it must match
 		reqToken := c.GetHeader("X-CSRF-Token")
 
-		if isCookieAuth {
-			if reqToken == "" || reqToken != csrfCookie {
+		// Enforce CSRF when cookie auth is present, OR if X-CSRF-Token header is provided alongside Bearer auth
+		if isCookieAuth || reqToken != "" {
+			if reqToken == "" || len(reqToken) != len(csrfCookie) ||
+				subtle.ConstantTimeCompare([]byte(reqToken), []byte(csrfCookie)) != 1 {
 				c.AbortWithStatusJSON(http.StatusForbidden, gin.H{
 					"error": "Cross-Site Request Forgery (CSRF) validation failed. Request blocked.",
 					"code":  "CSRF_VALIDATION_FAILED",

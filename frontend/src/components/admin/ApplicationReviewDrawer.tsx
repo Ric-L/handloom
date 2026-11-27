@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getAdminApplication, approveApplication, rejectApplication } from "../../api";
+import { getAdminApplication, approveApplication, rejectApplication, fetchAuthenticatedDocument } from "../../api";
 import { formatDate, statusBadgeColor } from "../../lib/utils";
 import {
   X,
@@ -57,8 +57,45 @@ export default function ApplicationReviewDrawer({
   const [rejectReason, setRejectReason] = useState("");
   const [rejectError, setRejectError] = useState("");
   const [actionError, setActionError] = useState<string | null>(null);
-  const [previewDoc, setPreviewDoc] = useState<{ title: string; url: string } | null>(null);
+  const [previewDoc, setPreviewDoc] = useState<{ title: string; url: string; mimeType?: string } | null>(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const [previewError, setPreviewError] = useState<string | null>(null);
   const [copiedRegNo, setCopiedRegNo] = useState(false);
+
+  const closePreview = () => {
+    if (previewDoc?.url.startsWith("blob:")) {
+      URL.revokeObjectURL(previewDoc.url);
+    }
+    setPreviewDoc(null);
+    setPreviewError(null);
+  };
+
+  const openDocumentPreview = async (title: string, docUrl?: string) => {
+    if (!docUrl) {
+      setPreviewError("This document was not uploaded by the applicant.");
+      setPreviewDoc({ title, url: "" });
+      return;
+    }
+    setPreviewError(null);
+    setPreviewLoading(true);
+    setPreviewDoc({ title, url: "" });
+    try {
+      const { objectUrl, mimeType } = await fetchAuthenticatedDocument(docUrl);
+      setPreviewDoc({ title, url: objectUrl, mimeType });
+    } catch {
+      setPreviewError("Failed to load document securely. Please verify your session.");
+    } finally {
+      setPreviewLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      if (previewDoc?.url.startsWith("blob:")) {
+        URL.revokeObjectURL(previewDoc.url);
+      }
+    };
+  }, [previewDoc]);
 
   const { data: app, isLoading, error } = useQuery({
     queryKey: ["adminAppDetail", applicationId],
@@ -407,7 +444,7 @@ export default function ApplicationReviewDrawer({
                     <div className="font-extrabold text-slate-900 flex items-center gap-2">
                       <FileText className="w-4 h-4 text-primary-700" /> 7 Mandatory Verification Documents
                     </div>
-                    <span className="text-slate-500 font-mono text-[11px]">Formats: JPG, PNG, PDF &lt; 2MB</span>
+                    <span className="text-slate-500 font-mono text-[11px]">Formats: JPG, PNG, WEBP, PDF &lt; 5MB</span>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -422,22 +459,23 @@ export default function ApplicationReviewDrawer({
                             <span className="text-2xl">{doc.icon}</span>
                             <div>
                               <div className="text-xs font-bold text-slate-900">{doc.label}</div>
-                              <span className="text-[10px] text-blue-600 font-bold">✓ Verified by Intake Guard</span>
+                              <span className={`text-[10px] font-bold ${docUrl ? "text-blue-600" : "text-slate-400"}`}>
+                                {docUrl ? "✓ Uploaded & Verified" : "Not Uploaded"}
+                              </span>
                             </div>
                           </div>
 
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setPreviewDoc({
-                                title: doc.label,
-                                url: docUrl || "https://images.unsplash.com/photo-1544816155-12df9643f363?w=600",
-                              })
-                            }
-                            className="p-1.5 text-xs font-bold text-primary-800 bg-primary-50 hover:bg-primary-100 rounded-lg border border-primary-200 transition flex items-center gap-1 cursor-pointer"
-                          >
-                            <ExternalLink className="w-3.5 h-3.5" /> View
-                          </button>
+                          {docUrl ? (
+                            <button
+                              type="button"
+                              onClick={() => openDocumentPreview(doc.label, docUrl)}
+                              className="p-1.5 text-xs font-bold text-primary-800 bg-primary-50 hover:bg-primary-100 rounded-lg border border-primary-200 transition flex items-center gap-1 cursor-pointer"
+                            >
+                              <ExternalLink className="w-3.5 h-3.5" /> View
+                            </button>
+                          ) : (
+                            <span className="text-[11px] font-semibold text-slate-400 px-2">Missing</span>
+                          )}
                         </div>
                       );
                     })}
@@ -651,24 +689,29 @@ export default function ApplicationReviewDrawer({
           <div className="bg-white rounded-3xl max-w-2xl w-full p-5 shadow-2xl space-y-4">
             <div className="flex justify-between items-center border-b border-slate-100 pb-3">
               <h4 className="font-extrabold text-sm text-slate-900">{previewDoc.title}</h4>
-              <button onClick={() => setPreviewDoc(null)} className="text-slate-400 hover:text-slate-700">
+              <button onClick={closePreview} className="text-slate-400 hover:text-slate-700 cursor-pointer">
                 <X className="w-5 h-5" />
               </button>
             </div>
             <div className="h-96 bg-slate-100 rounded-2xl overflow-hidden flex items-center justify-center border border-slate-200">
-              <img
-                src={previewDoc.url}
-                alt={previewDoc.title}
-                className="max-h-full max-w-full object-contain"
-                onError={e => {
-                  (e.target as any).src = "https://images.unsplash.com/photo-1544816155-12df9643f363?w=600";
-                }}
-              />
+              {previewLoading ? (
+                <div className="text-xs font-semibold text-slate-500">Decrypting &amp; loading document...</div>
+              ) : previewError ? (
+                <div className="text-xs font-semibold text-rose-700 px-4 text-center">{previewError}</div>
+              ) : previewDoc.mimeType === "application/pdf" ? (
+                <iframe src={previewDoc.url} title={previewDoc.title} className="w-full h-full border-0" />
+              ) : (
+                <img
+                  src={previewDoc.url}
+                  alt={previewDoc.title}
+                  className="max-h-full max-w-full object-contain"
+                />
+              )}
             </div>
             <div className="text-right">
               <button
-                onClick={() => setPreviewDoc(null)}
-                className="px-4 py-2 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl"
+                onClick={closePreview}
+                className="px-4 py-2 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl cursor-pointer"
               >
                 Close Preview
               </button>

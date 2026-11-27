@@ -98,6 +98,24 @@ export const uploadDocument = async (file: File) => {
   return res.data;
 };
 
+// Authenticated retrieval of uploaded PII documents (sends Bearer token & cookies)
+export const fetchAuthenticatedDocument = async (
+  urlOrPath: string
+): Promise<{ objectUrl: string; mimeType: string }> => {
+  const match = urlOrPath.match(/\/uploads\/([a-zA-Z0-9_-]+\.(?:jpg|jpeg|png|webp|pdf))$/i);
+  if (!match) {
+    throw new Error("Invalid document path");
+  }
+  const res = await client.get(`/uploads/${encodeURIComponent(match[1])}`, {
+    responseType: "blob",
+  });
+  const blob: Blob = res.data;
+  return {
+    objectUrl: URL.createObjectURL(blob),
+    mimeType: blob.type || "application/octet-stream",
+  };
+};
+
 // Candidate Dossier Retrieval & Updates
 export const getApplicationDossier = (id: string) =>
   client.get<ApplicationDetail>(`/applications/${id}/dossier`).then(r => r.data);

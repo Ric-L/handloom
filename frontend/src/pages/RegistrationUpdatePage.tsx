@@ -50,7 +50,7 @@ export default function RegistrationUpdatePage() {
     email: "",
     gov_id_type: "Aadhaar",
     gov_id_last4: "",
-    social_category: "GENERAL",
+    social_category: "ST",
     address_full: "",
     district_state_pin: "",
     emergency_name_rel: "",
@@ -92,7 +92,7 @@ export default function RegistrationUpdatePage() {
         alt_mobile: initialData.alt_mobile || "",
         gov_id_type: initialData.gov_id_type || "Aadhaar",
         gov_id_last4: initialData.gov_id_last4 || "",
-        social_category: initialData.social_category || "GENERAL",
+        social_category: initialData.social_category && initialData.social_category !== "GENERAL" ? initialData.social_category : "ST",
         address_full: initialData.address_full || "",
         district_state_pin: initialData.district_state_pin || "",
         highest_qual: initialData.highest_qual || "CLASS_X",
@@ -164,6 +164,17 @@ export default function RegistrationUpdatePage() {
 
     if (!form.declaration_agreed) {
       setSubmitError("Please confirm the Trainee Declaration & Consent to proceed.");
+      return;
+    }
+
+    const missingDocs: string[] = [];
+    if (!form.documents["photograph"]) missingDocs.push("Passport-Size Photograph");
+    if (!form.documents["id_proof"]) missingDocs.push("Aadhaar Card");
+    if (!form.documents["address_proof"]) missingDocs.push("Address Proof");
+    if (!form.documents["edu_cert"]) missingDocs.push("Educational Certificate");
+    if (!form.documents["category_disability_cert"]) missingDocs.push("ST / Minority Certificate");
+    if (missingDocs.length > 0) {
+      setSubmitError(`Please upload all mandatory documents: ${missingDocs.join(", ")}.`);
       return;
     }
 
@@ -366,17 +377,22 @@ export default function RegistrationUpdatePage() {
               <div>
                 <label className="block text-slate-700 font-bold mb-1">Social Category</label>
                 <div className="flex flex-wrap items-center gap-3 py-1.5">
-                  {["GENERAL", "OBC", "SC", "ST", "OTHER"].map(cat => (
-                    <label key={cat} className="inline-flex items-center gap-1.5 cursor-pointer font-semibold">
+                  {[
+                    { value: "ST", label: "ST" },
+                    { value: "OBC", label: "OBC" },
+                    { value: "SC", label: "SC" },
+                    { value: "OTHER", label: "Minority / Other" },
+                  ].map(cat => (
+                    <label key={cat.value} className="inline-flex items-center gap-1.5 cursor-pointer font-semibold">
                       <input
                         type="radio"
                         name="social_category"
-                        value={cat}
-                        checked={form.social_category === cat}
+                        value={cat.value}
+                        checked={form.social_category === cat.value}
                         onChange={e => setForm({ ...form, social_category: e.target.value })}
                         className="text-primary-600 focus:ring-primary-500"
                       />
-                      <span>{cat}</span>
+                      <span>{cat.label}</span>
                     </label>
                   ))}
                 </div>
@@ -671,7 +687,7 @@ export default function RegistrationUpdatePage() {
               />
 
               <FileUploadField
-                label="Identity Proof (Aadhaar / Voter ID)"
+                label="Aadhaar Card"
                 value={form.documents["id_proof"]}
                 onChange={url => handleDocChange("id_proof", url)}
                 required
@@ -681,12 +697,14 @@ export default function RegistrationUpdatePage() {
                 label="Address Proof (Domicile / Utility Bill)"
                 value={form.documents["address_proof"]}
                 onChange={url => handleDocChange("address_proof", url)}
+                required
               />
 
               <FileUploadField
                 label="Educational Certificate"
                 value={form.documents["edu_cert"]}
                 onChange={url => handleDocChange("edu_cert", url)}
+                required
               />
 
               <FileUploadField
@@ -696,9 +714,10 @@ export default function RegistrationUpdatePage() {
               />
 
               <FileUploadField
-                label="Category / Disability Certificate (if applicable)"
+                label="ST / Minority Certificate"
                 value={form.documents["category_disability_cert"]}
                 onChange={url => handleDocChange("category_disability_cert", url)}
+                required
               />
             </div>
           </div>

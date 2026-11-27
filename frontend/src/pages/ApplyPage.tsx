@@ -40,7 +40,7 @@ export default function ApplyPage() {
   const [guardianName, setGuardianName] = useState("");
   const [dob, setDob] = useState("");
   const [gender, setGender] = useState("MALE");
-  const [socialCategory, setSocialCategory] = useState("GENERAL");
+  const [socialCategory, setSocialCategory] = useState("ST");
   const [mobileNumber, setMobileNumber] = useState("");
   const [email, setEmail] = useState("");
   const [permanentAddress, setPermanentAddress] = useState("");
@@ -125,6 +125,24 @@ export default function ApplyPage() {
       return;
     }
     goToStep(2);
+  };
+
+  const handleNextFromStep3 = () => {
+    setError(null);
+    const missing: string[] = [];
+    if (!photographUrl) missing.push("Passport-Size Photograph");
+    if (!documents.id_proof) missing.push("Aadhaar Card");
+    if (!documents.address_proof) missing.push("Address Proof");
+    if (!documents.edu_cert) missing.push("Education Certificate");
+    if (!documents.category_disability_cert) missing.push("ST / Minority Certificate");
+
+    if (missing.length > 0) {
+      triggerError(
+        `Please upload all mandatory documents before continuing: ${missing.join(", ")}.`
+      );
+      return;
+    }
+    goToStep(4);
   };
 
   const handleFinalSubmit = async () => {
@@ -484,11 +502,10 @@ export default function ApplyPage() {
                   onChange={(e) => setSocialCategory(e.target.value)}
                   className="w-full border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-900 focus:ring-2 focus:ring-blue-600 focus:outline-none"
                 >
-                  <option value="GENERAL">General</option>
+                  <option value="ST">ST</option>
                   <option value="OBC">OBC</option>
                   <option value="SC">SC</option>
-                  <option value="ST">ST</option>
-                  <option value="MINORITY">Minority</option>
+                  <option value="OTHER">Minority / Other</option>
                 </select>
               </div>
             </div>
@@ -724,7 +741,7 @@ export default function ApplyPage() {
           <div>
             <h2 className="text-lg font-extrabold text-slate-900">3. Upload Photo &amp; Supporting Documents</h2>
             <p className="text-sm text-slate-600">
-              Take a clear photo or upload a PDF (under 5 MB each). You can skip any document you don&apos;t have right now.
+              Take a clear photo or upload a PDF (strictly below 5 MB each). Items marked with * are mandatory.
             </p>
           </div>
 
@@ -734,16 +751,19 @@ export default function ApplyPage() {
               value={photographUrl}
               onChange={setPhotographUrl}
               buttonText="Upload Photo"
+              required
             />
             <FileUploadField
-              label="Government ID Proof (Aadhaar / Voter ID)"
+              label="Aadhaar Card"
               value={documents.id_proof}
               onChange={(url) => setDocuments((prev) => ({ ...prev, id_proof: url }))}
+              required
             />
             <FileUploadField
               label="Address Proof"
               value={documents.address_proof}
               onChange={(url) => setDocuments((prev) => ({ ...prev, address_proof: url }))}
+              required
             />
             <FileUploadField
               label="Bank Passbook Front Page"
@@ -754,11 +774,13 @@ export default function ApplyPage() {
               label="Education Certificate"
               value={documents.edu_cert}
               onChange={(url) => setDocuments((prev) => ({ ...prev, edu_cert: url }))}
+              required
             />
             <FileUploadField
-              label="Caste / Minority / Disability Certificate"
+              label="ST / Minority Certificate"
               value={documents.category_disability_cert}
               onChange={(url) => setDocuments((prev) => ({ ...prev, category_disability_cert: url }))}
+              required
             />
             <FileUploadField
               label="Signature or Thumb Impression"
@@ -797,7 +819,7 @@ export default function ApplyPage() {
             </button>
             <button
               type="button"
-              onClick={() => goToStep(4)}
+              onClick={handleNextFromStep3}
               className="inline-flex items-center gap-2 bg-blue-700 hover:bg-blue-800 text-white font-bold px-7 py-3 rounded-xl text-sm transition cursor-pointer"
             >
               <span>Review Application</span>
