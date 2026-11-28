@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -13,6 +14,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"handloom-portal/internal/audit"
 )
@@ -37,7 +39,7 @@ type SubmitApplicationPayload struct {
 	CategoryID       int               `json:"category_id" form:"category_id"`
 	FullName         string            `json:"full_name" form:"full_name" binding:"required"`
 	GuardianName     string            `json:"guardian_name" form:"guardian_name" binding:"required"`
-	DOB              string            `json:"dob" form:"dob" binding:"required"`
+	DOB              string            `json:"dob" form:"dob"`
 	Gender           string            `json:"gender" form:"gender"`
 	MobileNumber     string            `json:"mobile_number" form:"mobile_number"`
 	Email            string            `json:"email" form:"email"`
@@ -46,6 +48,7 @@ type SubmitApplicationPayload struct {
 	GovIDLast4       string            `json:"gov_id_last4" form:"gov_id_last4"`
 	SocialCategory   string            `json:"social_category" form:"social_category"`
 	AddressFull      string            `json:"address_full" form:"address_full" binding:"required"`
+	District         string            `json:"district" form:"district"`
 	DistrictStatePin string            `json:"district_state_pin" form:"district_state_pin"`
 	HighestQual      string            `json:"highest_qual" form:"highest_qual" binding:"required"`
 	InstitutionName  string            `json:"institution_name" form:"institution_name"`
@@ -62,7 +65,7 @@ type SubmitApplicationPayload struct {
 	PhotographURL    string            `json:"photograph_url" form:"photograph_url"`
 }
 
-// Track allows applicants to check their admission progress via Mobile Number and Date of Birth
+// Track allows applicants to check their admission progress via Mobile Number or Registration No and Date of Birth
 func (h *ApplicationHandler) Track(c *gin.Context) {
 	// Support both identifier (mobile or reg_no) and reg_no
 	identifier := sanitizeInputMax(c.Query("identifier"), 40)
@@ -75,7 +78,7 @@ func (h *ApplicationHandler) Track(c *gin.Context) {
 	dobStr := strings.TrimSpace(c.Query("dob"))
 
 	if identifier == "" || dobStr == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Registered mobile number and Date of Birth are required"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Registered mobile number or registration number and Date of Birth are required"})
 		return
 	}
 	if _, err := time.Parse("2006-01-02", dobStr); err != nil {
@@ -83,19 +86,28 @@ func (h *ApplicationHandler) Track(c *gin.Context) {
 		return
 	}
 
-	var result struct {
-		RegistrationNo  string  `json:"registration_no"`
-		FullName        string  `json:"full_name"`
-		Category        string  `json:"category"`
-		CategoryCode    string  `json:"category_code"`
-		SubmittedAt     string  `json:"submitted_at"`
-		Status          string  `json:"status"`
-		RejectionReason *string `json:"rejection_reason,omitempty"`
-	}
+	var (
+		appID, regNo, fullName, guardianName, catTitle, catCode         string
+		gender, govIDType, govIDLast4, socialCat, addressFull, district string
+		districtStatePin, highestQual, occupation, trainingMode, status string
+		catID                                                           int
+		dob, submittedAt                                                time.Time
+		altMobile, institutionName, prevTraining, preferredCentre       *string
+		bankHolderName, bankNameBranch, accountNumber, ifscCode         *string
+		rejectionReason                                                 *string
+		reviewedAt                                                      *time.Time
+		priorExpRaw, documentsRaw                                       []byte
+	)
 
-	var submittedAt time.Time
 	err := h.DB.QueryRow(c.Request.Context(), `
-		SELECT a.registration_no, a.full_name, jc.title, jc.code, a.submitted_at, a.status, a.rejection_reason
+		SELECT a.id, a.registration_no, a.category_id, jc.title, jc.code,
+		       a.full_name, a.guardian_name, a.dob, a.gender, a.alt_mobile,
+		       a.gov_id_type, a.gov_id_last4, a.social_category,
+		       a.address_full, COALESCE(a.district, ''), a.district_state_pin,
+		       a.highest_qual, a.institution_name, a.occupation, a.prev_training,
+		       a.prior_experience, a.preferred_centre, a.training_mode,
+		       a.bank_holder_name, a.bank_name_branch, a.account_number, a.ifsc_code,
+		       a.documents, a.status, a.rejection_reason, a.submitted_at, a.reviewed_at
 		FROM applications a
 		JOIN job_categories jc ON jc.id = a.category_id
 		JOIN users u ON u.id = a.user_id
@@ -103,16 +115,74 @@ func (h *ApplicationHandler) Track(c *gin.Context) {
 		ORDER BY a.submitted_at DESC
 		LIMIT 1
 	`, identifier, dobStr).Scan(
-		&result.RegistrationNo, &result.FullName, &result.Category, &result.CategoryCode,
-		&submittedAt, &result.Status, &result.RejectionReason,
+		&appID, &regNo, &catID, &catTitle, &catCode,
+		&fullName, &guardianName, &dob, &gender, &altMobile,
+		&govIDType, &govIDLast4, &socialCat,
+		&addressFull, &district, &districtStatePin,
+		&highestQual, &institutionName, &occupation, &prevTraining,
+		&priorExpRaw, &preferredCentre, &trainingMode,
+		&bankHolderName, &bankNameBranch, &accountNumber, &ifscCode,
+		&documentsRaw, &status, &rejectionReason, &submittedAt, &reviewedAt,
 	)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "No matching application found for provided mobile number and date of birth."})
+		c.JSON(http.StatusNotFound, gin.H{"error": "No matching application found for provided registration/mobile number and date of birth."})
 		return
 	}
 
-	result.SubmittedAt = submittedAt.Format(time.RFC3339)
-	c.JSON(http.StatusOK, result)
+	rawDocs := map[string]string{}
+	if len(documentsRaw) > 0 {
+		_ = json.Unmarshal(documentsRaw, &rawDocs)
+	}
+	docStatus := make(map[string]bool, len(rawDocs))
+	for k, v := range rawDocs {
+		if strings.TrimSpace(v) != "" {
+			docStatus[k] = true
+		}
+	}
+
+	priorExp := map[string]any{}
+	if len(priorExpRaw) > 0 {
+		_ = json.Unmarshal(priorExpRaw, &priorExp)
+	}
+
+	res := gin.H{
+		"application_id":     appID,
+		"registration_no":    regNo,
+		"category_id":        catID,
+		"category":           catTitle,
+		"category_code":      catCode,
+		"full_name":          fullName,
+		"guardian_name":      guardianName,
+		"dob":                dob.Format("2006-01-02"),
+		"gender":             gender,
+		"alt_mobile":         altMobile,
+		"gov_id_type":        govIDType,
+		"gov_id_last4":       govIDLast4,
+		"social_category":    socialCat,
+		"address_full":       addressFull,
+		"district":           district,
+		"district_state_pin": districtStatePin,
+		"highest_qual":       highestQual,
+		"institution_name":   institutionName,
+		"occupation":         occupation,
+		"prev_training":      prevTraining,
+		"prior_experience":   priorExp,
+		"preferred_centre":   preferredCentre,
+		"training_mode":      trainingMode,
+		"bank_holder_name":   bankHolderName,
+		"bank_name_branch":   bankNameBranch,
+		"account_number":     maskAccountNumber(accountNumber),
+		"ifsc_code":          ifscCode,
+		"document_status":    docStatus,
+		"status":             status,
+		"rejection_reason":   rejectionReason,
+		"submitted_at":       submittedAt.Format(time.RFC3339),
+	}
+	if reviewedAt != nil {
+		res["reviewed_at"] = reviewedAt.Format(time.RFC3339)
+	}
+
+	c.JSON(http.StatusOK, res)
 }
 
 // Submit persists a new candidate application
@@ -161,19 +231,38 @@ func (h *ApplicationHandler) Submit(c *gin.Context) {
 		return
 	}
 
-	// Verify candidate hasn't already submitted for this trade
-	var existingCount int
-	_ = h.DB.QueryRow(ctx,
-		`SELECT COUNT(*) FROM applications WHERE user_id = $1 AND category_id = $2`,
+	// Block duplicate submissions while an existing application for this trade is PENDING or APPROVED.
+	// Previously REJECTED applications remain archived and allow submitting a new application.
+	var activeStatus string
+	activeErr := h.DB.QueryRow(ctx,
+		`SELECT status FROM applications
+		 WHERE user_id = $1 AND category_id = $2 AND status IN ('PENDING', 'APPROVED')
+		 ORDER BY submitted_at DESC
+		 LIMIT 1`,
 		userID, req.CategoryID,
-	).Scan(&existingCount)
-	if existingCount > 0 {
-		c.JSON(http.StatusConflict, gin.H{"error": "You have already submitted an application for this artisan category. Only one submission per category is permitted."})
+	).Scan(&activeStatus)
+	if activeErr == nil {
+		c.JSON(http.StatusConflict, gin.H{
+			"error": fmt.Sprintf(
+				"You already have a %s application for this category. A new application can only be submitted if your previous application for this category was rejected.",
+				strings.ToLower(activeStatus),
+			),
+			"code":            "DUPLICATE_ACTIVE_APPLICATION",
+			"existing_status": activeStatus,
+		})
 		return
 	}
 
-	// Validate Date of Birth
-	parsedDOB, err := time.Parse("2006-01-02", strings.TrimSpace(req.DOB))
+	// Validate Date of Birth (fallback to user profile DOB if omitted)
+	dobInput := strings.TrimSpace(req.DOB)
+	if dobInput == "" {
+		var profileDOB *string
+		_ = h.DB.QueryRow(ctx, `SELECT dob FROM users WHERE id = $1`, userID).Scan(&profileDOB)
+		if profileDOB != nil {
+			dobInput = strings.TrimSpace(*profileDOB)
+		}
+	}
+	parsedDOB, err := time.Parse("2006-01-02", dobInput)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Date of Birth format. Please use YYYY-MM-DD."})
 		return
@@ -213,8 +302,33 @@ func (h *ApplicationHandler) Submit(c *gin.Context) {
 		return
 	}
 
+	var resolvedDistrict string
+	if strings.TrimSpace(req.District) != "" {
+		if norm, ok := NormalizeManipurDistrict(req.District); ok {
+			resolvedDistrict = norm
+		} else {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Please select a valid district of Manipur."})
+			return
+		}
+	} else {
+		var userDistrict *string
+		_ = h.DB.QueryRow(ctx, `SELECT district FROM users WHERE id = $1`, userID).Scan(&userDistrict)
+		userDistVal := ""
+		if userDistrict != nil {
+			userDistVal = *userDistrict
+		}
+		guessed := ResolveDistrictFromTexts(req.DistrictStatePin, req.AddressFull, userDistVal)
+		if guessed != "Other / Unspecified" {
+			resolvedDistrict = guessed
+		}
+	}
+
 	if req.DistrictStatePin == "" {
-		req.DistrictStatePin = "Handloom Training Cluster"
+		if resolvedDistrict != "" {
+			req.DistrictStatePin = resolvedDistrict + ", Manipur"
+		} else {
+			req.DistrictStatePin = "Handloom Training Cluster"
+		}
 	}
 	if req.Occupation == "" {
 		req.Occupation = "SELF_EMPLOYED"
@@ -306,19 +420,19 @@ func (h *ApplicationHandler) Submit(c *gin.Context) {
 	err = h.DB.QueryRow(ctx, `
 		INSERT INTO applications (
 			registration_no, user_id, category_id, full_name, guardian_name, dob, gender,
-			alt_mobile, gov_id_type, gov_id_last4, social_category, address_full, district_state_pin,
+			alt_mobile, gov_id_type, gov_id_last4, social_category, address_full, district, district_state_pin,
 			highest_qual, institution_name, occupation, prev_training, prior_experience, preferred_centre, training_mode,
 			bank_holder_name, bank_name_branch, account_number, ifsc_code, documents, status
 		) VALUES (
 			$1, $2, $3, $4, $5, $6, $7,
-			NULLIF($8, ''), $9, $10, $11, $12, $13,
-			$14, NULLIF($15, ''), $16, NULLIF($17, ''), $18, NULLIF($19, ''), $20,
-			NULLIF($21, ''), NULLIF($22, ''), NULLIF($23, ''), NULLIF($24, ''), $25, 'PENDING'
+			NULLIF($8, ''), $9, $10, $11, $12, NULLIF($13, ''), $14,
+			$15, NULLIF($16, ''), $17, NULLIF($18, ''), $19, NULLIF($20, ''), $21,
+			NULLIF($22, ''), NULLIF($23, ''), NULLIF($24, ''), NULLIF($25, ''), $26, 'PENDING'
 		) RETURNING id, status, submitted_at`,
 		regNo, userID, req.CategoryID,
 		sanitizeInputMax(req.FullName, 150), sanitizeInputMax(req.GuardianName, 150), parsedDOB, req.Gender,
 		sanitizeInputMax(req.AltMobile, 15), req.GovIDType, sanitizeInputMax(req.GovIDLast4, 4), req.SocialCategory,
-		sanitizeInputMax(req.AddressFull, 500), sanitizeInputMax(req.DistrictStatePin, 150),
+		sanitizeInputMax(req.AddressFull, 500), resolvedDistrict, sanitizeInputMax(req.DistrictStatePin, 150),
 		sanitizeInputMax(req.HighestQual, 20), sanitizeInputMax(req.InstitutionName, 200), sanitizeInputMax(req.Occupation, 20),
 		sanitizeInputMax(req.PrevTraining, 300), expBytes, sanitizeInputMax(req.PreferredCentre, 150), sanitizeInputMax(req.TrainingMode, 30),
 		sanitizeInputMax(req.BankHolderName, 150), sanitizeInputMax(req.BankNameBranch, 200),
@@ -327,15 +441,28 @@ func (h *ApplicationHandler) Submit(c *gin.Context) {
 	).Scan(&appID, &status, &submittedAt)
 
 	if err != nil {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
+			c.JSON(http.StatusConflict, gin.H{
+				"error": "You already have a pending or approved application for this category.",
+				"code":  "DUPLICATE_ACTIVE_APPLICATION",
+			})
+			return
+		}
 		log.Printf("[SUBMIT ERROR] user=%s category=%d err=%v", userID, req.CategoryID, err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save application. Please verify all fields and try again."})
 		return
 	}
 
-	// Sync full_name back to user record if empty or updated
-	if strings.TrimSpace(req.FullName) != "" {
-		_, _ = h.DB.Exec(ctx, `UPDATE users SET full_name = $1 WHERE id = $2`, sanitizeInputMax(req.FullName, 150), userID)
-	}
+	// Sync full_name and missing profile dob/district back to user record
+	_, _ = h.DB.Exec(ctx,
+		`UPDATE users
+		 SET full_name = COALESCE(NULLIF($1, ''), full_name),
+		     dob = COALESCE(NULLIF(dob, ''), $2),
+		     district = COALESCE(NULLIF(district, ''), NULLIF($3, ''))
+		 WHERE id = $4`,
+		sanitizeInputMax(req.FullName, 150), parsedDOB.Format("2006-01-02"), resolvedDistrict, userID,
+	)
 
 	userRole := c.GetString("role")
 	audit.Log(c.Request.Context(), h.DB, &userID, userRole, audit.ActionApplicationSubmit, &appID, c.ClientIP(), nil, nil, map[string]any{
@@ -859,8 +986,12 @@ func (h *ApplicationHandler) UpdateApplication(c *gin.Context) {
 	}
 
 	if !isAdmin {
+		audit.Log(ctx, h.DB, &userID, userRole, audit.ActionAccessDenied, &appID, c.ClientIP(), nil, nil, map[string]any{
+			"reason": "Candidate attempted to modify finalized submitted application",
+		}, "DENIED")
 		c.JSON(http.StatusForbidden, gin.H{
-			"error": "This application has been finalized and submitted. Submitted applications are read-only and cannot be modified or replaced.",
+			"error": "Once submitted, applications are strictly view-only and cannot be edited or modified.",
+			"code":  "APPLICATION_READ_ONLY",
 		})
 		return
 	}

@@ -8,6 +8,7 @@ import RegisterPage from "./pages/RegisterPage";
 import CategoriesPage from "./pages/CategoriesPage";
 import ApplyPage from "./pages/ApplyPage";
 import RegistrationUpdatePage from "./pages/RegistrationUpdatePage";
+import TrackStatusDetailPage from "./pages/TrackStatusDetailPage";
 import DashboardPage from "./pages/DashboardPage";
 import AdminLoginPage from "./pages/admin/AdminLoginPage";
 import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
@@ -66,11 +67,20 @@ export default function App() {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/categories" element={<CategoriesPage />} />
+            <Route path="/track/details" element={<TrackStatusDetailPage />} />
             <Route
               path="/apply"
               element={
                 <CandidateRoute>
                   <ApplyPage />
+                </CandidateRoute>
+              }
+            />
+            <Route
+              path="/applications/:id"
+              element={
+                <CandidateRoute>
+                  <RegistrationUpdatePage />
                 </CandidateRoute>
               }
             />

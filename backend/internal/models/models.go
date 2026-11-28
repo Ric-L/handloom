@@ -6,6 +6,16 @@ type User struct {
 	ID           string    `json:"id" db:"id"`
 	MobileNumber string    `json:"mobile_number" db:"mobile_number"`
 	Email        *string   `json:"email,omitempty" db:"email"`
+	FullName     *string   `json:"full_name,omitempty" db:"full_name"`
+	FatherName   *string   `json:"father_name,omitempty" db:"father_name"`
+	MotherName   *string   `json:"mother_name,omitempty" db:"mother_name"`
+	DOB          *string   `json:"dob,omitempty" db:"dob"`
+	Country      *string   `json:"country,omitempty" db:"country"`
+	State        *string   `json:"state,omitempty" db:"state"`
+	District     *string   `json:"district,omitempty" db:"district"`
+	AddressLine1 *string   `json:"address_line1,omitempty" db:"address_line1"`
+	AddressLine2 *string   `json:"address_line2,omitempty" db:"address_line2"`
+	AddressLine3 *string   `json:"address_line3,omitempty" db:"address_line3"`
 	PasswordHash string    `json:"-" db:"password_hash"`
 	Role         string    `json:"role" db:"role"`
 	CreatedAt    time.Time `json:"created_at" db:"created_at"`
@@ -63,6 +73,14 @@ type Claims struct {
 	Role   string `json:"role"`
 }
 
+type DistrictMetric struct {
+	District     string `json:"district"`
+	TotalApplied int    `json:"total_applied"`
+	Pending      int    `json:"pending"`
+	Approved     int    `json:"approved"`
+	Rejected     int    `json:"rejected"`
+}
+
 type CategoryMetric struct {
 	CategoryID     int    `json:"category_id"`
 	Code           string `json:"code"`
@@ -80,4 +98,5 @@ type AdminMetricsResponse struct {
 	Approved     int              `json:"approved"`
 	Rejected     int              `json:"rejected"`
 	Categories   []CategoryMetric `json:"categories"`
+	Districts    []DistrictMetric `json:"districts"`
 }

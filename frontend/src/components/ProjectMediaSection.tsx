@@ -133,26 +133,26 @@ export const ProjectMediaSection: React.FC = () => {
   });
 
   return (
-    <section id="project-media" className="scroll-mt-20 py-14 bg-gradient-to-b from-slate-50 via-slate-100/70 to-white">
+    <section id="project-media" className="scroll-mt-20 py-14 bg-[#FAF6EE] rounded-2xl border border-[#D9C5A3]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Heading */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 pb-6 border-b border-slate-200">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 pb-6 border-b border-[#D9C5A3]">
           <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-blue-100 text-blue-800 border border-blue-200 mb-3">
-              <Camera className="w-3.5 h-3.5 text-blue-700" />
-              Visual Archive & Documentaries
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-[0.16em] bg-[#EEF2E7] text-[#3E492D] border border-[#5C6B45]/30 mb-3">
+              <Camera className="w-3.5 h-3.5 text-[#5C6B45]" />
+              Visual Archive &amp; Documentaries
             </div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-              Project Media, Craft Films & Field Gallery
+            <h2 className="font-serif text-2xl sm:text-3xl text-[#3B3028] tracking-tight">
+              Craft Films &amp; Field Gallery
             </h2>
-            <p className="mt-2 text-sm text-slate-600 max-w-2xl">
-              Glimpses into accredited weaving clusters, master craft demonstrations, live loom workshops, and state exhibitions documenting our artisan community.
+            <p className="mt-2 text-sm text-[#6E5D50] max-w-2xl">
+              Glimpses into weaving clusters, master craft demonstrations, live loom workshops, and exhibitions documenting our artisan community.
             </p>
           </div>
 
           <div className="mt-4 md:mt-0 flex items-center gap-2">
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-              {MEDIA_ITEMS.length} Certified Media Items
+            <span className="text-xs font-bold text-[#6E5D50] uppercase tracking-wider">
+              {MEDIA_ITEMS.length} Media Features
             </span>
           </div>
         </div>
@@ -166,10 +166,10 @@ export const ProjectMediaSection: React.FC = () => {
               <button
                 key={tab.id}
                 onClick={() => setActiveFilter(tab.id)}
-                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all shrink-0 ${
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all shrink-0 cursor-pointer ${
                   isActive
-                    ? "bg-gradient-to-r from-blue-700 via-blue-800 to-indigo-800 text-white shadow-md shadow-blue-900/20"
-                    : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-100 hover:text-slate-900"
+                    ? "bg-[#8B5E3C] text-[#F5EFE3] shadow-xs"
+                    : "bg-white text-[#3B3028] border border-[#D9C5A3] hover:bg-[#EDE3D2]"
                 }`}
               >
                 <Icon className="w-4 h-4" />
@@ -185,10 +185,10 @@ export const ProjectMediaSection: React.FC = () => {
             <div
               key={item.id}
               onClick={() => setActiveItem(item)}
-              className="group bg-white rounded-3xl overflow-hidden border border-slate-200/90 shadow-sm hover:shadow-xl hover:border-blue-400 transition-all duration-300 cursor-pointer flex flex-col"
+              className="group bg-white rounded-xl overflow-hidden border border-[#D9C5A3] shadow-2xs hover:shadow-md hover:border-[#8B5E3C] transition-all duration-300 cursor-pointer flex flex-col"
             >
               {/* Thumbnail Container */}
-              <div className="relative aspect-[16/10] overflow-hidden bg-slate-900">
+              <div className="relative aspect-[16/10] overflow-hidden bg-[#2A211B]">
                 <img
                   src={item.thumbnail}
                   alt={item.title}
@@ -197,18 +197,18 @@ export const ProjectMediaSection: React.FC = () => {
                 />
 
                 {/* Gradient Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-black/20" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#2A211B]/80 via-transparent to-black/20" />
 
                 {/* Badges */}
                 <div className="absolute top-3 left-3 flex items-center gap-2">
                   <span
-                    className={`text-[11px] font-extrabold uppercase px-2.5 py-1 rounded-md text-white shadow backdrop-blur-md ${
-                      item.type === "video" ? "bg-rose-600/90" : "bg-blue-600/90"
+                    className={`text-[11px] font-bold uppercase px-2.5 py-1 rounded-md text-[#F5EFE3] shadow backdrop-blur-md ${
+                      item.type === "video" ? "bg-[#8B5E3C]/90" : "bg-[#5C6B45]/90"
                     }`}
                   >
                     {item.type === "video" ? "Video Documentary" : "Photo Feature"}
                   </span>
-                  <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-black/60 text-white backdrop-blur-md">
+                  <span className="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-[#2A211B]/75 text-[#F5EFE3] backdrop-blur-md">
                     {item.category}
                   </span>
                 </div>
@@ -216,11 +216,11 @@ export const ProjectMediaSection: React.FC = () => {
                 {/* Play Button Overlay or Expand Icon */}
                 <div className="absolute inset-0 flex items-center justify-center">
                   {item.type === "video" ? (
-                    <div className="w-14 h-14 rounded-full bg-blue-600/90 text-white flex items-center justify-center shadow-lg shadow-blue-900/50 group-hover:scale-110 group-hover:bg-blue-500 transition-all duration-300">
-                      <Play className="w-6 h-6 fill-white ml-0.5" />
+                    <div className="w-14 h-14 rounded-full bg-[#8B5E3C]/95 text-[#F5EFE3] flex items-center justify-center shadow-lg group-hover:scale-110 transition-all duration-300">
+                      <Play className="w-6 h-6 fill-[#F5EFE3] ml-0.5" />
                     </div>
                   ) : (
-                    <div className="w-11 h-11 rounded-full bg-slate-900/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 group-hover:scale-105 transition-all duration-300 backdrop-blur-sm">
+                    <div className="w-11 h-11 rounded-full bg-[#3B3028]/70 text-[#F5EFE3] flex items-center justify-center opacity-0 group-hover:opacity-100 group-hover:scale-105 transition-all duration-300 backdrop-blur-sm">
                       <Maximize2 className="w-5 h-5" />
                     </div>
                   )}
@@ -228,7 +228,7 @@ export const ProjectMediaSection: React.FC = () => {
 
                 {/* Duration / Tag footer on image */}
                 {item.duration && (
-                  <div className="absolute bottom-3 right-3 px-2 py-0.5 rounded bg-black/80 text-[11px] font-mono font-bold text-white backdrop-blur-md">
+                  <div className="absolute bottom-3 right-3 px-2 py-0.5 rounded bg-[#2A211B]/85 text-[11px] font-mono font-bold text-[#F5EFE3] backdrop-blur-md">
                     {item.duration}
                   </div>
                 )}
@@ -237,23 +237,23 @@ export const ProjectMediaSection: React.FC = () => {
               {/* Card Meta Content */}
               <div className="p-5 flex-1 flex flex-col justify-between">
                 <div>
-                  <div className="flex items-center gap-1.5 text-xs text-blue-700 font-bold mb-2">
+                  <div className="flex items-center gap-1.5 text-xs text-[#5C6B45] font-semibold mb-2">
                     <MapPin className="w-3.5 h-3.5 shrink-0" />
                     <span className="truncate">{item.location}</span>
                   </div>
 
-                  <h3 className="text-base font-bold text-slate-900 group-hover:text-blue-700 transition leading-snug mb-2">
+                  <h3 className="font-serif text-lg text-[#3B3028] group-hover:text-[#8B5E3C] transition leading-snug mb-2">
                     {item.title}
                   </h3>
 
-                  <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed mb-4">{item.description}</p>
+                  <p className="text-xs text-[#6E5D50] line-clamp-2 leading-relaxed mb-4">{item.description}</p>
                 </div>
 
-                <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+                <div className="pt-3 border-t border-[#E9DEC8] flex items-center justify-between text-xs text-[#6E5D50]">
                   <span className="flex items-center gap-1 font-medium">
-                    <Calendar className="w-3.5 h-3.5 text-slate-400" /> {item.date}
+                    <Calendar className="w-3.5 h-3.5 text-[#8D7B6D]" /> {item.date}
                   </span>
-                  <span className="text-blue-700 font-extrabold flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
+                  <span className="text-[#8B5E3C] font-semibold flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
                     {item.type === "video" ? "Watch Video" : "View Photo"} <ChevronRight className="w-3.5 h-3.5" />
                   </span>
                 </div>
@@ -264,23 +264,23 @@ export const ProjectMediaSection: React.FC = () => {
 
         {/* Media Lightbox / Modal */}
         {activeItem && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-slate-950/80 backdrop-blur-md animate-in fade-in">
-            <div className="bg-slate-900 rounded-3xl max-w-4xl w-full overflow-hidden shadow-2xl border border-slate-700 flex flex-col max-h-[92vh]">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-[#2A211B]/80 backdrop-blur-md">
+            <div className="bg-[#3B3028] rounded-2xl max-w-4xl w-full overflow-hidden shadow-2xl border border-[#D9C5A3]/40 flex flex-col max-h-[92vh]">
               {/* Modal Top Bar */}
-              <div className="p-4 bg-slate-950/80 border-b border-slate-800 flex items-center justify-between text-white">
+              <div className="p-4 bg-[#2A211B] border-b border-[#D9C5A3]/25 flex items-center justify-between text-[#F5EFE3]">
                 <div className="flex items-center gap-2">
                   <span
-                    className={`text-[11px] font-extrabold uppercase px-2 py-0.5 rounded ${
-                      activeItem.type === "video" ? "bg-rose-600" : "bg-blue-600"
+                    className={`text-[11px] font-bold uppercase px-2 py-0.5 rounded ${
+                      activeItem.type === "video" ? "bg-[#8B5E3C]" : "bg-[#5C6B45]"
                     }`}
                   >
-                    {activeItem.type === "video" ? "Official Video Player" : "High-Resolution Image"}
+                    {activeItem.type === "video" ? "Craft Video Player" : "High-Resolution Image"}
                   </span>
-                  <span className="text-xs text-slate-400 font-mono">[{activeItem.id}]</span>
+                  <span className="text-xs text-[#D9C5A3] font-mono">[{activeItem.id}]</span>
                 </div>
                 <button
                   onClick={() => setActiveItem(null)}
-                  className="p-1.5 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition"
+                  className="p-1.5 rounded-full bg-[#3B3028] hover:bg-[#8B5E3C] text-[#D9C5A3] hover:text-[#F5EFE3] transition cursor-pointer"
                 >
                   <X className="w-5 h-5" />
                 </button>

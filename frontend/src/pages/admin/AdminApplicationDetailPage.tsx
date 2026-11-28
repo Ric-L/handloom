@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getAdminApplication, approveApplication, rejectApplication, fetchAuthenticatedDocument } from "../../api";
@@ -161,7 +161,7 @@ export default function AdminApplicationDetailPage() {
     return (
       <div className="max-w-7xl mx-auto py-24 text-center space-y-4">
         <div className="animate-spin w-10 h-10 border-4 border-primary-600 border-t-transparent rounded-full mx-auto" />
-        <h2 className="text-base font-bold text-slate-800">Retrieving Candidate Verification Dossier...</h2>
+        <h2 className="text-base font-bold text-[#3B3028]">Retrieving Candidate Verification Dossier...</h2>
         <p className="text-xs text-slate-400">Loading government ID proofs, DBT banking, and trade allocation</p>
       </div>
     );
@@ -198,28 +198,28 @@ export default function AdminApplicationDetailPage() {
   return (
     <div className="space-y-6 pb-20">
       {/* 1. Breadcrumbs & Back Navigation */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-slate-200">
-        <div className="flex items-center gap-2 text-xs font-semibold text-slate-500">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-[#D9C5A3]">
+        <div className="flex items-center gap-2 text-xs font-semibold text-[#6E5D50]">
           <Link to="/admin" className="hover:text-primary-800 flex items-center gap-1 transition">
             <ArrowLeft className="w-3.5 h-3.5" /> Moderation Console
           </Link>
           <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
           <span>Verification Queue</span>
           <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
-          <span className="text-slate-900 font-bold">{app.full_name}</span>
+          <span className="text-[#3B3028] font-bold">{app.full_name}</span>
         </div>
 
         <button
           onClick={() => navigate("/admin")}
-          className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-slate-900 bg-white hover:bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-xl shadow-2xs transition self-start sm:self-auto cursor-pointer"
+          className="inline-flex items-center gap-1.5 text-xs font-bold text-[#6E5D50] hover:text-[#3B3028] bg-white hover:bg-[#FAF6EE] border border-[#D9C5A3] px-3 py-1.5 rounded-xl shadow-2xs transition self-start sm:self-auto cursor-pointer"
         >
           <ArrowLeft className="w-3.5 h-3.5" /> Back to Queue
         </button>
       </div>
 
       {/* 2. Top Executive Command Card */}
-      <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-xs space-y-6">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pb-6 border-b border-slate-100">
+      <div className="bg-white rounded-3xl border border-[#D9C5A3] p-6 sm:p-8 shadow-xs space-y-6">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pb-6 border-b border-[#D9C5A3]">
           {/* Candidate Primary Identity */}
           <div className="flex items-start sm:items-center gap-4">
             <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary-800 to-slate-950 text-white font-black text-xl flex items-center justify-center shadow-md shadow-primary-950/20 shrink-0 border border-primary-700/40">
@@ -227,7 +227,7 @@ export default function AdminApplicationDetailPage() {
             </div>
             <div className="space-y-1.5">
               <div className="flex flex-wrap items-center gap-2.5">
-                <h1 className="text-2xl sm:text-3xl font-black text-slate-950 tracking-tight leading-none">
+                <h1 className="text-2xl sm:text-3xl font-black text-[#3B3028] tracking-tight leading-none">
                   {app.full_name}
                 </h1>
                 <span
@@ -243,17 +243,17 @@ export default function AdminApplicationDetailPage() {
                 </span>
               </div>
 
-              <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500 font-medium">
+              <div className="flex flex-wrap items-center gap-3 text-xs text-[#6E5D50] font-medium">
                 {/* Monospace Registration Number with 1-click copy */}
-                <div className="inline-flex items-center gap-1.5 font-mono text-xs font-extrabold bg-slate-100 text-slate-900 px-2.5 py-1 rounded-lg border border-slate-200 shadow-2xs">
+                <div className="inline-flex items-center gap-1.5 font-mono text-xs font-extrabold bg-[#FAF6EE] text-[#3B3028] px-2.5 py-1 rounded-lg border border-[#D9C5A3] shadow-2xs">
                   <span>Reg No: {app.registration_no}</span>
                   <button
                     onClick={() => handleCopy(app.registration_no)}
                     title="Copy Registration Number"
-                    className="text-slate-400 hover:text-slate-900 p-0.5 transition"
+                    className="text-slate-400 hover:text-[#3B3028] p-0.5 transition"
                   >
                     {copiedRegNo ? (
-                      <Check className="w-3.5 h-3.5 text-blue-600" />
+                      <Check className="w-3.5 h-3.5 text-[#8B5E3C]" />
                     ) : (
                       <Copy className="w-3.5 h-3.5" />
                     )}
@@ -288,7 +288,7 @@ export default function AdminApplicationDetailPage() {
                 {isCategoryLocked ? (
                   <button
                     disabled
-                    className="px-6 py-2.5 text-xs font-bold text-slate-400 bg-slate-200 border border-slate-300 rounded-xl flex items-center gap-1.5 cursor-not-allowed"
+                    className="px-6 py-2.5 text-xs font-bold text-slate-400 bg-slate-200 border border-[#D9C5A3] rounded-xl flex items-center gap-1.5 cursor-not-allowed"
                     title="Category quota reached. No approvals permitted."
                   >
                     <Lock className="w-4 h-4" /> Quota Full (Locked)
@@ -297,7 +297,7 @@ export default function AdminApplicationDetailPage() {
                   <button
                     type="button"
                     onClick={() => setConfirmApproveOpen(true)}
-                    className="px-6 py-2.5 text-xs font-extrabold text-white bg-gradient-to-r from-blue-700 via-blue-800 to-indigo-800 hover:from-blue-800 hover:to-indigo-900 rounded-xl transition shadow-md shadow-blue-900/20 flex items-center gap-1.5 cursor-pointer"
+                    className="px-6 py-2.5 text-xs font-extrabold text-white bg-gradient-to-r from-[#8B5E3C] via-blue-800 to-[#5C6B45] hover:from-[#8B5E3C] hover:to-[#5C6B45] rounded-xl transition shadow-md  flex items-center gap-1.5 cursor-pointer"
                   >
                     <CheckCircle className="w-4 h-4" /> Approve Candidate
                   </button>
@@ -305,8 +305,8 @@ export default function AdminApplicationDetailPage() {
               </>
             ) : (
               <div className="flex items-center gap-2.5">
-                <div className="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 font-bold text-xs border border-slate-200">
-                  Decision: <strong className="text-slate-950 uppercase">{app.status}</strong>
+                <div className="px-4 py-2 rounded-xl bg-[#FAF6EE] text-slate-700 font-bold text-xs border border-[#D9C5A3]">
+                  Decision: <strong className="text-[#3B3028] uppercase">{app.status}</strong>
                 </div>
 
                 {app.status === "APPROVED" && (
@@ -327,12 +327,12 @@ export default function AdminApplicationDetailPage() {
         <div
           className={`p-4.5 rounded-2xl border flex flex-col md:flex-row md:items-center justify-between gap-4 ${isCategoryLocked
               ? "bg-rose-50/70 border-rose-200 text-rose-950"
-              : "bg-blue-50/70 border-blue-200 text-blue-950"
+              : "bg-[#FAF6EE] border-[#D9C5A3] text-[#3B3028]"
             }`}
         >
           <div className="flex items-center gap-3">
             <div
-              className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 ${isCategoryLocked ? "bg-rose-200 text-rose-900" : "bg-blue-200 text-blue-900"
+              className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 ${isCategoryLocked ? "bg-rose-200 text-rose-900" : "bg-blue-200 text-[#3B3028]"
                 }`}
             >
               {app.category_code}
@@ -341,7 +341,7 @@ export default function AdminApplicationDetailPage() {
               <div className="text-[11px] font-bold uppercase tracking-wider opacity-75">
                 Applied Craft Trade Category
               </div>
-              <div className="font-extrabold text-slate-900 text-sm sm:text-base leading-snug">
+              <div className="font-extrabold text-[#3B3028] text-sm sm:text-base leading-snug">
                 {app.category_code} — {app.category_title}
               </div>
             </div>
@@ -349,8 +349,8 @@ export default function AdminApplicationDetailPage() {
 
           <div className="flex items-center gap-4 text-xs font-bold text-left md:text-right">
             <div>
-              <span className="text-slate-500 font-medium block text-[11px]">Category Approval Intake:</span>
-              <span className="text-slate-900 font-mono text-sm">
+              <span className="text-[#6E5D50] font-medium block text-[11px]">Category Approval Intake:</span>
+              <span className="text-[#3B3028] font-mono text-sm">
                 <strong>{app.approved_count}</strong> / {app.approval_limit} Seats
               </span>
             </div>
@@ -361,7 +361,7 @@ export default function AdminApplicationDetailPage() {
                   <Lock className="w-3.5 h-3.5" /> QUOTA FULL (LOCKED)
                 </span>
               ) : (
-                <span className="inline-flex items-center gap-1 text-[11px] font-extrabold text-blue-800 bg-blue-200/90 px-3 py-1 rounded-full border border-blue-300">
+                <span className="inline-flex items-center gap-1 text-[11px] font-extrabold text-[#734C30] bg-blue-200/90 px-3 py-1 rounded-full border border-[#D9C5A3]">
                   <Sparkles className="w-3.5 h-3.5" /> {app.approval_limit - app.approved_count} Seats Available
                 </span>
               )}
@@ -395,136 +395,136 @@ export default function AdminApplicationDetailPage() {
         {/* Left Column: Candidate Dossier & Banking (7 cols) */}
         <div className="lg:col-span-7 space-y-6">
           {/* Section 1: Personal Dossier */}
-          <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-xs space-y-4">
-            <div className="flex items-center gap-2 font-black text-slate-900 text-sm pb-3 border-b border-slate-100">
+          <div className="bg-white rounded-3xl border border-[#D9C5A3] p-6 shadow-xs space-y-4">
+            <div className="flex items-center gap-2 font-black text-[#3B3028] text-sm pb-3 border-b border-[#D9C5A3]">
               <User className="w-4 h-4 text-primary-700" />
               <span>1. Candidate Personal Profile</span>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-              <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-100 space-y-0.5">
+              <div className="bg-[#FAF6EE] p-3.5 rounded-2xl border border-[#D9C5A3] space-y-0.5">
                 <span className="text-slate-400 font-medium block text-[11px]">Full Name</span>
-                <span className="font-extrabold text-slate-900 text-sm">{app.full_name}</span>
+                <span className="font-extrabold text-[#3B3028] text-sm">{app.full_name}</span>
               </div>
 
-              <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-100 space-y-0.5">
+              <div className="bg-[#FAF6EE] p-3.5 rounded-2xl border border-[#D9C5A3] space-y-0.5">
                 <span className="text-slate-400 font-medium block text-[11px]">Father / Guardian</span>
-                <span className="font-bold text-slate-800 text-sm">{app.guardian_name}</span>
+                <span className="font-bold text-[#3B3028] text-sm">{app.guardian_name}</span>
               </div>
 
-              <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-100 space-y-0.5">
+              <div className="bg-[#FAF6EE] p-3.5 rounded-2xl border border-[#D9C5A3] space-y-0.5">
                 <span className="text-slate-400 font-medium block text-[11px]">Date of Birth</span>
-                <span className="font-bold text-slate-800 font-mono text-xs">{app.dob}</span>
+                <span className="font-bold text-[#3B3028] font-mono text-xs">{app.dob}</span>
               </div>
 
-              <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-100 space-y-0.5">
+              <div className="bg-[#FAF6EE] p-3.5 rounded-2xl border border-[#D9C5A3] space-y-0.5">
                 <span className="text-slate-400 font-medium block text-[11px]">Gender & Social Category</span>
-                <span className="font-bold text-slate-900">
+                <span className="font-bold text-[#3B3028]">
                   {app.gender} • <strong className="text-primary-800 bg-primary-100 px-1.5 py-0.2 rounded font-black">{app.social_category}</strong>
                 </span>
               </div>
             </div>
 
             {app.alt_mobile && (
-              <div className="flex items-center gap-2 text-xs text-slate-600 bg-slate-50 p-3 rounded-xl border border-slate-100">
+              <div className="flex items-center gap-2 text-xs text-[#6E5D50] bg-[#FAF6EE] p-3 rounded-xl border border-[#D9C5A3]">
                 <Phone className="w-3.5 h-3.5 text-primary-700" />
-                <span>Alternate Contact Mobile: <strong className="font-mono text-slate-900">{app.alt_mobile}</strong></span>
+                <span>Alternate Contact Mobile: <strong className="font-mono text-[#3B3028]">{app.alt_mobile}</strong></span>
               </div>
             )}
           </div>
 
           {/* Section 2: Government ID & Address */}
-          <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-xs space-y-4">
-            <div className="flex items-center gap-2 font-black text-slate-900 text-sm pb-3 border-b border-slate-100">
+          <div className="bg-white rounded-3xl border border-[#D9C5A3] p-6 shadow-xs space-y-4">
+            <div className="flex items-center gap-2 font-black text-[#3B3028] text-sm pb-3 border-b border-[#D9C5A3]">
               <Shield className="w-4 h-4 text-primary-700" />
               <span>2. Government Identity & Residential Verification</span>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-              <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-100 space-y-1">
+              <div className="bg-[#FAF6EE] p-3.5 rounded-2xl border border-[#D9C5A3] space-y-1">
                 <span className="text-slate-400 font-medium block text-[11px]">Document Type</span>
-                <span className="font-bold text-slate-900">{app.gov_id_type}</span>
+                <span className="font-bold text-[#3B3028]">{app.gov_id_type}</span>
               </div>
 
-              <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-100 space-y-1">
+              <div className="bg-[#FAF6EE] p-3.5 rounded-2xl border border-[#D9C5A3] space-y-1">
                 <span className="text-slate-400 font-medium block text-[11px]">Verified Digits</span>
-                <span className="font-mono font-black text-slate-900 bg-white border border-slate-300 px-2 py-0.5 rounded-lg inline-block">
+                <span className="font-mono font-black text-[#3B3028] bg-white border border-[#D9C5A3] px-2 py-0.5 rounded-lg inline-block">
                   •••• {app.gov_id_last4}
                 </span>
               </div>
             </div>
 
-            <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 text-xs space-y-2">
-              <div className="flex items-center gap-1.5 font-bold text-slate-800">
+            <div className="bg-[#FAF6EE] p-4 rounded-2xl border border-[#D9C5A3] text-xs space-y-2">
+              <div className="flex items-center gap-1.5 font-bold text-[#3B3028]">
                 <MapPin className="w-4 h-4 text-primary-700" /> District & Residential Address
               </div>
-              <p className="text-slate-800 leading-relaxed font-sans bg-white p-3 rounded-xl border border-slate-200 text-xs">
+              <p className="text-[#3B3028] leading-relaxed font-sans bg-white p-3 rounded-xl border border-[#D9C5A3] text-xs">
                 {app.address_full}
               </p>
-              <div className="text-[11px] font-bold text-slate-600 font-mono">
+              <div className="text-[11px] font-bold text-[#6E5D50] font-mono">
                 Location: {app.district_state_pin}
               </div>
             </div>
           </div>
 
           {/* Section 3: Academic & Training Details */}
-          <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-xs space-y-4">
-            <div className="flex items-center gap-2 font-black text-slate-900 text-sm pb-3 border-b border-slate-100">
+          <div className="bg-white rounded-3xl border border-[#D9C5A3] p-6 shadow-xs space-y-4">
+            <div className="flex items-center gap-2 font-black text-[#3B3028] text-sm pb-3 border-b border-[#D9C5A3]">
               <GraduationCap className="w-4 h-4 text-primary-700" />
               <span>3. Academic & Craft Profile</span>
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-              <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
+              <div className="bg-[#FAF6EE] p-3 rounded-xl border border-[#D9C5A3]">
                 <span className="text-slate-400 block text-[11px]">Qualification</span>
-                <span className="font-bold text-slate-900">{app.highest_qual}</span>
+                <span className="font-bold text-[#3B3028]">{app.highest_qual}</span>
               </div>
-              <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
+              <div className="bg-[#FAF6EE] p-3 rounded-xl border border-[#D9C5A3]">
                 <span className="text-slate-400 block text-[11px]">Occupation</span>
-                <span className="font-bold text-slate-900">{app.occupation}</span>
+                <span className="font-bold text-[#3B3028]">{app.occupation}</span>
               </div>
-              <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
+              <div className="bg-[#FAF6EE] p-3 rounded-xl border border-[#D9C5A3]">
                 <span className="text-slate-400 block text-[11px]">Training Mode</span>
-                <span className="font-bold text-slate-900">{app.training_mode}</span>
+                <span className="font-bold text-[#3B3028]">{app.training_mode}</span>
               </div>
-              <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
+              <div className="bg-[#FAF6EE] p-3 rounded-xl border border-[#D9C5A3]">
                 <span className="text-slate-400 block text-[11px]">Center Preference</span>
-                <span className="font-bold text-slate-900">{app.preferred_centre || "District HQ"}</span>
+                <span className="font-bold text-[#3B3028]">{app.preferred_centre || "District HQ"}</span>
               </div>
             </div>
           </div>
 
           {/* Section 4: DBT Stipend Banking */}
-          <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-xs space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-              <div className="flex items-center gap-2 font-black text-slate-900 text-sm">
+          <div className="bg-white rounded-3xl border border-[#D9C5A3] p-6 shadow-xs space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-[#D9C5A3]">
+              <div className="flex items-center gap-2 font-black text-[#3B3028] text-sm">
                 <CreditCard className="w-4 h-4 text-primary-700" />
                 <span>4. DBT Monthly Stipend Bank Account</span>
               </div>
-              <span className="text-[11px] font-bold text-blue-700 bg-blue-100 px-2.5 py-0.5 rounded-full border border-blue-200">
+              <span className="text-[11px] font-bold text-[#8B5E3C] bg-[#EFE6D5] px-2.5 py-0.5 rounded-full border border-[#D9C5A3]">
                 ✓ PFMS / DBT Direct Transfer Ready
               </span>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-              <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-100 space-y-1">
+              <div className="bg-[#FAF6EE] p-3.5 rounded-2xl border border-[#D9C5A3] space-y-1">
                 <span className="text-slate-400 text-[11px] block">Account Holder Name</span>
-                <span className="font-extrabold text-slate-900 text-sm">{app.bank_holder_name || app.full_name}</span>
+                <span className="font-extrabold text-[#3B3028] text-sm">{app.bank_holder_name || app.full_name}</span>
               </div>
 
-              <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-100 space-y-1">
+              <div className="bg-[#FAF6EE] p-3.5 rounded-2xl border border-[#D9C5A3] space-y-1">
                 <span className="text-slate-400 text-[11px] block">Bank Name & Branch</span>
-                <span className="font-extrabold text-slate-900 text-sm">{app.bank_name_branch || "State Bank of India"}</span>
+                <span className="font-extrabold text-[#3B3028] text-sm">{app.bank_name_branch || "State Bank of India"}</span>
               </div>
 
-              <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-100 space-y-1">
+              <div className="bg-[#FAF6EE] p-3.5 rounded-2xl border border-[#D9C5A3] space-y-1">
                 <span className="text-slate-400 text-[11px] block">Account Number</span>
-                <span className="font-mono font-black text-slate-900 text-sm">
+                <span className="font-mono font-black text-[#3B3028] text-sm">
                   {app.account_number ? `•••• •••• ${app.account_number.slice(-4)}` : "Verified on File"}
                 </span>
               </div>
 
-              <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-100 space-y-1">
+              <div className="bg-[#FAF6EE] p-3.5 rounded-2xl border border-[#D9C5A3] space-y-1">
                 <span className="text-slate-400 text-[11px] block">Bank IFSC Code</span>
                 <span className="font-mono font-black text-primary-800 text-sm">{app.ifsc_code || "SBIN0001234"}</span>
               </div>
@@ -534,16 +534,16 @@ export default function AdminApplicationDetailPage() {
 
         {/* Right Column: 7 Mandatory Documents Verification Suite (5 cols) */}
         <div className="lg:col-span-5 space-y-6">
-          <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-xs space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-              <div className="flex items-center gap-2 font-black text-slate-900 text-sm">
+          <div className="bg-white rounded-3xl border border-[#D9C5A3] p-6 shadow-xs space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-[#D9C5A3]">
+              <div className="flex items-center gap-2 font-black text-[#3B3028] text-sm">
                 <FileText className="w-4 h-4 text-primary-700" />
                 <span>Verification Document Suite</span>
               </div>
               <span className="text-[11px] text-slate-400 font-mono">7 Checks</span>
             </div>
 
-            <p className="text-xs text-slate-500 leading-relaxed">
+            <p className="text-xs text-[#6E5D50] leading-relaxed">
               Examine applicant's uploaded documents. Click any document card to expand into full-screen high-resolution inspection lightbox.
             </p>
 
@@ -554,15 +554,15 @@ export default function AdminApplicationDetailPage() {
                   <div
                     key={doc.key}
                     onClick={() => docUrl && openDocumentPreview(doc.label, docUrl)}
-                    className={`p-3.5 rounded-2xl border border-slate-200/90 transition-all flex items-center justify-between group ${docUrl ? "hover:border-primary-400 hover:bg-primary-50/20 cursor-pointer" : "opacity-75"
+                    className={`p-3.5 rounded-2xl border border-[#D9C5A3] transition-all flex items-center justify-between group ${docUrl ? "hover:border-primary-400 hover:bg-primary-50/20 cursor-pointer" : "opacity-75"
                       }`}
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-slate-100 text-xl flex items-center justify-center border border-slate-200 group-hover:scale-105 transition-transform">
+                      <div className="w-10 h-10 rounded-xl bg-[#FAF6EE] text-xl flex items-center justify-center border border-[#D9C5A3] group-hover:scale-105 transition-transform">
                         {doc.icon}
                       </div>
                       <div>
-                        <div className="text-xs font-bold text-slate-900 group-hover:text-primary-900 transition-colors">
+                        <div className="text-xs font-bold text-[#3B3028] group-hover:text-primary-900 transition-colors">
                           {doc.label}
                         </div>
                         <div className="text-[10px] text-slate-400 font-medium">{doc.type}</div>
@@ -572,13 +572,13 @@ export default function AdminApplicationDetailPage() {
                     <div className="flex items-center gap-2">
                       {docUrl ? (
                         <>
-                          <span className="text-[11px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200">
+                          <span className="text-[11px] font-bold text-[#8B5E3C] bg-[#FAF6EE] px-2 py-0.5 rounded-full border border-[#D9C5A3]">
                             ✓ Uploaded
                           </span>
                           <ZoomIn className="w-4 h-4 text-slate-400 group-hover:text-primary-700 transition" />
                         </>
                       ) : (
-                        <span className="text-[11px] font-semibold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">
+                        <span className="text-[11px] font-semibold text-slate-400 bg-[#FAF6EE] px-2 py-0.5 rounded-full">
                           Not Uploaded
                         </span>
                       )}
@@ -592,19 +592,19 @@ export default function AdminApplicationDetailPage() {
       </div>
 
       {/* 4. Bottom Sticky Moderation Bar */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 shadow-xl py-3 px-6">
+      <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-[#D9C5A3] shadow-xl py-3 px-6">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <button
               onClick={() => navigate("/admin")}
-              className="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl transition"
+              className="px-4 py-2 text-xs font-bold text-[#6E5D50] hover:bg-[#EDE3D2] rounded-xl transition"
             >
               ← Back to Queue
             </button>
             <div className="h-4 w-px bg-slate-300 hidden sm:block" />
-            <div className="text-xs text-slate-600 hidden sm:block">
-              Candidate: <strong className="text-slate-900">{app.full_name}</strong> • Trade:{" "}
-              <strong className="text-slate-900">{app.category_code}</strong>
+            <div className="text-xs text-[#6E5D50] hidden sm:block">
+              Candidate: <strong className="text-[#3B3028]">{app.full_name}</strong> • Trade:{" "}
+              <strong className="text-[#3B3028]">{app.category_code}</strong>
             </div>
           </div>
 
@@ -626,7 +626,7 @@ export default function AdminApplicationDetailPage() {
                 {isCategoryLocked ? (
                   <button
                     disabled
-                    className="px-6 py-2.5 text-xs font-bold text-slate-400 bg-slate-200 border border-slate-300 rounded-xl flex items-center gap-1.5 cursor-not-allowed"
+                    className="px-6 py-2.5 text-xs font-bold text-slate-400 bg-slate-200 border border-[#D9C5A3] rounded-xl flex items-center gap-1.5 cursor-not-allowed"
                     title="Category quota reached. No approvals permitted."
                   >
                     <Lock className="w-4 h-4" /> Quota Full (Locked)
@@ -635,14 +635,14 @@ export default function AdminApplicationDetailPage() {
                   <button
                     type="button"
                     onClick={() => setConfirmApproveOpen(true)}
-                    className="px-6 py-2.5 text-xs font-extrabold text-white bg-gradient-to-r from-blue-700 via-blue-800 to-indigo-800 hover:from-blue-800 hover:to-indigo-900 rounded-xl transition shadow-md shadow-blue-900/20 flex items-center gap-1.5 cursor-pointer"
+                    className="px-6 py-2.5 text-xs font-extrabold text-white bg-gradient-to-r from-[#8B5E3C] via-blue-800 to-[#5C6B45] hover:from-[#8B5E3C] hover:to-[#5C6B45] rounded-xl transition shadow-md  flex items-center gap-1.5 cursor-pointer"
                   >
                     <CheckCircle className="w-4 h-4" /> Approve Candidate
                   </button>
                 )}
               </>
             ) : (
-              <span className="text-xs font-extrabold text-slate-500 uppercase tracking-wider">
+              <span className="text-xs font-extrabold text-[#6E5D50] uppercase tracking-wider">
                 Application is {app.status}
               </span>
             )}
@@ -652,16 +652,16 @@ export default function AdminApplicationDetailPage() {
 
       {/* Confirmation Modal for Approval */}
       {confirmApproveOpen && (
-        <div className="fixed inset-0 z-60 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl space-y-5 border border-slate-200">
-            <div className="flex items-center gap-3 text-blue-700">
-              <div className="w-10 h-10 rounded-2xl bg-blue-100 flex items-center justify-center">
-                <CheckCircle className="w-6 h-6 text-blue-600" />
+        <div className="fixed inset-0 z-60 bg-[#2A211B]/70 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl space-y-5 border border-[#D9C5A3]">
+            <div className="flex items-center gap-3 text-[#8B5E3C]">
+              <div className="w-10 h-10 rounded-2xl bg-[#EFE6D5] flex items-center justify-center">
+                <CheckCircle className="w-6 h-6 text-[#8B5E3C]" />
               </div>
-              <h3 className="text-lg font-black text-slate-900 tracking-tight">Confirm Candidate Approval</h3>
+              <h3 className="text-lg font-black text-[#3B3028] tracking-tight">Confirm Candidate Approval</h3>
             </div>
 
-            <p className="text-xs text-slate-600 leading-relaxed">
+            <p className="text-xs text-[#6E5D50] leading-relaxed">
               Are you sure you want to approve candidate <strong>{app.full_name}</strong> for trade{" "}
               <strong>
                 {app.category_code} ({app.category_title})
@@ -669,7 +669,7 @@ export default function AdminApplicationDetailPage() {
               ?
             </p>
 
-            <div className="bg-blue-50 border border-blue-200 p-4 rounded-2xl text-xs text-blue-950 space-y-1.5 font-medium">
+            <div className="bg-[#FAF6EE] border border-[#D9C5A3] p-4 rounded-2xl text-xs text-[#3B3028] space-y-1.5 font-medium">
               <div>
                 Current Approvals: <strong>{app.approved_count}</strong> / {app.approval_limit}
               </div>
@@ -686,14 +686,14 @@ export default function AdminApplicationDetailPage() {
             <div className="flex justify-end gap-3 pt-2">
               <button
                 onClick={() => setConfirmApproveOpen(false)}
-                className="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl transition cursor-pointer"
+                className="px-4 py-2 text-xs font-bold text-[#6E5D50] hover:bg-[#EDE3D2] rounded-xl transition cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 onClick={() => approveMutation.mutate(app.id)}
                 disabled={approveMutation.isPending}
-                className="px-5 py-2.5 text-xs font-bold text-white bg-gradient-to-r from-blue-700 via-blue-800 to-indigo-800 hover:from-blue-800 hover:to-indigo-900 rounded-xl transition disabled:opacity-50 flex items-center gap-1.5 cursor-pointer shadow-md shadow-blue-900/20"
+                className="px-5 py-2.5 text-xs font-bold text-white bg-gradient-to-r from-[#8B5E3C] via-blue-800 to-[#5C6B45] hover:from-[#8B5E3C] hover:to-[#5C6B45] rounded-xl transition disabled:opacity-50 flex items-center gap-1.5 cursor-pointer shadow-md "
               >
                 {approveMutation.isPending ? "Executing Atomic Quota Guard..." : "Confirm & Approve"}
               </button>
@@ -704,26 +704,26 @@ export default function AdminApplicationDetailPage() {
 
       {/* Rejection Modal with Presets */}
       {rejectModalOpen && (
-        <div className="fixed inset-0 z-60 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl space-y-5 border border-slate-200">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div className="fixed inset-0 z-60 bg-[#2A211B]/70 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl space-y-5 border border-[#D9C5A3]">
+            <div className="flex items-center justify-between pb-3 border-b border-[#D9C5A3]">
               <div className="flex items-center gap-2.5 text-rose-700">
                 <XCircle className="w-6 h-6" />
-                <h3 className="text-base font-black text-slate-900 tracking-tight">Reject Application with Reason</h3>
+                <h3 className="text-base font-black text-[#3B3028] tracking-tight">Reject Application with Reason</h3>
               </div>
-              <button onClick={() => setRejectModalOpen(false)} className="text-slate-400 hover:text-slate-600">
+              <button onClick={() => setRejectModalOpen(false)} className="text-slate-400 hover:text-[#6E5D50]">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <p className="text-xs text-slate-600 leading-relaxed">
+            <p className="text-xs text-[#6E5D50] leading-relaxed">
               Admission policy requires a documented reason for rejecting candidate{" "}
               <strong>{app.full_name}</strong> (Min 10 characters). This will be recorded in audit logs and visible to the applicant.
             </p>
 
             {/* Presets */}
             <div>
-              <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">
+              <label className="block text-[11px] font-bold text-[#6E5D50] uppercase tracking-wider mb-2">
                 Fast Administrative Presets:
               </label>
               <div className="flex flex-wrap gap-1.5">
@@ -732,7 +732,7 @@ export default function AdminApplicationDetailPage() {
                     key={idx}
                     type="button"
                     onClick={() => setRejectReason(preset)}
-                    className="text-[11px] bg-slate-100 hover:bg-rose-50 hover:text-rose-800 hover:border-rose-300 border border-slate-200 text-slate-700 px-3 py-1.5 rounded-lg transition text-left cursor-pointer font-medium"
+                    className="text-[11px] bg-[#FAF6EE] hover:bg-rose-50 hover:text-rose-800 hover:border-rose-300 border border-[#D9C5A3] text-slate-700 px-3 py-1.5 rounded-lg transition text-left cursor-pointer font-medium"
                   >
                     + {preset}
                   </button>
@@ -753,11 +753,11 @@ export default function AdminApplicationDetailPage() {
                 }}
                 rows={3}
                 placeholder="Enter specific audit remarks for rejection..."
-                className={`w-full p-3.5 border rounded-2xl text-xs focus:outline-none focus:ring-2 focus:ring-rose-500 transition font-medium ${rejectError ? "border-rose-500 ring-1 ring-rose-500" : "border-slate-300"
+                className={`w-full p-3.5 border rounded-2xl text-xs focus:outline-none focus:ring-2 focus:ring-rose-500 transition font-medium ${rejectError ? "border-rose-500 ring-1 ring-rose-500" : "border-[#D9C5A3]"
                   }`}
               />
               <div className="flex justify-between items-center mt-1.5 text-[11px]">
-                <span className={rejectReason.trim().length < 10 ? "text-amber-600 font-bold" : "text-blue-600 font-bold"}>
+                <span className={rejectReason.trim().length < 10 ? "text-amber-600 font-bold" : "text-[#8B5E3C] font-bold"}>
                   {rejectReason.trim().length} / 10 characters minimum
                 </span>
                 {rejectError && <span className="text-rose-600 font-bold">{rejectError}</span>}
@@ -767,7 +767,7 @@ export default function AdminApplicationDetailPage() {
             <div className="flex justify-end gap-3 pt-2">
               <button
                 onClick={() => setRejectModalOpen(false)}
-                className="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl transition cursor-pointer"
+                className="px-4 py-2 text-xs font-bold text-[#6E5D50] hover:bg-[#EDE3D2] rounded-xl transition cursor-pointer"
               >
                 Cancel
               </button>
@@ -785,17 +785,17 @@ export default function AdminApplicationDetailPage() {
 
       {/* Document Lightbox Modal */}
       {previewDoc && (
-        <div className="fixed inset-0 z-70 bg-slate-950/85 backdrop-blur-xs flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-70 bg-[#2A211B]/85 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl max-w-3xl w-full p-5 shadow-2xl space-y-4">
-            <div className="flex justify-between items-center border-b border-slate-100 pb-3">
-              <h4 className="font-extrabold text-sm text-slate-900">{previewDoc.title}</h4>
+            <div className="flex justify-between items-center border-b border-[#D9C5A3] pb-3">
+              <h4 className="font-extrabold text-sm text-[#3B3028]">{previewDoc.title}</h4>
               <button onClick={closePreview} className="text-slate-400 hover:text-slate-700 cursor-pointer">
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <div className="h-96 sm:h-[480px] bg-slate-100 rounded-2xl overflow-hidden flex items-center justify-center border border-slate-200">
+            <div className="h-96 sm:h-[480px] bg-[#FAF6EE] rounded-2xl overflow-hidden flex items-center justify-center border border-[#D9C5A3]">
               {previewLoading ? (
-                <div className="text-xs font-semibold text-slate-500">Loading document securely...</div>
+                <div className="text-xs font-semibold text-[#6E5D50]">Loading document securely...</div>
               ) : previewError ? (
                 <div className="text-xs font-semibold text-rose-700 px-4 text-center">{previewError}</div>
               ) : previewDoc.mimeType === "application/pdf" ? (
@@ -811,7 +811,7 @@ export default function AdminApplicationDetailPage() {
             <div className="text-right">
               <button
                 onClick={closePreview}
-                className="px-4 py-2 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl cursor-pointer"
+                className="px-4 py-2 text-xs font-bold text-slate-700 bg-[#FAF6EE] hover:bg-slate-200 rounded-xl cursor-pointer"
               >
                 Close Lightbox
               </button>

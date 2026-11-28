@@ -13,6 +13,15 @@ export interface User {
   role: UserRole;
   created_at: string;
   full_name?: string;
+  father_name?: string;
+  mother_name?: string;
+  dob?: string;
+  country?: string;
+  state?: string;
+  district?: string;
+  address_line1?: string;
+  address_line2?: string;
+  address_line3?: string;
 }
 
 export interface JobCategory {
@@ -39,6 +48,7 @@ export interface Application {
   gov_id_last4: string;
   social_category: SocialCategory;
   address_full?: string;
+  district?: string;
   district_state_pin: string;
   emergency_contact?: { name: string; relationship: string; mobile: string };
   highest_qual: HighestQual;
@@ -75,13 +85,38 @@ export interface AuthResponse {
 }
 
 export interface TrackResponse {
+  application_id?: string;
   full_name: string;
   category: string;
+  category_id?: number;
   category_code?: string;
   submitted_at: string;
+  reviewed_at?: string;
   status: ApplicationStatus;
   rejection_reason?: string;
   registration_no?: string;
+  guardian_name?: string;
+  dob?: string;
+  gender?: Gender;
+  alt_mobile?: string;
+  gov_id_type?: string;
+  gov_id_last4?: string;
+  social_category?: SocialCategory;
+  address_full?: string;
+  district?: string;
+  district_state_pin?: string;
+  highest_qual?: HighestQual;
+  institution_name?: string;
+  occupation?: Occupation;
+  prev_training?: string;
+  prior_experience?: { has_experience: boolean; details?: string };
+  preferred_centre?: string;
+  training_mode?: TrainingMode;
+  bank_holder_name?: string;
+  bank_name_branch?: string;
+  account_number?: string;
+  ifsc_code?: string;
+  document_status?: Record<string, boolean>;
 }
 
 export interface CategoryMetric {
@@ -95,12 +130,21 @@ export interface CategoryMetric {
   is_approval_open: boolean;
 }
 
+export interface DistrictMetric {
+  district: string;
+  total_applied: number;
+  pending: number;
+  approved: number;
+  rejected: number;
+}
+
 export interface AdminMetrics {
   total_applied: number;
   pending: number;
   approved: number;
   rejected: number;
   categories: CategoryMetric[];
+  districts?: DistrictMetric[];
 }
 
 export interface ApprovedSlipData {

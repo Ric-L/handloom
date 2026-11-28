@@ -59,12 +59,56 @@ func (h *AdminHandler) Metrics(c *gin.Context) {
 		categories = []models.CategoryMetric{}
 	}
 
+	// Aggregate district-wise application counts from actual applications data
+	districtMap := make(map[string]*models.DistrictMetric, len(ManipurDistricts)+1)
+	for _, d := range ManipurDistricts {
+		districtMap[d] = &models.DistrictMetric{District: d}
+	}
+
+	distRows, err := h.DB.Query(ctx, `
+		SELECT COALESCE(a.district, ''), a.district_state_pin, a.address_full, COALESCE(u.district, ''), a.status
+		FROM applications a
+		LEFT JOIN users u ON u.id = a.user_id`)
+	if err == nil {
+		defer distRows.Close()
+		for distRows.Next() {
+			var appDist, distStatePin, addrFull, userDist, appStatus string
+			if scanErr := distRows.Scan(&appDist, &distStatePin, &addrFull, &userDist, &appStatus); scanErr != nil {
+				continue
+			}
+			resolved := ResolveDistrictFromTexts(appDist, distStatePin, addrFull, userDist)
+			dm, exists := districtMap[resolved]
+			if !exists {
+				dm = &models.DistrictMetric{District: resolved}
+				districtMap[resolved] = dm
+			}
+			dm.TotalApplied++
+			switch appStatus {
+			case "PENDING":
+				dm.Pending++
+			case "APPROVED":
+				dm.Approved++
+			case "REJECTED":
+				dm.Rejected++
+			}
+		}
+	}
+
+	districts := make([]models.DistrictMetric, 0, len(districtMap))
+	for _, d := range ManipurDistricts {
+		districts = append(districts, *districtMap[d])
+	}
+	if other, ok := districtMap["Other / Unspecified"]; ok && other.TotalApplied > 0 {
+		districts = append(districts, *other)
+	}
+
 	c.JSON(http.StatusOK, models.AdminMetricsResponse{
 		TotalApplied: total,
 		Pending:      pending,
 		Approved:     approved,
 		Rejected:     rejected,
 		Categories:   categories,
+		Districts:    districts,
 	})
 }
 
@@ -111,7 +155,7 @@ func (h *AdminHandler) ListApplications(c *gin.Context) {
 	}
 
 	if district != "" {
-		baseWhere += fmt.Sprintf(" AND a.district_state_pin ILIKE $%d", argIdx)
+		baseWhere += fmt.Sprintf(" AND (COALESCE(a.district, '') ILIKE $%d OR a.district_state_pin ILIKE $%d OR a.address_full ILIKE $%d)", argIdx, argIdx, argIdx)
 		args = append(args, "%"+district+"%")
 		argIdx++
 	}

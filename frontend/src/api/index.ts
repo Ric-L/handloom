@@ -2,6 +2,7 @@ import client from "./client";
 import { API_BASE_URL } from "../lib/constants";
 import type {
   AuthResponse,
+  User,
   Application,
   ApplicationDetail,
   ApprovedSlipData,
@@ -21,8 +22,41 @@ export const trackApplication = (identifier: string, dob: string) =>
     .then(r => r.data);
 
 // Candidate Authentication
-export const register = (data: { mobile_number: string; password: string; email?: string }) =>
+export interface RegisterPayload {
+  full_name: string;
+  father_name: string;
+  mother_name: string;
+  dob: string;
+  mobile_number: string;
+  email: string;
+  password: string;
+  country: string;
+  state: string;
+  district: string;
+  address_line1: string;
+  address_line2?: string;
+  address_line3?: string;
+}
+
+export interface UpdateProfilePayload {
+  full_name: string;
+  father_name: string;
+  mother_name: string;
+  dob: string;
+  email: string;
+  country: string;
+  state: string;
+  district: string;
+  address_line1: string;
+  address_line2?: string;
+  address_line3?: string;
+}
+
+export const register = (data: RegisterPayload) =>
   client.post<AuthResponse>("/auth/register", data).then(r => r.data);
+
+export const updateProfile = (data: UpdateProfilePayload) =>
+  client.put<{ message: string; user: User }>("/auth/profile", data).then(r => r.data);
 
 export const login = (data: { mobile_number: string; password: string }) =>
   client.post<AuthResponse>("/auth/login", data).then(r => r.data);
@@ -116,12 +150,9 @@ export const fetchAuthenticatedDocument = async (
   };
 };
 
-// Candidate Dossier Retrieval & Updates
+// Candidate Dossier Retrieval (Strictly View-Only once submitted)
 export const getApplicationDossier = (id: string) =>
   client.get<ApplicationDetail>(`/applications/${id}/dossier`).then(r => r.data);
-
-export const updateApplicationDossier = (id: string, data: any) =>
-  client.put<{ message: string; id: string }>(`/applications/${id}`, data).then(r => r.data);
 
 // Super Admin Category Quota Management
 export const updateCategoryQuota = (categoryId: number | string, approvalLimit: number) =>

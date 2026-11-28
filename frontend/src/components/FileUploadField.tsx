@@ -8,6 +8,7 @@ interface FileUploadFieldProps {
   onChange: (url: string) => void;
   required?: boolean;
   compact?: boolean;
+  readOnly?: boolean;
   buttonText?: string;
   accept?: string;
   helperText?: string;
@@ -19,6 +20,7 @@ export default function FileUploadField({
   onChange,
   required = false,
   compact = false,
+  readOnly = false,
   buttonText = "Choose File",
   accept = "image/jpeg,image/png,image/webp,application/pdf",
   helperText = "Photo (JPG, PNG, WEBP) or PDF, strictly below 5 MB",
@@ -89,70 +91,82 @@ export default function FileUploadField({
   if (compact) {
     return (
       <div className="space-y-1.5">
-        <label className="block text-sm font-bold text-slate-800 flex items-center justify-between">
+        <label className="text-sm font-semibold text-[#3B3028] flex items-center justify-between">
           <span>
-            {label} {required && <span className="text-rose-600">*</span>}
+            {label} {required && <span className="text-[#8B5E3C]">*</span>}
           </span>
           {value && (
-            <span className="text-xs font-bold text-emerald-700 flex items-center gap-1">
+            <span className="text-xs font-semibold text-[#5C6B45] flex items-center gap-1">
               <CheckCircle2 className="w-3.5 h-3.5" /> Uploaded
             </span>
           )}
         </label>
 
-        <input
-          type="file"
-          ref={fileInputRef}
-          onChange={handleFileSelect}
-          accept={accept}
-          className="hidden"
-        />
+        {!readOnly && (
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileSelect}
+            accept={accept}
+            className="hidden"
+          />
+        )}
 
         <div
-          onClick={() => !isUploading && fileInputRef.current?.click()}
-          className={`w-full flex items-center justify-between py-2.5 px-3.5 border rounded-xl text-sm cursor-pointer transition ${
+          onClick={() => !readOnly && !isUploading && fileInputRef.current?.click()}
+          className={`w-full flex items-center justify-between py-2.5 px-3.5 border rounded-lg text-sm transition ${
+            readOnly ? "cursor-default" : "cursor-pointer"
+          } ${
             error
-              ? "border-rose-400 bg-rose-50/40"
+              ? "border-[#A9442A] bg-[#FDF2EE]"
               : value
-              ? "border-emerald-300 bg-emerald-50/40 text-slate-900"
-              : "border-slate-300 bg-white hover:border-blue-400 text-slate-600"
+              ? "border-[#5C6B45] bg-[#EEF2E7]/60 text-[#3B3028]"
+              : "border-[#D9C5A3] bg-[#FAF6EE] hover:border-[#8B5E3C] text-[#6E5D50]"
           }`}
         >
           <div className="flex items-center gap-2.5 truncate pr-2">
-            <Upload className={`w-4 h-4 shrink-0 ${value ? "text-emerald-600" : "text-slate-400"}`} />
+            <Upload className={`w-4 h-4 shrink-0 ${value ? "text-[#5C6B45]" : "text-[#8D7B6D]"}`} />
             <span className="truncate font-medium">
-              {isUploading ? "Uploading..." : value ? fileName || "File attached" : "Tap to select file"}
+              {isUploading
+                ? "Uploading..."
+                : value
+                ? fileName || "File attached"
+                : readOnly
+                ? "Not provided"
+                : "Tap to select file"}
             </span>
           </div>
 
           <div className="flex items-center gap-1.5 shrink-0">
             {isUploading ? (
-              <Loader2 className="w-4 h-4 text-blue-600 animate-spin" />
+              <Loader2 className="w-4 h-4 text-[#8B5E3C] animate-spin" />
             ) : value ? (
               <div className="flex items-center gap-1">
                 <button
                   type="button"
                   onClick={handlePreview}
                   disabled={isOpening}
-                  className="p-1.5 text-blue-700 hover:bg-blue-50 rounded-lg transition cursor-pointer"
+                  className="p-1.5 text-[#8B5E3C] hover:bg-[#EDE3D2] rounded-lg transition cursor-pointer"
                   title="View uploaded file"
                 >
                   {isOpening ? <Loader2 className="w-4 h-4 animate-spin" /> : <Eye className="w-4 h-4" />}
                 </button>
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleClear();
-                  }}
-                  className="p-1.5 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition cursor-pointer"
-                  title="Remove file"
-                >
-                  <X className="w-4 h-4" />
-                </button>
+                {!readOnly && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleClear();
+                    }}
+                    className="p-1.5 text-[#6E5D50] hover:text-[#A9442A] hover:bg-[#FDF2EE] rounded-lg transition cursor-pointer"
+                    title="Remove file"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
               </div>
-            ) : (
-              <span className="px-3 py-1 bg-blue-700 text-white font-bold text-xs rounded-lg">
+            ) : readOnly ? null : (
+              <span className="px-3 py-1 bg-[#8B5E3C] text-[#F5EFE3] font-semibold text-xs rounded-md">
                 {buttonText}
               </span>
             )}
@@ -160,7 +174,7 @@ export default function FileUploadField({
         </div>
 
         {error && (
-          <p className="text-xs text-rose-700 font-medium flex items-center gap-1">
+          <p className="text-xs text-[#A9442A] font-medium flex items-center gap-1">
             <AlertCircle className="w-3.5 h-3.5 shrink-0" />
             {error}
           </p>
@@ -170,37 +184,39 @@ export default function FileUploadField({
   }
 
   return (
-    <div className="p-4 rounded-2xl border border-slate-200 bg-white space-y-2.5">
+    <div className="p-4 rounded-xl border border-[#D9C5A3] bg-[#FAF6EE] space-y-2.5">
       <div className="flex items-center justify-between gap-2">
-        <label className="text-sm font-bold text-slate-900">
-          {label} {required && <span className="text-rose-600">*</span>}
+        <label className="text-sm font-semibold text-[#3B3028]">
+          {label} {required && <span className="text-[#8B5E3C]">*</span>}
         </label>
         {value ? (
-          <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> Uploaded
+          <span className="inline-flex items-center gap-1 text-xs font-semibold text-[#3E492D] bg-[#EEF2E7] px-2.5 py-0.5 rounded-full border border-[#5C6B45]/40">
+            <CheckCircle2 className="w-3.5 h-3.5 text-[#5C6B45]" /> Uploaded
           </span>
         ) : required ? (
-          <span className="text-xs font-bold text-rose-700 bg-rose-50 px-2.5 py-0.5 rounded-full border border-rose-200">
+          <span className="text-xs font-semibold text-[#8B5E3C] bg-[#F3EAE2] px-2.5 py-0.5 rounded-full border border-[#D9C5A3]">
             Required
           </span>
         ) : (
-          <span className="text-xs text-slate-500">Optional</span>
+          <span className="text-xs text-[#6E5D50]">Optional</span>
         )}
       </div>
 
-      <input
-        type="file"
-        ref={fileInputRef}
-        onChange={handleFileSelect}
-        accept={accept}
-        className="hidden"
-      />
+      {!readOnly && (
+        <input
+          type="file"
+          ref={fileInputRef}
+          onChange={handleFileSelect}
+          accept={accept}
+          className="hidden"
+        />
+      )}
 
       {value ? (
-        <div className="flex items-center justify-between p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm">
+        <div className="flex items-center justify-between p-3 bg-white border border-[#D9C5A3] rounded-lg text-sm">
           <div className="flex items-center gap-2.5 truncate pr-2">
-            <FileText className="w-4 h-4 text-blue-700 shrink-0" />
-            <span className="truncate font-medium text-slate-800 text-xs sm:text-sm">
+            <FileText className="w-4 h-4 text-[#5C6B45] shrink-0" />
+            <span className="truncate font-medium text-[#3B3028] text-xs sm:text-sm">
               {fileName || value.split("/").pop()}
             </span>
           </div>
@@ -210,48 +226,54 @@ export default function FileUploadField({
               type="button"
               onClick={handlePreview}
               disabled={isOpening}
-              className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-bold text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition cursor-pointer"
+              className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-[#8B5E3C] bg-[#FAF6EE] border border-[#D9C5A3] rounded-md hover:bg-[#EDE3D2] transition cursor-pointer"
             >
               {isOpening ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Eye className="w-3.5 h-3.5" />}
               <span>View</span>
             </button>
-            <button
-              type="button"
-              onClick={handleClear}
-              className="p-1.5 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition cursor-pointer"
-              title="Remove file"
-            >
-              <X className="w-4 h-4" />
-            </button>
+            {!readOnly && (
+              <button
+                type="button"
+                onClick={handleClear}
+                className="p-1.5 text-[#6E5D50] hover:text-[#A9442A] hover:bg-[#FDF2EE] rounded-md transition cursor-pointer"
+                title="Remove file"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
           </div>
+        </div>
+      ) : readOnly ? (
+        <div className="p-3 bg-white/60 border border-[#D9C5A3] rounded-lg text-xs text-[#6E5D50]">
+          Not uploaded
         </div>
       ) : (
         <button
           type="button"
           onClick={() => !isUploading && fileInputRef.current?.click()}
           disabled={isUploading}
-          className="w-full border-2 border-dashed border-slate-300 hover:border-blue-500 rounded-xl p-4 text-center cursor-pointer transition bg-slate-50 hover:bg-blue-50/40"
+          className="w-full border-2 border-dashed border-[#D9C5A3] hover:border-[#8B5E3C] rounded-lg p-4 text-center cursor-pointer transition bg-white hover:bg-[#F5EFE3]/70"
         >
           {isUploading ? (
-            <div className="flex items-center justify-center gap-2 text-sm text-blue-700 font-semibold">
+            <div className="flex items-center justify-center gap-2 text-sm text-[#8B5E3C] font-semibold">
               <Loader2 className="w-4 h-4 animate-spin" />
               <span>Uploading file...</span>
             </div>
           ) : (
             <div className="space-y-1">
-              <div className="flex items-center justify-center gap-2 text-sm text-blue-700 font-bold">
+              <div className="flex items-center justify-center gap-2 text-sm text-[#8B5E3C] font-semibold">
                 <Upload className="w-4 h-4" />
                 <span>Tap here to upload file</span>
               </div>
-              <p className="text-xs text-slate-500">{helperText}</p>
+              <p className="text-xs text-[#6E5D50]">{helperText}</p>
             </div>
           )}
         </button>
       )}
 
       {error && (
-        <p className="text-xs text-rose-700 font-medium flex items-center gap-1.5">
-          <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+        <p className="text-xs text-[#A9442A] font-medium flex items-center gap-1.5">
+          <AlertCircle className="w-4 h-4 text-[#A9442A] shrink-0" />
           {error}
         </p>
       )}

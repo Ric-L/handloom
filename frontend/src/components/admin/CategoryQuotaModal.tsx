@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+﻿import React, { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { updateCategoryQuota } from "../../api";
 import { CategoryMetric } from "../../types";
@@ -100,10 +100,10 @@ export default function CategoryQuotaModal({
   const totalApproved = categories.reduce((sum, c) => sum + c.approved_count, 0);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs animate-in fade-in duration-200">
-      <div className="bg-white rounded-3xl border border-slate-200 shadow-2xl w-full max-w-3xl overflow-hidden flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#2A211B]/60 backdrop-blur-xs animate-in fade-in duration-200">
+      <div className="bg-white rounded-3xl border border-[#D9C5A3] shadow-2xl w-full max-w-3xl overflow-hidden flex flex-col max-h-[90vh]">
         {/* Modal Top Header */}
-        <div className="p-6 bg-slate-900 text-white flex items-center justify-between border-b border-slate-800">
+        <div className="p-6 bg-[#3B3028] text-white flex items-center justify-between border-b border-slate-800">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-primary-600/30 text-primary-300 border border-primary-500/40 flex items-center justify-center">
               <Sliders className="w-5 h-5 text-primary-400" />
@@ -131,8 +131,8 @@ export default function CategoryQuotaModal({
 
         {/* Feedback Alerts */}
         {successMessage && (
-          <div className="p-3.5 bg-blue-50 border-b border-blue-200 text-blue-900 text-xs font-bold flex items-center gap-2">
-            <Check className="w-4 h-4 text-blue-600 shrink-0" />
+          <div className="p-3.5 bg-[#FAF6EE] border-b border-[#D9C5A3] text-[#3B3028] text-xs font-bold flex items-center gap-2">
+            <Check className="w-4 h-4 text-[#8B5E3C] shrink-0" />
             <span>{successMessage}</span>
           </div>
         )}
@@ -145,9 +145,9 @@ export default function CategoryQuotaModal({
 
         {/* Modal Body: Table matching image */}
         <div className="overflow-y-auto p-6 space-y-4">
-          <div className="border border-slate-200 rounded-2xl overflow-hidden shadow-2xs">
+          <div className="border border-[#D9C5A3] rounded-2xl overflow-hidden shadow-2xs">
             <table className="w-full text-xs text-left">
-              <thead className="bg-slate-100 text-slate-600 font-extrabold uppercase tracking-wider text-[11px] border-b border-slate-200">
+              <thead className="bg-[#FAF6EE] text-[#6E5D50] font-extrabold uppercase tracking-wider text-[11px] border-b border-[#D9C5A3]">
                 <tr>
                   <th className="px-5 py-3.5">Job Role</th>
                   <th className="px-4 py-3.5 text-center">Approved</th>
@@ -156,7 +156,7 @@ export default function CategoryQuotaModal({
                   <th className="px-5 py-3.5 text-right">Action</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-[#E9DEC8]">
                 {categories.map(cat => {
                   const currentVal = quotas[cat.category_id] ?? cat.approval_limit;
                   const isDirty = currentVal !== cat.approval_limit;
@@ -166,16 +166,16 @@ export default function CategoryQuotaModal({
                   return (
                     <tr
                       key={cat.category_id}
-                      className="hover:bg-slate-50/60 transition group"
+                      className="hover:bg-[#FAF6EE] transition group"
                     >
                       {/* Job Role Title + Code */}
                       <td className="px-5 py-3.5">
                         <div className="flex items-center gap-2.5">
-                          <span className="font-mono text-xs font-black px-2 py-0.5 rounded-md bg-slate-100 text-slate-800 border border-slate-200 shrink-0">
+                          <span className="font-mono text-xs font-black px-2 py-0.5 rounded-md bg-[#FAF6EE] text-[#3B3028] border border-[#D9C5A3] shrink-0">
                             {cat.code}
                           </span>
                           <div>
-                            <span className="font-extrabold text-slate-900 text-xs block leading-tight">
+                            <span className="font-extrabold text-[#3B3028] text-xs block leading-tight">
                               {cat.title}
                             </span>
                             <span className="text-[10px] text-slate-400 font-medium">
@@ -200,7 +200,7 @@ export default function CategoryQuotaModal({
                           className={`w-28 text-center font-mono font-black text-xs py-1.5 px-2 border rounded-xl transition ${
                             isDirty
                               ? "border-primary-500 bg-primary-50/30 text-primary-950 ring-2 ring-primary-500/20"
-                              : "border-slate-300 bg-white text-slate-900 focus:border-primary-500 focus:outline-none"
+                              : "border-[#D9C5A3] bg-white text-[#3B3028] focus:border-primary-500 focus:outline-none"
                           }`}
                         />
                       </td>
@@ -212,8 +212,8 @@ export default function CategoryQuotaModal({
                             <Lock className="w-3 h-3 text-rose-600" /> Quota Full
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 text-[10px] font-extrabold text-blue-800 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-full">
-                            <Unlock className="w-3 h-3 text-blue-600" /> Open
+                          <span className="inline-flex items-center gap-1 text-[10px] font-extrabold text-[#734C30] bg-[#FAF6EE] border border-[#D9C5A3] px-2 py-0.5 rounded-full">
+                            <Unlock className="w-3 h-3 text-[#8B5E3C]" /> Open
                           </span>
                         )}
                       </td>
@@ -227,7 +227,7 @@ export default function CategoryQuotaModal({
                           className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl transition cursor-pointer shadow-2xs ${
                             isDirty
                               ? "bg-primary-700 hover:bg-primary-800 text-white"
-                              : "bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200"
+                              : "bg-[#FAF6EE] text-slate-400 cursor-not-allowed border border-[#D9C5A3]"
                           }`}
                         >
                           <Save className="w-3.5 h-3.5" />
@@ -238,16 +238,16 @@ export default function CategoryQuotaModal({
                   );
                 })}
               </tbody>
-              <tfoot className="bg-slate-100/90 font-black text-slate-900 border-t border-slate-200 text-xs">
+              <tfoot className="bg-[#FAF6EE] font-black text-[#3B3028] border-t border-[#D9C5A3] text-xs">
                 <tr>
                   <td className="px-5 py-3.5 uppercase tracking-wider">TOTAL SANCTIONED SEATS</td>
-                  <td className="px-4 py-3.5 text-center font-mono font-bold text-slate-800">
+                  <td className="px-4 py-3.5 text-center font-mono font-bold text-[#3B3028]">
                     {totalApproved}
                   </td>
                   <td className="px-4 py-3.5 text-center font-mono font-black text-sm text-primary-900">
                     {totalSanctioned.toLocaleString()}
                   </td>
-                  <td colSpan={2} className="px-5 py-3.5 text-right text-slate-500 font-semibold text-[11px]">
+                  <td colSpan={2} className="px-5 py-3.5 text-right text-[#6E5D50] font-semibold text-[11px]">
                     Available Capacity: {(totalSanctioned - totalApproved).toLocaleString()} seats
                   </td>
                 </tr>
@@ -257,14 +257,14 @@ export default function CategoryQuotaModal({
         </div>
 
         {/* Modal Bottom Bar */}
-        <div className="p-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between text-xs">
-          <span className="text-slate-500 font-medium">
+        <div className="p-4 bg-[#FAF6EE] border-t border-[#D9C5A3] flex items-center justify-between text-xs">
+          <span className="text-[#6E5D50] font-medium">
             Super Administrator Quota Modification: Changes apply globally in real-time.
           </span>
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl shadow-xs transition cursor-pointer"
+            className="px-4 py-2 bg-[#3B3028] hover:bg-slate-800 text-white font-bold rounded-xl shadow-xs transition cursor-pointer"
           >
             Done Managing Quotas
           </button>

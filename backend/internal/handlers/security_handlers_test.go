@@ -179,6 +179,111 @@ func TestTrackRejectsInvalidDOBFormat(t *testing.T) {
 	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
 	if w.Code != http.StatusBadRequest {
-		t.Fatalf("expected 400 for SQLi DOB payload, got %d", w.Code)
+		t.Fatalf("expected 400 for SQLi DOB, got %d", w.Code)
+	}
+}
+
+func TestNormalizeAndResolveManipurDistrict(t *testing.T) {
+	if got, ok := NormalizeManipurDistrict("  imphal west "); !ok || got != "Imphal West" {
+		t.Fatalf("expected canonical Imphal West, got (%q, %v)", got, ok)
+	}
+	if _, ok := NormalizeManipurDistrict("Unknown District"); ok {
+		t.Fatalf("expected invalid district to fail")
+	}
+	if got := ResolveDistrictFromTexts("", "Paona Bazar, Imphal East, Manipur", "", ""); got != "Imphal East" {
+		t.Fatalf("expected Imphal East from address string, got %q", got)
+	}
+	if got := ResolveDistrictFromTexts("", "No match text"); got != "Other / Unspecified" {
+		t.Fatalf("expected Other / Unspecified fallback, got %q", got)
+	}
+}
+
+func TestRegisterValidationFieldErrors(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	r := gin.New()
+	h := &AuthHandler{}
+	r.POST("/register", h.Register)
+
+	payload := `{
+		"full_name": "",
+		"father_name": "",
+		"mother_name": "",
+		"dob": "",
+		"mobile_number": "12345",
+		"email": "invalid-email",
+		"password": "short",
+		"country": "India",
+		"state": "Manipur",
+		"district": "NotAManipurDistrict",
+		"address_line1": ""
+	}`
+	req := httptest.NewRequest(http.MethodPost, "/register", strings.NewReader(payload))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+
+	if w.Code != http.StatusBadRequest {
+		t.Fatalf("expected 400 Bad Request, got %d (%s)", w.Code, w.Body.String())
+	}
+
+	var body struct {
+		Error  string            `json:"error"`
+		Errors map[string]string `json:"errors"`
+	}
+	if err := json.Unmarshal(w.Body.Bytes(), &body); err != nil {
+		t.Fatalf("json.Unmarshal: %v", err)
+	}
+	for _, field := range []string{
+		"full_name", "father_name", "mother_name", "dob", "mobile_number",
+		"email", "password", "district", "address_line1",
+	} {
+		if body.Errors[field] == "" {
+			t.Fatalf("expected field error for %q, got errors=%v", field, body.Errors)
+		}
+	}
+}
+
+func TestUpdateProfileValidationFieldErrors(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	r := gin.New()
+	h := &AuthHandler{}
+	r.PUT("/profile", func(c *gin.Context) {
+		c.Set("user_id", "550e8400-e29b-41d4-a716-446655440000")
+		c.Set("role", "APPLICANT")
+		h.UpdateProfile(c)
+	})
+
+	payload := `{
+		"full_name": "A",
+		"father_name": "",
+		"mother_name": "",
+		"dob": "2099-01-01",
+		"email": "bad-email",
+		"country": "India",
+		"state": "Manipur",
+		"district": "Invalid",
+		"address_line1": ""
+	}`
+	req := httptest.NewRequest(http.MethodPut, "/profile", strings.NewReader(payload))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+
+	if w.Code != http.StatusBadRequest {
+		t.Fatalf("expected 400 Bad Request, got %d (%s)", w.Code, w.Body.String())
+	}
+
+	var body struct {
+		Errors map[string]string `json:"errors"`
+	}
+	if err := json.Unmarshal(w.Body.Bytes(), &body); err != nil {
+		t.Fatalf("json.Unmarshal: %v", err)
+	}
+	for _, field := range []string{
+		"full_name", "father_name", "mother_name", "dob", "email", "district", "address_line1",
+	} {
+		if body.Errors[field] == "" {
+			t.Fatalf("expected field error for %q, got errors=%v", field, body.Errors)
+		}
 	}
 }

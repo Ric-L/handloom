@@ -13,3 +13,25 @@ export const JOB_CATEGORIES = [
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080/api/v1";
 export const MAX_FILE_SIZE_MB = 5;
 export const ALLOWED_FILE_TYPES = ["image/jpeg", "image/png", "image/webp", "application/pdf"];
+
+export const MANIPUR_DISTRICTS = [
+  "Bishnupur",
+  "Chandel",
+  "Churachandpur",
+  "Imphal East",
+  "Imphal West",
+  "Jiribam",
+  "Kakching",
+  "Kamjong",
+  "Kangpokpi",
+  "Noney",
+  "Pherzawl",
+  "Senapati",
+  "Tamenglong",
+  "Tengnoupal",
+  "Thoubal",
+  "Ukhrul",
+] as const;
+
+export const DEFAULT_COUNTRY = "India";
+export const DEFAULT_STATE = "Manipur";

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getAdminApplication, approveApplication, rejectApplication, fetchAuthenticatedDocument } from "../../api";
 import { formatDate, statusBadgeColor } from "../../lib/utils";
@@ -173,13 +173,13 @@ export default function ApplicationReviewDrawer({
   ];
 
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden bg-slate-950/70 backdrop-blur-xs flex justify-end">
+    <div className="fixed inset-0 z-50 overflow-hidden bg-[#2A211B]/70 backdrop-blur-xs flex justify-end">
       <div className="w-full max-w-3xl bg-white h-full shadow-2xl flex flex-col transform transition-all duration-300">
         {/* Top Header */}
-        <div className="px-6 py-4 bg-slate-950 text-white flex items-center justify-between border-b border-slate-800">
+        <div className="px-6 py-4 bg-[#2A211B] text-white flex items-center justify-between border-b border-slate-800">
           <div className="space-y-1">
             <div className="flex items-center gap-3">
-              <span className="font-mono text-xs font-black bg-slate-900 border border-slate-700 px-2.5 py-1 rounded-lg text-primary-300 flex items-center gap-1.5">
+              <span className="font-mono text-xs font-black bg-[#3B3028] border border-slate-700 px-2.5 py-1 rounded-lg text-primary-300 flex items-center gap-1.5">
                 {app?.registration_no || "LOADING..."}
                 {app?.registration_no && (
                   <button
@@ -227,7 +227,7 @@ export default function ApplicationReviewDrawer({
           {isLoading && (
             <div className="text-center py-24 text-slate-400 space-y-3">
               <div className="animate-spin w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full mx-auto" />
-              <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+              <p className="text-xs font-bold text-[#6E5D50] uppercase tracking-wider">
                 Retrieving candidate verification dossier...
               </p>
             </div>
@@ -246,14 +246,14 @@ export default function ApplicationReviewDrawer({
                 className={`p-4.5 rounded-2xl border flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
                   isCategoryLocked
                     ? "bg-rose-50/70 border-rose-200 text-rose-950"
-                    : "bg-blue-50/70 border-blue-200 text-blue-950"
+                    : "bg-[#FAF6EE] border-[#D9C5A3] text-[#3B3028]"
                 }`}
               >
                 <div>
                   <div className="text-[11px] font-bold uppercase tracking-wider opacity-75">
                     Target Trade Approval Quota
                   </div>
-                  <div className="font-black text-sm text-slate-900 mt-0.5">
+                  <div className="font-black text-sm text-[#3B3028] mt-0.5">
                     {app.category_code} — {app.category_title}
                   </div>
                 </div>
@@ -267,7 +267,7 @@ export default function ApplicationReviewDrawer({
                       <Lock className="w-3 h-3" /> QUOTA FULL (LOCKED)
                     </span>
                   ) : (
-                    <span className="text-[11px] font-extrabold text-blue-800 bg-blue-200/90 px-2.5 py-0.5 rounded-full inline-block">
+                    <span className="text-[11px] font-extrabold text-[#734C30] bg-blue-200/90 px-2.5 py-0.5 rounded-full inline-block">
                       {app.approval_limit - app.approved_count} seats remaining
                     </span>
                   )}
@@ -287,7 +287,7 @@ export default function ApplicationReviewDrawer({
               )}
 
               {/* Navigation Tabs inside Drawer */}
-              <div className="flex border-b border-slate-200 gap-6 text-xs font-bold">
+              <div className="flex border-b border-[#D9C5A3] gap-6 text-xs font-bold">
                 {[
                   { id: "profile", label: "Candidate Profile & Identity" },
                   { id: "banking", label: "DBT Bank Stipend Account" },
@@ -312,28 +312,28 @@ export default function ApplicationReviewDrawer({
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {/* Personal Information */}
-                    <div className="bg-slate-50 rounded-2xl p-4.5 border border-slate-200 space-y-3 text-xs">
-                      <div className="flex items-center gap-2 font-extrabold text-slate-900 text-xs uppercase tracking-wider pb-2 border-b border-slate-200">
+                    <div className="bg-[#FAF6EE] rounded-2xl p-4.5 border border-[#D9C5A3] space-y-3 text-xs">
+                      <div className="flex items-center gap-2 font-extrabold text-[#3B3028] text-xs uppercase tracking-wider pb-2 border-b border-[#D9C5A3]">
                         <User className="w-4 h-4 text-primary-700" /> Personal Dossier
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-slate-500">Full Name</span>
-                        <span className="font-extrabold text-slate-900 text-sm">{app.full_name}</span>
+                        <span className="text-[#6E5D50]">Full Name</span>
+                        <span className="font-extrabold text-[#3B3028] text-sm">{app.full_name}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-slate-500">Father / Guardian</span>
-                        <span className="font-bold text-slate-800">{app.guardian_name}</span>
+                        <span className="text-[#6E5D50]">Father / Guardian</span>
+                        <span className="font-bold text-[#3B3028]">{app.guardian_name}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-slate-500">Date of Birth</span>
-                        <span className="font-bold text-slate-800 font-mono">{app.dob}</span>
+                        <span className="text-[#6E5D50]">Date of Birth</span>
+                        <span className="font-bold text-[#3B3028] font-mono">{app.dob}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-slate-500">Gender</span>
-                        <span className="font-bold text-slate-800">{app.gender}</span>
+                        <span className="text-[#6E5D50]">Gender</span>
+                        <span className="font-bold text-[#3B3028]">{app.gender}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-slate-500">Social Category</span>
+                        <span className="text-[#6E5D50]">Social Category</span>
                         <span className="font-black text-primary-800 bg-primary-100/80 px-2 py-0.5 rounded">
                           {app.social_category}
                         </span>
@@ -341,27 +341,27 @@ export default function ApplicationReviewDrawer({
                     </div>
 
                     {/* Identity Verification */}
-                    <div className="bg-slate-50 rounded-2xl p-4.5 border border-slate-200 space-y-3 text-xs">
-                      <div className="flex items-center gap-2 font-extrabold text-slate-900 text-xs uppercase tracking-wider pb-2 border-b border-slate-200">
+                    <div className="bg-[#FAF6EE] rounded-2xl p-4.5 border border-[#D9C5A3] space-y-3 text-xs">
+                      <div className="flex items-center gap-2 font-extrabold text-[#3B3028] text-xs uppercase tracking-wider pb-2 border-b border-[#D9C5A3]">
                         <Shield className="w-4 h-4 text-primary-700" /> Government ID Verification
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-slate-500">Government ID Type</span>
-                        <span className="font-bold text-slate-900">{app.gov_id_type}</span>
+                        <span className="text-[#6E5D50]">Government ID Type</span>
+                        <span className="font-bold text-[#3B3028]">{app.gov_id_type}</span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="text-slate-500">ID Verification Last 4</span>
-                        <span className="font-mono font-black text-slate-900 bg-white border border-slate-300 px-2.5 py-1 rounded-lg">
+                        <span className="text-[#6E5D50]">ID Verification Last 4</span>
+                        <span className="font-mono font-black text-[#3B3028] bg-white border border-[#D9C5A3] px-2.5 py-1 rounded-lg">
                           •••• {app.gov_id_last4}
                         </span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-slate-500">District & State</span>
-                        <span className="font-bold text-slate-900">{app.district_state_pin}</span>
+                        <span className="text-[#6E5D50]">District & State</span>
+                        <span className="font-bold text-[#3B3028]">{app.district_state_pin}</span>
                       </div>
                       <div>
-                        <span className="text-slate-500 block mb-1">Permanent Residential Address:</span>
-                        <p className="bg-white p-2.5 rounded-xl border border-slate-200 text-slate-800 leading-relaxed font-sans text-xs">
+                        <span className="text-[#6E5D50] block mb-1">Permanent Residential Address:</span>
+                        <p className="bg-white p-2.5 rounded-xl border border-[#D9C5A3] text-[#3B3028] leading-relaxed font-sans text-xs">
                           {app.address_full}
                         </p>
                       </div>
@@ -369,26 +369,26 @@ export default function ApplicationReviewDrawer({
                   </div>
 
                   {/* Academic & Trade Qualifications */}
-                  <div className="bg-slate-50 rounded-2xl p-4.5 border border-slate-200 text-xs space-y-3">
-                    <div className="flex items-center gap-2 font-extrabold text-slate-900 text-xs uppercase tracking-wider pb-2 border-b border-slate-200">
+                  <div className="bg-[#FAF6EE] rounded-2xl p-4.5 border border-[#D9C5A3] text-xs space-y-3">
+                    <div className="flex items-center gap-2 font-extrabold text-[#3B3028] text-xs uppercase tracking-wider pb-2 border-b border-[#D9C5A3]">
                       <GraduationCap className="w-4 h-4 text-primary-700" /> Academic & Trade Profile
                     </div>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                       <div>
-                        <span className="text-slate-500 block text-[11px]">Highest Qualification</span>
-                        <span className="font-bold text-slate-900">{app.highest_qual}</span>
+                        <span className="text-[#6E5D50] block text-[11px]">Highest Qualification</span>
+                        <span className="font-bold text-[#3B3028]">{app.highest_qual}</span>
                       </div>
                       <div>
-                        <span className="text-slate-500 block text-[11px]">Current Occupation</span>
-                        <span className="font-bold text-slate-900">{app.occupation}</span>
+                        <span className="text-[#6E5D50] block text-[11px]">Current Occupation</span>
+                        <span className="font-bold text-[#3B3028]">{app.occupation}</span>
                       </div>
                       <div>
-                        <span className="text-slate-500 block text-[11px]">Training Mode</span>
-                        <span className="font-bold text-slate-900">{app.training_mode}</span>
+                        <span className="text-[#6E5D50] block text-[11px]">Training Mode</span>
+                        <span className="font-bold text-[#3B3028]">{app.training_mode}</span>
                       </div>
                       <div>
-                        <span className="text-slate-500 block text-[11px]">Preferred Centre</span>
-                        <span className="font-bold text-slate-900">{app.preferred_centre || "District Training Center"}</span>
+                        <span className="text-[#6E5D50] block text-[11px]">Preferred Centre</span>
+                        <span className="font-bold text-[#3B3028]">{app.preferred_centre || "District Training Center"}</span>
                       </div>
                     </div>
                   </div>
@@ -397,41 +397,41 @@ export default function ApplicationReviewDrawer({
 
               {/* Tab 2: DBT Stipend Banking */}
               {activeTab === "banking" && (
-                <div className="bg-slate-50 rounded-2xl p-6 border border-slate-200 space-y-4 text-xs">
-                  <div className="flex items-center justify-between pb-3 border-b border-slate-200">
-                    <div className="flex items-center gap-2 font-extrabold text-slate-900 text-sm">
+                <div className="bg-[#FAF6EE] rounded-2xl p-6 border border-[#D9C5A3] space-y-4 text-xs">
+                  <div className="flex items-center justify-between pb-3 border-b border-[#D9C5A3]">
+                    <div className="flex items-center gap-2 font-extrabold text-[#3B3028] text-sm">
                       <CreditCard className="w-5 h-5 text-primary-700" /> DBT Stipend Disbursement Account
                     </div>
-                    <span className="text-[11px] font-bold text-blue-700 bg-blue-100 px-2.5 py-0.5 rounded-full border border-blue-200">
+                    <span className="text-[11px] font-bold text-[#8B5E3C] bg-[#EFE6D5] px-2.5 py-0.5 rounded-full border border-[#D9C5A3]">
                       ✓ Direct Benefit Transfer Eligible
                     </span>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="bg-white p-3.5 rounded-xl border border-slate-200 space-y-1">
-                      <span className="text-slate-500 text-[11px] block">Bank Account Holder</span>
-                      <span className="font-extrabold text-slate-900 text-sm">{app.bank_holder_name || app.full_name}</span>
+                    <div className="bg-white p-3.5 rounded-xl border border-[#D9C5A3] space-y-1">
+                      <span className="text-[#6E5D50] text-[11px] block">Bank Account Holder</span>
+                      <span className="font-extrabold text-[#3B3028] text-sm">{app.bank_holder_name || app.full_name}</span>
                     </div>
 
-                    <div className="bg-white p-3.5 rounded-xl border border-slate-200 space-y-1">
-                      <span className="text-slate-500 text-[11px] block">Bank Name & Branch</span>
-                      <span className="font-extrabold text-slate-900 text-sm">{app.bank_name_branch || "State Bank of India"}</span>
+                    <div className="bg-white p-3.5 rounded-xl border border-[#D9C5A3] space-y-1">
+                      <span className="text-[#6E5D50] text-[11px] block">Bank Name & Branch</span>
+                      <span className="font-extrabold text-[#3B3028] text-sm">{app.bank_name_branch || "State Bank of India"}</span>
                     </div>
 
-                    <div className="bg-white p-3.5 rounded-xl border border-slate-200 space-y-1">
-                      <span className="text-slate-500 text-[11px] block">Bank Account Number</span>
-                      <span className="font-mono font-black text-slate-900 text-sm">
+                    <div className="bg-white p-3.5 rounded-xl border border-[#D9C5A3] space-y-1">
+                      <span className="text-[#6E5D50] text-[11px] block">Bank Account Number</span>
+                      <span className="font-mono font-black text-[#3B3028] text-sm">
                         {app.account_number ? `•••• •••• ${app.account_number.slice(-4)}` : "Verified On File"}
                       </span>
                     </div>
 
-                    <div className="bg-white p-3.5 rounded-xl border border-slate-200 space-y-1">
-                      <span className="text-slate-500 text-[11px] block">Bank IFSC Code</span>
+                    <div className="bg-white p-3.5 rounded-xl border border-[#D9C5A3] space-y-1">
+                      <span className="text-[#6E5D50] text-[11px] block">Bank IFSC Code</span>
                       <span className="font-mono font-black text-primary-800 text-sm">{app.ifsc_code || "SBIN0001234"}</span>
                     </div>
                   </div>
 
-                  <p className="text-[11px] text-slate-500 leading-relaxed">
+                  <p className="text-[11px] text-[#6E5D50] leading-relaxed">
                     Stipend payments will be routed directly via PFMS (Public Financial Management System) to this account following admission approval.
                   </p>
                 </div>
@@ -440,11 +440,11 @@ export default function ApplicationReviewDrawer({
               {/* Tab 3: Document Verification Suite */}
               {activeTab === "documents" && (
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between pb-2 border-b border-slate-200 text-xs">
-                    <div className="font-extrabold text-slate-900 flex items-center gap-2">
+                  <div className="flex items-center justify-between pb-2 border-b border-[#D9C5A3] text-xs">
+                    <div className="font-extrabold text-[#3B3028] flex items-center gap-2">
                       <FileText className="w-4 h-4 text-primary-700" /> 7 Mandatory Verification Documents
                     </div>
-                    <span className="text-slate-500 font-mono text-[11px]">Formats: JPG, PNG, WEBP, PDF &lt; 5MB</span>
+                    <span className="text-[#6E5D50] font-mono text-[11px]">Formats: JPG, PNG, WEBP, PDF &lt; 5MB</span>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -453,13 +453,13 @@ export default function ApplicationReviewDrawer({
                       return (
                         <div
                           key={doc.key}
-                          className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 flex items-center justify-between hover:border-primary-400 hover:bg-white transition"
+                          className="bg-[#FAF6EE] border border-[#D9C5A3] rounded-xl p-3.5 flex items-center justify-between hover:border-primary-400 hover:bg-white transition"
                         >
                           <div className="flex items-center gap-3">
                             <span className="text-2xl">{doc.icon}</span>
                             <div>
-                              <div className="text-xs font-bold text-slate-900">{doc.label}</div>
-                              <span className={`text-[10px] font-bold ${docUrl ? "text-blue-600" : "text-slate-400"}`}>
+                              <div className="text-xs font-bold text-[#3B3028]">{doc.label}</div>
+                              <span className={`text-[10px] font-bold ${docUrl ? "text-[#8B5E3C]" : "text-slate-400"}`}>
                                 {docUrl ? "✓ Uploaded & Verified" : "Not Uploaded"}
                               </span>
                             </div>
@@ -484,13 +484,13 @@ export default function ApplicationReviewDrawer({
               )}
 
               {/* Audit Meta */}
-              <div className="text-[11px] text-slate-400 flex items-center justify-between pt-3 border-t border-slate-200">
+              <div className="text-[11px] text-slate-400 flex items-center justify-between pt-3 border-t border-[#D9C5A3]">
                 <span className="flex items-center gap-1">
                   <Clock className="w-3.5 h-3.5" /> Submitted: {formatDate(app.submitted_at)}
                 </span>
                 {app.reviewed_at && (
                   <span>
-                    Reviewed by Admin: <strong className="text-slate-600">{formatDate(app.reviewed_at)}</strong>
+                    Reviewed by Admin: <strong className="text-[#6E5D50]">{formatDate(app.reviewed_at)}</strong>
                   </span>
                 )}
               </div>
@@ -500,10 +500,10 @@ export default function ApplicationReviewDrawer({
 
         {/* Footer Moderation Actions */}
         {app && (
-          <div className="px-6 py-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between gap-4">
+          <div className="px-6 py-4 bg-[#FAF6EE] border-t border-[#D9C5A3] flex items-center justify-between gap-4">
             <button
               onClick={onClose}
-              className="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-200 rounded-xl transition cursor-pointer"
+              className="px-4 py-2 text-xs font-bold text-[#6E5D50] hover:bg-slate-200 rounded-xl transition cursor-pointer"
             >
               Close Dossier
             </button>
@@ -525,7 +525,7 @@ export default function ApplicationReviewDrawer({
                 {isCategoryLocked ? (
                   <button
                     disabled
-                    className="px-5 py-2.5 text-xs font-bold text-slate-400 bg-slate-200 border border-slate-300 rounded-xl flex items-center gap-1.5 cursor-not-allowed"
+                    className="px-5 py-2.5 text-xs font-bold text-slate-400 bg-slate-200 border border-[#D9C5A3] rounded-xl flex items-center gap-1.5 cursor-not-allowed"
                     title="Category quota reached. No approvals permitted."
                   >
                     <Lock className="w-4 h-4" /> Quota Full (Locked)
@@ -534,14 +534,14 @@ export default function ApplicationReviewDrawer({
                   <button
                     type="button"
                     onClick={() => setConfirmApproveOpen(true)}
-                    className="px-6 py-2.5 text-xs font-extrabold text-white bg-gradient-to-r from-blue-700 via-blue-800 to-indigo-800 hover:from-blue-800 hover:to-indigo-900 rounded-xl transition shadow-md shadow-blue-900/20 flex items-center gap-1.5 cursor-pointer"
+                    className="px-6 py-2.5 text-xs font-extrabold text-white bg-gradient-to-r from-[#8B5E3C] via-blue-800 to-[#5C6B45] hover:from-[#8B5E3C] hover:to-[#5C6B45] rounded-xl transition shadow-md  flex items-center gap-1.5 cursor-pointer"
                   >
                     <CheckCircle className="w-4 h-4" /> Approve Candidate
                   </button>
                 )}
               </div>
             ) : (
-              <span className="text-xs font-extrabold text-slate-500 uppercase tracking-wider">
+              <span className="text-xs font-extrabold text-[#6E5D50] uppercase tracking-wider">
                 Action Completed: Application is {app.status}
               </span>
             )}
@@ -551,16 +551,16 @@ export default function ApplicationReviewDrawer({
 
       {/* Confirmation Modal for Approval */}
       {confirmApproveOpen && app && (
-        <div className="fixed inset-0 z-60 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl space-y-5 border border-slate-200">
-            <div className="flex items-center gap-3 text-blue-700">
-              <div className="w-10 h-10 rounded-2xl bg-blue-100 flex items-center justify-center">
-                <CheckCircle className="w-6 h-6 text-blue-600" />
+        <div className="fixed inset-0 z-60 bg-[#2A211B]/70 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl space-y-5 border border-[#D9C5A3]">
+            <div className="flex items-center gap-3 text-[#8B5E3C]">
+              <div className="w-10 h-10 rounded-2xl bg-[#EFE6D5] flex items-center justify-center">
+                <CheckCircle className="w-6 h-6 text-[#8B5E3C]" />
               </div>
-              <h3 className="text-lg font-black text-slate-900 tracking-tight">Confirm Candidate Approval</h3>
+              <h3 className="text-lg font-black text-[#3B3028] tracking-tight">Confirm Candidate Approval</h3>
             </div>
 
-            <p className="text-xs text-slate-600 leading-relaxed">
+            <p className="text-xs text-[#6E5D50] leading-relaxed">
               Are you sure you want to approve candidate <strong>{app.full_name}</strong> for trade{" "}
               <strong>
                 {app.category_code} ({app.category_title})
@@ -568,7 +568,7 @@ export default function ApplicationReviewDrawer({
               ?
             </p>
 
-            <div className="bg-blue-50 border border-blue-200 p-4 rounded-2xl text-xs text-blue-950 space-y-1.5 font-medium">
+            <div className="bg-[#FAF6EE] border border-[#D9C5A3] p-4 rounded-2xl text-xs text-[#3B3028] space-y-1.5 font-medium">
               <div>
                 Current Approvals: <strong>{app.approved_count}</strong> / {app.approval_limit}
               </div>
@@ -585,14 +585,14 @@ export default function ApplicationReviewDrawer({
             <div className="flex justify-end gap-3 pt-2">
               <button
                 onClick={() => setConfirmApproveOpen(false)}
-                className="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl transition cursor-pointer"
+                className="px-4 py-2 text-xs font-bold text-[#6E5D50] hover:bg-[#EDE3D2] rounded-xl transition cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 onClick={() => approveMutation.mutate(app.id)}
                 disabled={approveMutation.isPending}
-                className="px-5 py-2.5 text-xs font-bold text-white bg-gradient-to-r from-blue-700 via-blue-800 to-indigo-800 hover:from-blue-800 hover:to-indigo-900 rounded-xl transition disabled:opacity-50 flex items-center gap-1.5 cursor-pointer shadow-md shadow-blue-900/20"
+                className="px-5 py-2.5 text-xs font-bold text-white bg-gradient-to-r from-[#8B5E3C] via-blue-800 to-[#5C6B45] hover:from-[#8B5E3C] hover:to-[#5C6B45] rounded-xl transition disabled:opacity-50 flex items-center gap-1.5 cursor-pointer shadow-md "
               >
                 {approveMutation.isPending ? "Executing Atomic Quota Guard..." : "Confirm & Approve"}
               </button>
@@ -603,26 +603,26 @@ export default function ApplicationReviewDrawer({
 
       {/* Rejection Modal with Presets & Audit Requirement */}
       {rejectModalOpen && app && (
-        <div className="fixed inset-0 z-60 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl space-y-5 border border-slate-200">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div className="fixed inset-0 z-60 bg-[#2A211B]/70 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl space-y-5 border border-[#D9C5A3]">
+            <div className="flex items-center justify-between pb-3 border-b border-[#D9C5A3]">
               <div className="flex items-center gap-2.5 text-rose-700">
                 <XCircle className="w-6 h-6" />
-                <h3 className="text-base font-black text-slate-900 tracking-tight">Reject Application with Reason</h3>
+                <h3 className="text-base font-black text-[#3B3028] tracking-tight">Reject Application with Reason</h3>
               </div>
-              <button onClick={() => setRejectModalOpen(false)} className="text-slate-400 hover:text-slate-600">
+              <button onClick={() => setRejectModalOpen(false)} className="text-slate-400 hover:text-[#6E5D50]">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <p className="text-xs text-slate-600 leading-relaxed">
+            <p className="text-xs text-[#6E5D50] leading-relaxed">
               Admission policy requires a documented reason for rejecting candidate{" "}
               <strong>{app.full_name}</strong> (Min 10 characters). This will be recorded in audit logs and visible to the applicant.
             </p>
 
             {/* Presets */}
             <div>
-              <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">
+              <label className="block text-[11px] font-bold text-[#6E5D50] uppercase tracking-wider mb-2">
                 Fast Administrative Presets:
               </label>
               <div className="flex flex-wrap gap-1.5">
@@ -631,7 +631,7 @@ export default function ApplicationReviewDrawer({
                     key={idx}
                     type="button"
                     onClick={() => setRejectReason(preset)}
-                    className="text-[11px] bg-slate-100 hover:bg-rose-50 hover:text-rose-800 hover:border-rose-300 border border-slate-200 text-slate-700 px-3 py-1.5 rounded-lg transition text-left cursor-pointer font-medium"
+                    className="text-[11px] bg-[#FAF6EE] hover:bg-rose-50 hover:text-rose-800 hover:border-rose-300 border border-[#D9C5A3] text-slate-700 px-3 py-1.5 rounded-lg transition text-left cursor-pointer font-medium"
                   >
                     + {preset}
                   </button>
@@ -653,11 +653,11 @@ export default function ApplicationReviewDrawer({
                 rows={3}
                 placeholder="Enter specific audit remarks for rejection..."
                 className={`w-full p-3.5 border rounded-2xl text-xs focus:outline-none focus:ring-2 focus:ring-rose-500 transition font-medium ${
-                  rejectError ? "border-rose-500 ring-1 ring-rose-500" : "border-slate-300"
+                  rejectError ? "border-rose-500 ring-1 ring-rose-500" : "border-[#D9C5A3]"
                 }`}
               />
               <div className="flex justify-between items-center mt-1.5 text-[11px]">
-                <span className={rejectReason.trim().length < 10 ? "text-amber-600 font-bold" : "text-blue-600 font-bold"}>
+                <span className={rejectReason.trim().length < 10 ? "text-amber-600 font-bold" : "text-[#8B5E3C] font-bold"}>
                   {rejectReason.trim().length} / 10 characters minimum
                 </span>
                 {rejectError && <span className="text-rose-600 font-bold">{rejectError}</span>}
@@ -667,7 +667,7 @@ export default function ApplicationReviewDrawer({
             <div className="flex justify-end gap-3 pt-2">
               <button
                 onClick={() => setRejectModalOpen(false)}
-                className="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl transition cursor-pointer"
+                className="px-4 py-2 text-xs font-bold text-[#6E5D50] hover:bg-[#EDE3D2] rounded-xl transition cursor-pointer"
               >
                 Cancel
               </button>
@@ -685,17 +685,17 @@ export default function ApplicationReviewDrawer({
 
       {/* Document Lightbox Modal */}
       {previewDoc && (
-        <div className="fixed inset-0 z-70 bg-slate-950/85 backdrop-blur-xs flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-70 bg-[#2A211B]/85 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl max-w-2xl w-full p-5 shadow-2xl space-y-4">
-            <div className="flex justify-between items-center border-b border-slate-100 pb-3">
-              <h4 className="font-extrabold text-sm text-slate-900">{previewDoc.title}</h4>
+            <div className="flex justify-between items-center border-b border-[#D9C5A3] pb-3">
+              <h4 className="font-extrabold text-sm text-[#3B3028]">{previewDoc.title}</h4>
               <button onClick={closePreview} className="text-slate-400 hover:text-slate-700 cursor-pointer">
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <div className="h-96 bg-slate-100 rounded-2xl overflow-hidden flex items-center justify-center border border-slate-200">
+            <div className="h-96 bg-[#FAF6EE] rounded-2xl overflow-hidden flex items-center justify-center border border-[#D9C5A3]">
               {previewLoading ? (
-                <div className="text-xs font-semibold text-slate-500">Decrypting &amp; loading document...</div>
+                <div className="text-xs font-semibold text-[#6E5D50]">Decrypting &amp; loading document...</div>
               ) : previewError ? (
                 <div className="text-xs font-semibold text-rose-700 px-4 text-center">{previewError}</div>
               ) : previewDoc.mimeType === "application/pdf" ? (
@@ -711,7 +711,7 @@ export default function ApplicationReviewDrawer({
             <div className="text-right">
               <button
                 onClick={closePreview}
-                className="px-4 py-2 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl cursor-pointer"
+                className="px-4 py-2 text-xs font-bold text-slate-700 bg-[#FAF6EE] hover:bg-slate-200 rounded-xl cursor-pointer"
               >
                 Close Preview
               </button>

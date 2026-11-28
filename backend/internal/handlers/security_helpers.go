@@ -90,6 +90,58 @@ func isAllowedValue(val string, allowed ...string) bool {
 	return false
 }
 
+// ManipurDistricts enumerates the 16 districts of Manipur.
+var ManipurDistricts = []string{
+	"Bishnupur",
+	"Chandel",
+	"Churachandpur",
+	"Imphal East",
+	"Imphal West",
+	"Jiribam",
+	"Kakching",
+	"Kamjong",
+	"Kangpokpi",
+	"Noney",
+	"Pherzawl",
+	"Senapati",
+	"Tamenglong",
+	"Tengnoupal",
+	"Thoubal",
+	"Ukhrul",
+}
+
+// NormalizeManipurDistrict returns the canonical district spelling when valid.
+func NormalizeManipurDistrict(input string) (string, bool) {
+	cleaned := strings.TrimSpace(input)
+	for _, d := range ManipurDistricts {
+		if strings.EqualFold(cleaned, d) {
+			return d, true
+		}
+	}
+	return "", false
+}
+
+// ResolveDistrictFromTexts extracts a matching Manipur district from candidate strings.
+func ResolveDistrictFromTexts(candidates ...string) string {
+	for _, raw := range candidates {
+		if norm, ok := NormalizeManipurDistrict(raw); ok {
+			return norm
+		}
+	}
+	for _, raw := range candidates {
+		lower := strings.ToLower(strings.TrimSpace(raw))
+		if lower == "" {
+			continue
+		}
+		for _, d := range ManipurDistricts {
+			if strings.Contains(lower, strings.ToLower(d)) {
+				return d
+			}
+		}
+	}
+	return "Other / Unspecified"
+}
+
 // checkAdminPermission enforces granular RBAC permissions stored in users.permissions for REVIEWER_ADMIN.
 // SUPER_ADMIN always holds full administrative permissions.
 func checkAdminPermission(ctx context.Context, db *pgxpool.Pool, userID, role, permKey string) bool {

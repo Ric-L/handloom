@@ -16,7 +16,16 @@ CREATE TABLE IF NOT EXISTS users (
     email         VARCHAR(255),
     password_hash TEXT NOT NULL,
     role          VARCHAR(20) NOT NULL DEFAULT 'APPLICANT' CHECK (role IN ('APPLICANT','REVIEWER_ADMIN','SUPER_ADMIN')),
-    full_name       VARCHAR(150),
+    full_name     VARCHAR(150),
+    father_name   VARCHAR(150),
+    mother_name   VARCHAR(150),
+    dob           VARCHAR(10),
+    country       VARCHAR(80) NOT NULL DEFAULT 'India',
+    state         VARCHAR(80) NOT NULL DEFAULT 'Manipur',
+    district      VARCHAR(80),
+    address_line1 VARCHAR(255),
+    address_line2 VARCHAR(255),
+    address_line3 VARCHAR(255),
     is_disabled     BOOLEAN NOT NULL DEFAULT FALSE,
     disabled_reason VARCHAR(255),
     disabled_at     TIMESTAMPTZ,
@@ -47,6 +56,7 @@ CREATE TABLE IF NOT EXISTS applications (
     gov_id_last4     CHAR(4) NOT NULL,
     social_category  VARCHAR(10) NOT NULL CHECK (social_category IN ('GENERAL','SC','ST','OBC','OTHER')),
     address_full     TEXT NOT NULL,
+    district         VARCHAR(80),
     district_state_pin VARCHAR(150) NOT NULL,
     emergency_contact JSONB NOT NULL DEFAULT '{}',
     highest_qual     VARCHAR(20) NOT NULL,
@@ -66,8 +76,7 @@ CREATE TABLE IF NOT EXISTS applications (
     rejection_reason TEXT,
     reviewed_by      UUID REFERENCES users(id),
     reviewed_at      TIMESTAMPTZ,
-    submitted_at     TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    CONSTRAINT uq_user_category UNIQUE(user_id, category_id)
+    submitted_at     TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS audit_log (
@@ -122,6 +131,7 @@ CREATE INDEX IF NOT EXISTS idx_applications_registration_no ON applications(regi
 CREATE INDEX IF NOT EXISTS idx_applications_user_id ON applications(user_id);
 CREATE INDEX IF NOT EXISTS idx_applications_status ON applications(status);
 CREATE INDEX IF NOT EXISTS idx_applications_category_id ON applications(category_id);
+CREATE UNIQUE INDEX IF NOT EXISTS uq_user_category_active ON applications(user_id, category_id) WHERE status IN ('PENDING', 'APPROVED');
 CREATE INDEX IF NOT EXISTS idx_user_sessions_token ON user_sessions(session_token);
 CREATE INDEX IF NOT EXISTS idx_user_sessions_user_id ON user_sessions(user_id);
 CREATE INDEX IF NOT EXISTS idx_user_sessions_active ON user_sessions(user_id, is_revoked, expires_at);
@@ -132,6 +142,21 @@ CREATE INDEX IF NOT EXISTS idx_audit_log_action ON audit_log(action);
 
 const schemaUpdates = `
 ALTER TABLE users ADD COLUMN IF NOT EXISTS full_name VARCHAR(150);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS father_name VARCHAR(150);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS mother_name VARCHAR(150);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS dob VARCHAR(10);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS country VARCHAR(80) NOT NULL DEFAULT 'India';
+ALTER TABLE users ADD COLUMN IF NOT EXISTS state VARCHAR(80) NOT NULL DEFAULT 'Manipur';
+ALTER TABLE users ADD COLUMN IF NOT EXISTS district VARCHAR(80);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS address_line1 VARCHAR(255);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS address_line2 VARCHAR(255);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS address_line3 VARCHAR(255);
+
+ALTER TABLE applications ADD COLUMN IF NOT EXISTS district VARCHAR(80);
+CREATE INDEX IF NOT EXISTS idx_applications_district ON applications(district);
+ALTER TABLE applications DROP CONSTRAINT IF EXISTS uq_user_category;
+DROP INDEX IF EXISTS uq_user_category;
+CREATE UNIQUE INDEX IF NOT EXISTS uq_user_category_active ON applications(user_id, category_id) WHERE status IN ('PENDING', 'APPROVED');
 
 -- Seed administrator full names if not set
 UPDATE users SET full_name = 'Super Administrator' WHERE role = 'SUPER_ADMIN' AND (full_name IS NULL OR full_name = '');
@@ -147,6 +172,17 @@ FROM (
     ORDER BY user_id, submitted_at DESC
 ) a
 WHERE u.id = a.user_id AND (u.full_name IS NULL OR u.full_name = '');
+
+-- Populate applicant DOB and district from latest submitted applications if blank
+UPDATE users u
+SET dob = TO_CHAR(a.dob, 'YYYY-MM-DD')
+FROM (
+    SELECT DISTINCT ON (user_id) user_id, dob
+    FROM applications
+    WHERE dob IS NOT NULL
+    ORDER BY user_id, submitted_at DESC
+) a
+WHERE u.id = a.user_id AND (u.dob IS NULL OR u.dob = '');
 
 ALTER TABLE users ADD COLUMN IF NOT EXISTS is_disabled BOOLEAN NOT NULL DEFAULT FALSE;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS disabled_reason VARCHAR(255);

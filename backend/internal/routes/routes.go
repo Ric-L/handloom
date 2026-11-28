@@ -59,6 +59,7 @@ func Register(r *gin.Engine, pool *pgxpool.Pool, cfg *config.Config) {
 	v1.POST("/auth/refresh-session", authM, authH.RefreshSession)
 	v1.GET("/auth/session-status", authM, authH.SessionStatus)
 	v1.GET("/auth/me", authM, authH.Me)
+	v1.PUT("/auth/profile", authM, authH.UpdateProfile)
 
 	// 3. Applicant Endpoints (Authenticated Applicant / Reviewer / Super Admin)
 	v1.POST("/applications", authM, submitRateLimiter.Middleware(), appH.Submit)

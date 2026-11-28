@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Users,
@@ -211,8 +211,8 @@ export default function AdminCandidatesPage() {
     switch (status) {
       case "APPROVED":
         return (
-          <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-300">
-            <CheckCircle2 className="w-2.5 h-2.5 text-emerald-600" /> Approved
+          <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#EEF2E7] text-[#5C6B45] border border-[#5C6B45]/40">
+            <CheckCircle2 className="w-2.5 h-2.5 text-[#5C6B45]" /> Approved
           </span>
         );
       case "PENDING":
@@ -229,7 +229,7 @@ export default function AdminCandidatesPage() {
         );
       default:
         return (
-          <span className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 border border-slate-200">
+          <span className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#FAF6EE] text-[#6E5D50] border border-[#D9C5A3]">
             <HelpCircle className="w-2.5 h-2.5 text-slate-400" /> Unapplied
           </span>
         );
@@ -244,12 +244,12 @@ export default function AdminCandidatesPage() {
       <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-xl bg-blue-700 flex items-center justify-center shadow-md">
+            <div className="w-10 h-10 rounded-xl bg-[#8B5E3C] flex items-center justify-center shadow-md">
               <Users className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h1 className="text-xl font-black text-slate-900 tracking-tight">Registered Candidates</h1>
-              <p className="text-xs text-slate-500 font-medium">
+              <h1 className="text-xl font-black text-[#3B3028] tracking-tight">Registered Candidates</h1>
+              <p className="text-xs text-[#6E5D50] font-medium">
                 Comprehensive directory of artisan candidates, verification status, and submission records
               </p>
             </div>
@@ -266,12 +266,12 @@ export default function AdminCandidatesPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search by name, mobile, email..."
-              className="w-full pl-9 pr-3 py-2 text-xs border border-slate-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition font-medium"
+              className="w-full pl-9 pr-3 py-2 text-xs border border-[#D9C5A3] rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#8B5E3C]/30 transition font-medium"
             />
             {search && (
               <button
                 onClick={() => setSearch("")}
-                className="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600 text-xs"
+                className="absolute right-2.5 top-2.5 text-slate-400 hover:text-[#6E5D50] text-xs"
               >
                 ✕
               </button>
@@ -283,8 +283,8 @@ export default function AdminCandidatesPage() {
             onClick={() => setShowHeaderFilters(!showHeaderFilters)}
             className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold border transition cursor-pointer ${
               showHeaderFilters
-                ? "bg-blue-50 text-blue-700 border-blue-200"
-                : "bg-white text-slate-700 border-slate-300 hover:bg-slate-50"
+                ? "bg-[#FAF6EE] text-[#8B5E3C] border-[#D9C5A3]"
+                : "bg-white text-slate-700 border-[#D9C5A3] hover:bg-[#FAF6EE]"
             }`}
             title="Toggle column header filters row"
           >
@@ -307,10 +307,10 @@ export default function AdminCandidatesPage() {
       </div>
 
       {/* Table Card */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-2xl border border-[#D9C5A3] shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left">
-            <thead className="bg-slate-50 text-slate-600 text-xs font-bold uppercase tracking-wider border-b border-slate-200">
+            <thead className="bg-[#FAF6EE] text-[#6E5D50] text-xs font-bold uppercase tracking-wider border-b border-[#D9C5A3]">
               {/* Primary Column Header Row */}
               <tr>
                 <th className="px-5 py-3.5">Candidate Name / Identity</th>
@@ -324,7 +324,7 @@ export default function AdminCandidatesPage() {
 
               {/* Interactive Header Filters Row */}
               {showHeaderFilters && (
-                <tr className="bg-slate-100/90 border-t border-slate-200 font-normal normal-case">
+                <tr className="bg-[#FAF6EE] border-t border-[#D9C5A3] font-normal normal-case">
                   {/* 1. Candidate Name (Text Search) */}
                   <th className="px-5 py-2">
                     <div className="relative">
@@ -334,7 +334,7 @@ export default function AdminCandidatesPage() {
                         value={filterName}
                         onChange={(e) => setFilterName(e.target.value)}
                         placeholder="Search name..."
-                        className="w-full pl-7 pr-2 py-1 text-xs border border-slate-300 rounded-md bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 font-normal"
+                        className="w-full pl-7 pr-2 py-1 text-xs border border-[#D9C5A3] rounded-md bg-white focus:outline-none focus:ring-1 focus:ring-[#8B5E3C]/30 font-normal"
                       />
                     </div>
                   </th>
@@ -348,7 +348,7 @@ export default function AdminCandidatesPage() {
                         value={filterMobile}
                         onChange={(e) => setFilterMobile(e.target.value)}
                         placeholder="Search mobile..."
-                        className="w-full pl-7 pr-2 py-1 text-xs border border-slate-300 rounded-md bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 font-mono font-normal"
+                        className="w-full pl-7 pr-2 py-1 text-xs border border-[#D9C5A3] rounded-md bg-white focus:outline-none focus:ring-1 focus:ring-[#8B5E3C]/30 font-mono font-normal"
                       />
                     </div>
                   </th>
@@ -362,7 +362,7 @@ export default function AdminCandidatesPage() {
                         value={filterEmail}
                         onChange={(e) => setFilterEmail(e.target.value)}
                         placeholder="Search email..."
-                        className="w-full pl-7 pr-2 py-1 text-xs border border-slate-300 rounded-md bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 font-normal"
+                        className="w-full pl-7 pr-2 py-1 text-xs border border-[#D9C5A3] rounded-md bg-white focus:outline-none focus:ring-1 focus:ring-[#8B5E3C]/30 font-normal"
                       />
                     </div>
                   </th>
@@ -380,7 +380,7 @@ export default function AdminCandidatesPage() {
                             onChange={(e) => setFilterMinApps(e.target.value)}
                             placeholder="Min"
                             aria-label="Minimum applications"
-                            className="w-full px-1.5 py-0.5 text-[11px] border border-slate-300 rounded bg-white text-center font-mono focus:outline-none focus:ring-1 focus:ring-blue-500"
+                            className="w-full px-1.5 py-0.5 text-[11px] border border-[#D9C5A3] rounded bg-white text-center font-mono focus:outline-none focus:ring-1 focus:ring-[#8B5E3C]/30"
                           />
                         </div>
                         <span className="text-slate-400 text-[10px]">–</span>
@@ -392,7 +392,7 @@ export default function AdminCandidatesPage() {
                             onChange={(e) => setFilterMaxApps(e.target.value)}
                             placeholder="Max"
                             aria-label="Maximum applications"
-                            className="w-full px-1.5 py-0.5 text-[11px] border border-slate-300 rounded bg-white text-center font-mono focus:outline-none focus:ring-1 focus:ring-blue-500"
+                            className="w-full px-1.5 py-0.5 text-[11px] border border-[#D9C5A3] rounded bg-white text-center font-mono focus:outline-none focus:ring-1 focus:ring-[#8B5E3C]/30"
                           />
                         </div>
                       </div>
@@ -401,7 +401,7 @@ export default function AdminCandidatesPage() {
                         value={filterHasApps}
                         onChange={(e) => setFilterHasApps(e.target.value)}
                         aria-label="Filter has filed applications"
-                        className="w-full px-1.5 py-0.5 text-[10px] border border-slate-300 rounded bg-white text-slate-700 font-medium focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer"
+                        className="w-full px-1.5 py-0.5 text-[10px] border border-[#D9C5A3] rounded bg-white text-slate-700 font-medium focus:outline-none focus:ring-1 focus:ring-[#8B5E3C]/30 cursor-pointer"
                       >
                         <option value="ALL">Filed: All</option>
                         <option value="YES">Yes (1+)</option>
@@ -418,7 +418,7 @@ export default function AdminCandidatesPage() {
                         value={filterStatus}
                         onChange={(e) => setFilterStatus(e.target.value)}
                         aria-label="Filter status"
-                        className="w-full px-1.5 py-0.5 text-[10px] border border-slate-300 rounded bg-white text-slate-800 font-semibold focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer"
+                        className="w-full px-1.5 py-0.5 text-[10px] border border-[#D9C5A3] rounded bg-white text-[#3B3028] font-semibold focus:outline-none focus:ring-1 focus:ring-[#8B5E3C]/30 cursor-pointer"
                       >
                         <option value="ALL">Status: All</option>
                         <option value="APPROVED">Approved</option>
@@ -431,7 +431,7 @@ export default function AdminCandidatesPage() {
                         value={filterCategory}
                         onChange={(e) => setFilterCategory(e.target.value)}
                         aria-label="Filter social category"
-                        className="w-full px-1.5 py-0.5 text-[10px] border border-slate-300 rounded bg-white text-slate-700 font-medium focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer"
+                        className="w-full px-1.5 py-0.5 text-[10px] border border-[#D9C5A3] rounded bg-white text-slate-700 font-medium focus:outline-none focus:ring-1 focus:ring-[#8B5E3C]/30 cursor-pointer"
                       >
                         <option value="ALL">Category: All</option>
                         <option value="GENERAL">General</option>
@@ -453,7 +453,7 @@ export default function AdminCandidatesPage() {
                           value={filterDateFrom}
                           onChange={(e) => setFilterDateFrom(e.target.value)}
                           aria-label="Registered date from"
-                          className="w-full px-1 py-0.5 text-[10px] border border-slate-300 rounded bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 font-mono"
+                          className="w-full px-1 py-0.5 text-[10px] border border-[#D9C5A3] rounded bg-white focus:outline-none focus:ring-1 focus:ring-[#8B5E3C]/30 font-mono"
                         />
                       </div>
                       <div className="flex items-center gap-1">
@@ -463,7 +463,7 @@ export default function AdminCandidatesPage() {
                           value={filterDateTo}
                           onChange={(e) => setFilterDateTo(e.target.value)}
                           aria-label="Registered date to"
-                          className="w-full px-1 py-0.5 text-[10px] border border-slate-300 rounded bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 font-mono"
+                          className="w-full px-1 py-0.5 text-[10px] border border-[#D9C5A3] rounded bg-white focus:outline-none focus:ring-1 focus:ring-[#8B5E3C]/30 font-mono"
                         />
                       </div>
                     </div>
@@ -485,7 +485,7 @@ export default function AdminCandidatesPage() {
               )}
             </thead>
 
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-[#E9DEC8]">
               {isLoading ? (
                 // Skeleton loading rows
                 Array.from({ length: 6 }).map((_, i) => (
@@ -509,7 +509,7 @@ export default function AdminCandidatesPage() {
                 <tr>
                   <td colSpan={7} className="text-center py-16 space-y-2">
                     <p className="font-bold text-slate-700">No candidates found matching criteria</p>
-                    <p className="text-xs text-slate-500">
+                    <p className="text-xs text-[#6E5D50]">
                       {hasActiveFilters
                         ? "Try clearing some header filters or widening numeric/date ranges."
                         : "No applicants have registered on the platform yet."}
@@ -517,7 +517,7 @@ export default function AdminCandidatesPage() {
                     {hasActiveFilters && (
                       <button
                         onClick={handleResetFilters}
-                        className="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-blue-300 bg-blue-50 text-blue-700 text-xs font-semibold hover:bg-blue-100 transition cursor-pointer"
+                        className="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#D9C5A3] bg-[#FAF6EE] text-[#8B5E3C] text-xs font-semibold hover:bg-[#EFE6D5] transition cursor-pointer"
                       >
                         <RotateCcw className="w-3.5 h-3.5" /> Reset Filters
                       </button>
@@ -530,16 +530,16 @@ export default function AdminCandidatesPage() {
                   const appCount = candidate.application_count ?? candidate.applications_count ?? 0;
 
                   return (
-                    <tr key={candidate.id} className="hover:bg-slate-50/80 transition-colors">
+                    <tr key={candidate.id} className="hover:bg-[#FAF6EE] transition-colors">
                       {/* Candidate Name / Identity Column */}
                       <td className="px-5 py-4">
                         <div className="flex items-center gap-2.5">
-                          <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-800 border border-blue-300 flex items-center justify-center text-xs font-black shrink-0 shadow-2xs">
+                          <div className="w-8 h-8 rounded-full bg-[#EFE6D5] text-[#734C30] border border-[#D9C5A3] flex items-center justify-center text-xs font-black shrink-0 shadow-2xs">
                             {getInitials(fullName)}
                           </div>
                           <div>
                             {fullName ? (
-                              <span className="font-bold text-slate-900 block leading-tight text-sm">
+                              <span className="font-bold text-[#3B3028] block leading-tight text-sm">
                                 {fullName}
                               </span>
                             ) : (
@@ -557,7 +557,7 @@ export default function AdminCandidatesPage() {
                                 title="Copy Candidate ID"
                               >
                                 {copiedId === candidate.id ? (
-                                  <Check className="w-3 h-3 text-blue-600" />
+                                  <Check className="w-3 h-3 text-[#8B5E3C]" />
                                 ) : (
                                   <Copy className="w-3 h-3" />
                                 )}
@@ -568,12 +568,12 @@ export default function AdminCandidatesPage() {
                       </td>
 
                       {/* Mobile Number */}
-                      <td className="px-5 py-4 font-mono font-bold text-slate-900 whitespace-nowrap text-sm">
+                      <td className="px-5 py-4 font-mono font-bold text-[#3B3028] whitespace-nowrap text-sm">
                         {candidate.mobile_number}
                       </td>
 
                       {/* Email */}
-                      <td className="px-5 py-4 text-slate-600 text-xs">
+                      <td className="px-5 py-4 text-[#6E5D50] text-xs">
                         {candidate.email || <span className="text-slate-400 italic">—</span>}
                       </td>
 
@@ -582,8 +582,8 @@ export default function AdminCandidatesPage() {
                         <span
                           className={`inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-black border shadow-2xs ${
                             appCount > 0
-                              ? "bg-blue-50 text-blue-800 border-blue-300 font-bold"
-                              : "bg-slate-100 text-slate-400 border-slate-200"
+                              ? "bg-[#FAF6EE] text-[#734C30] border-[#D9C5A3] font-bold"
+                              : "bg-[#FAF6EE] text-slate-400 border-[#D9C5A3]"
                           }`}
                         >
                           {appCount}
@@ -595,7 +595,7 @@ export default function AdminCandidatesPage() {
                         <div className="flex flex-col items-center gap-1">
                           {getStatusBadge(candidate.latest_status)}
                           {candidate.social_category && candidate.social_category !== "NONE" && (
-                            <span className="text-[10px] font-bold text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">
+                            <span className="text-[10px] font-bold text-[#6E5D50] bg-[#FAF6EE] px-1.5 py-0.5 rounded border border-[#D9C5A3]">
                               {candidate.social_category}
                             </span>
                           )}
@@ -603,7 +603,7 @@ export default function AdminCandidatesPage() {
                       </td>
 
                       {/* Registered On */}
-                      <td className="px-5 py-4 text-slate-500 text-xs whitespace-nowrap">
+                      <td className="px-5 py-4 text-[#6E5D50] text-xs whitespace-nowrap">
                         {formatDate(candidate.created_at)}
                       </td>
 
@@ -612,7 +612,7 @@ export default function AdminCandidatesPage() {
                         {appCount > 0 ? (
                           <button
                             onClick={() => navigate(`/admin/applications?search=${candidate.mobile_number}`)}
-                            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold border border-blue-300 bg-blue-50 text-blue-700 hover:bg-blue-100 hover:border-blue-400 transition cursor-pointer shadow-2xs"
+                            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold border border-[#D9C5A3] bg-[#FAF6EE] text-[#8B5E3C] hover:bg-[#EFE6D5] hover:border-[#D9C5A3] transition cursor-pointer shadow-2xs"
                             title={`View applications filed by ${candidate.mobile_number}`}
                           >
                             <span>Dossier</span>
@@ -632,15 +632,15 @@ export default function AdminCandidatesPage() {
 
         {/* Pagination & Summary Bar */}
         {data && data.total > 0 && (
-          <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-slate-600 font-medium">
+          <div className="px-6 py-4 bg-[#FAF6EE] border-t border-[#D9C5A3] flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-[#6E5D50] font-medium">
             <span>
               Showing{" "}
-              <strong className="text-slate-900">{Math.min(data.total, (page - 1) * pageSize + 1)}</strong>
+              <strong className="text-[#3B3028]">{Math.min(data.total, (page - 1) * pageSize + 1)}</strong>
               {" "}to{" "}
-              <strong className="text-slate-900">{Math.min(data.total, page * pageSize)}</strong>
-              {" "}of <strong className="text-slate-900">{data.total}</strong> registered candidates
+              <strong className="text-[#3B3028]">{Math.min(data.total, page * pageSize)}</strong>
+              {" "}of <strong className="text-[#3B3028]">{data.total}</strong> registered candidates
               {hasActiveFilters && (
-                <span className="ml-2 text-blue-700 font-semibold">(Filters active)</span>
+                <span className="ml-2 text-[#8B5E3C] font-semibold">(Filters active)</span>
               )}
             </span>
 
@@ -649,18 +649,18 @@ export default function AdminCandidatesPage() {
                 type="button"
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page <= 1}
-                className="px-3 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition font-semibold flex items-center gap-1 cursor-pointer"
+                className="px-3 py-1.5 rounded-lg border border-[#D9C5A3] bg-white hover:bg-[#EDE3D2] disabled:opacity-40 disabled:cursor-not-allowed transition font-semibold flex items-center gap-1 cursor-pointer"
               >
                 <ChevronLeft className="w-3.5 h-3.5" /> Prev
               </button>
-              <span className="px-2 font-bold text-slate-800">
+              <span className="px-2 font-bold text-[#3B3028]">
                 Page {page} of {totalPages}
               </span>
               <button
                 type="button"
                 onClick={() => setPage((p) => (p < totalPages ? p + 1 : p))}
                 disabled={page >= totalPages}
-                className="px-3 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition font-semibold flex items-center gap-1 cursor-pointer"
+                className="px-3 py-1.5 rounded-lg border border-[#D9C5A3] bg-white hover:bg-[#EDE3D2] disabled:opacity-40 disabled:cursor-not-allowed transition font-semibold flex items-center gap-1 cursor-pointer"
               >
                 Next <ChevronRight className="w-3.5 h-3.5" />
               </button>

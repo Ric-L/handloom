@@ -34,6 +34,7 @@ const (
 
 	// Candidate & Public Actions
 	ActionUserRegistered    = "USER_REGISTERED"
+	ActionProfileUpdated    = "PROFILE_UPDATED"
 	ActionApplicationSubmit = "APPLICATION_SUBMITTED"
 	ActionDocumentUploaded  = "DOCUMENT_UPLOADED"
 

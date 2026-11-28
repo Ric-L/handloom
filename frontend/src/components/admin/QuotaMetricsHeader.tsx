@@ -13,7 +13,6 @@ import {
   ChevronRight,
   Check,
   Sliders,
-  Crown,
 } from "lucide-react";
 
 interface QuotaMetricsHeaderProps {
@@ -43,11 +42,11 @@ export default function QuotaMetricsHeader({
 
   if (isLoading && !metrics) {
     return (
-      <div className="bg-white rounded-3xl border border-slate-200 p-8 shadow-xs animate-pulse space-y-6">
-        <div className="h-6 bg-slate-200 rounded-lg w-1/4" />
+      <div className="bg-white rounded-2xl border border-[#D9C5A3] p-8 shadow-2xs animate-pulse space-y-6">
+        <div className="h-6 bg-[#EDE3D2] rounded-lg w-1/4" />
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {[1, 2, 3, 4].map(i => (
-            <div key={i} className="h-28 bg-slate-100 rounded-2xl" />
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="h-28 bg-[#FAF6EE] rounded-2xl border border-[#D9C5A3]" />
           ))}
         </div>
       </div>
@@ -58,137 +57,69 @@ export default function QuotaMetricsHeader({
 
   const totalSanctionedQuota = metrics.categories.reduce((acc, c) => acc + c.approval_limit, 0) || 3020;
   const overallApproved = metrics.approved;
-  const overallPercentage = totalSanctionedQuota > 0 ? ((overallApproved / totalSanctionedQuota) * 100).toFixed(1) : "0.0";
+  const overallPercentage =
+    totalSanctionedQuota > 0 ? ((overallApproved / totalSanctionedQuota) * 100).toFixed(1) : "0.0";
 
   const cards = [
     {
       label: "TOTAL APPLICATIONS",
       value: metrics.total_applied,
-      subtext: "Across all 9 job categories",
+      subtext: `Across ${metrics.categories.length} trades`,
       icon: Users,
-      border: "border-slate-200 hover:border-indigo-300",
-      bg: "bg-white",
-      iconBg: "bg-indigo-50 text-indigo-700 border border-indigo-100",
-      accent: "bg-indigo-600",
-      indicator: "text-slate-500",
+      border: "border-[#D9C5A3] hover:border-[#8B5E3C]",
+      iconBg: "bg-[#FAF6EE] text-[#3B3028] border border-[#D9C5A3]",
+      accent: "bg-[#3B3028]",
+      indicator: "text-[#6E5D50]",
     },
     {
       label: "PENDING REVIEW",
       value: metrics.pending,
-      subtext: "Awaiting administrative action",
+      subtext: "Awaiting administrative review",
       icon: Clock,
-      border: "border-slate-200 hover:border-amber-300",
-      bg: "bg-white",
-      iconBg: "bg-amber-50 text-amber-700 border border-amber-100",
-      accent: "bg-amber-500",
+      border: "border-[#D9C5A3] hover:border-[#8B5E3C]",
+      iconBg: "bg-[#F3EAE2] text-[#8B5E3C] border border-[#D9C5A3]",
+      accent: "bg-[#8B5E3C]",
       pulse: metrics.pending > 0,
-      indicator: metrics.pending > 0 ? "text-amber-700 font-bold" : "text-slate-500",
+      indicator: metrics.pending > 0 ? "text-[#8B5E3C] font-semibold" : "text-[#6E5D50]",
     },
     {
       label: "APPROVED CANDIDATES",
       value: metrics.approved,
       subtext: `${overallApproved} of ${totalSanctionedQuota} capacity (${overallPercentage}%)`,
       icon: CheckCircle2,
-      border: "border-slate-200 hover:border-blue-300",
-      bg: "bg-white",
-      iconBg: "bg-blue-50 text-blue-700 border border-blue-100",
-      accent: "bg-blue-600",
-      indicator: "text-blue-700 font-bold",
+      border: "border-[#D9C5A3] hover:border-[#5C6B45]",
+      iconBg: "bg-[#EEF2E7] text-[#5C6B45] border border-[#5C6B45]/30",
+      accent: "bg-[#5C6B45]",
+      indicator: "text-[#5C6B45] font-semibold",
     },
     {
       label: "REJECTED APPLICATIONS",
       value: metrics.rejected,
-      subtext: "Logged with mandatory reason",
+      subtext: "Logged with audit reason",
       icon: XCircle,
-      border: "border-slate-200 hover:border-rose-300",
-      bg: "bg-white",
-      iconBg: "bg-rose-50 text-rose-700 border border-rose-100",
-      accent: "bg-rose-600",
-      indicator: "text-slate-500",
+      border: "border-[#D9C5A3] hover:border-[#A9442A]",
+      iconBg: "bg-[#FDF2EE] text-[#A9442A] border border-[#C97B65]/40",
+      accent: "bg-[#A9442A]",
+      indicator: "text-[#6E5D50]",
     },
   ];
 
-  const getTradeTheme = (code: string) => {
-    switch (code) {
-      case "MER-01":
-        return {
-          pill: "bg-indigo-50 text-indigo-800 border-indigo-200",
-          accent: "from-indigo-600 to-blue-600",
-          activeBg: "bg-indigo-50/30",
-        };
-      case "EMB-02":
-        return {
-          pill: "bg-purple-50 text-purple-800 border-purple-200",
-          accent: "from-purple-600 to-pink-600",
-          activeBg: "bg-purple-50/30",
-        };
-      case "JQW-03":
-        return {
-          pill: "bg-blue-50 text-blue-800 border-blue-200",
-          accent: "from-blue-600 to-sky-600",
-          activeBg: "bg-blue-50/30",
-        };
-      case "LLW-04":
-        return {
-          pill: "bg-sky-50 text-sky-800 border-sky-200",
-          accent: "from-sky-600 to-cyan-600",
-          activeBg: "bg-sky-50/30",
-        };
-      case "BWA-05":
-        return {
-          pill: "bg-amber-50 text-amber-800 border-amber-200",
-          accent: "from-amber-600 to-yellow-600",
-          activeBg: "bg-amber-50/30",
-        };
-      case "APA-06":
-        return {
-          pill: "bg-orange-50 text-orange-800 border-orange-200",
-          accent: "from-orange-600 to-amber-600",
-          activeBg: "bg-orange-50/30",
-        };
-      case "TPM-07":
-        return {
-          pill: "bg-cyan-50 text-cyan-800 border-cyan-200",
-          accent: "from-cyan-600 to-sky-600",
-          activeBg: "bg-cyan-50/30",
-        };
-      case "CPW-08":
-        return {
-          pill: "bg-rose-50 text-rose-800 border-rose-200",
-          accent: "from-rose-600 to-pink-600",
-          activeBg: "bg-rose-50/30",
-        };
-      case "PPM-09":
-        return {
-          pill: "bg-violet-50 text-violet-800 border-violet-200",
-          accent: "from-violet-600 to-fuchsia-600",
-          activeBg: "bg-violet-50/30",
-        };
-      default:
-        return {
-          pill: "bg-slate-100 text-slate-800 border-slate-200",
-          accent: "from-slate-600 to-slate-800",
-          activeBg: "bg-slate-50",
-        };
-    }
-  };
-
   return (
     <div className="space-y-6">
-      {/* 1. Header Bar with Refresh & Status */}
+      {/* 1. Header Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <div className="flex items-center gap-2.5">
-            <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
-              Artisan Admission Quota Status
+            <h2 className="font-serif text-2xl sm:text-3xl text-[#3B3028] tracking-tight">
+              Admission Quota Status
             </h2>
-            <span className="inline-flex items-center gap-1 text-[11px] font-extrabold uppercase bg-blue-50 text-blue-800 border border-blue-200 px-2.5 py-0.5 rounded-full shadow-2xs">
-              <span className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-pulse" />
+            <span className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase bg-[#EEF2E7] text-[#3E492D] border border-[#5C6B45]/30 px-2.5 py-0.5 rounded-full">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#5C6B45] animate-pulse" />
               Live Monitor
             </span>
           </div>
-          <p className="text-xs text-slate-500 mt-1">
-            Strict category quota enforcement across 9 trades • 3,020 total sanctioned seats
+          <p className="text-xs text-[#6E5D50] mt-1">
+            Category quota enforcement across {metrics.categories.length} training trades
           </p>
         </div>
 
@@ -197,186 +128,177 @@ export default function QuotaMetricsHeader({
             <button
               type="button"
               onClick={() => setQuotaModalOpen(true)}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-amber-900 bg-amber-50 hover:bg-amber-100 border border-amber-300 rounded-xl shadow-2xs transition cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-[#F5EFE3] bg-[#8B5E3C] hover:bg-[#734C30] rounded-lg shadow-2xs transition cursor-pointer"
               title="Super Admin: Modify category quota allocations"
             >
-              <Sliders className="w-3.5 h-3.5 text-amber-700" />
+              <Sliders className="w-3.5 h-3.5" />
               <span>Modify Quota Limits</span>
             </button>
           )}
 
           <button
             onClick={onRefresh}
-            className="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold text-slate-700 bg-white hover:bg-slate-50 border border-slate-300 rounded-xl shadow-2xs transition cursor-pointer hover:shadow-xs active:translate-y-px"
+            className="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold text-[#3B3028] bg-white hover:bg-[#FAF6EE] border border-[#D9C5A3] rounded-lg shadow-2xs transition cursor-pointer"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? "animate-spin text-primary-700" : "text-slate-500"}`} />
-            <span>Refresh Live Metrics</span>
+            <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? "animate-spin text-[#8B5E3C]" : "text-[#6E5D50]"}`} />
+            <span>Refresh Metrics</span>
           </button>
         </div>
       </div>
 
-      {/* 2. Executive Stat KPI Cards */}
+      {/* 2. Executive KPI Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {cards.map(c => {
+        {cards.map((c) => {
           const Icon = c.icon;
           return (
             <div
               key={c.label}
-              className={`rounded-2xl border p-5 shadow-xs transition-all duration-200 relative overflow-hidden bg-white ${c.border} hover:shadow-md group`}
+              className={`rounded-2xl border p-5 shadow-2xs transition-all duration-200 relative overflow-hidden bg-white ${c.border} hover:shadow-md group`}
             >
               <div className="flex items-center justify-between mb-3">
-                <span className="text-[11px] font-black tracking-wider uppercase text-slate-500 flex items-center gap-1.5">
-                  {c.pulse && <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping inline-block" />}
+                <span className="text-[11px] font-bold tracking-wider uppercase text-[#6E5D50] flex items-center gap-1.5">
+                  {c.pulse && <span className="w-2 h-2 rounded-full bg-[#8B5E3C] animate-ping inline-block" />}
                   {c.label}
                 </span>
-                <div className={`w-9 h-9 rounded-xl flex items-center justify-center transition-transform group-hover:scale-105 ${c.iconBg}`}>
+                <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${c.iconBg}`}>
                   <Icon className="w-4 h-4" />
                 </div>
               </div>
 
-              <div className="text-3xl sm:text-4xl font-black tracking-tight text-slate-900 font-mono">
+              <div className="font-serif text-3xl sm:text-4xl tracking-tight text-[#3B3028]">
                 {c.value.toLocaleString()}
               </div>
 
-              <div className="mt-2 text-xs text-slate-500 font-medium flex items-center justify-between">
+              <div className="mt-2 text-xs font-medium">
                 <span className={c.indicator}>{c.subtext}</span>
               </div>
 
-              {/* Accent bottom accent line */}
-              <div className={`absolute bottom-0 left-0 right-0 h-1 ${c.accent} opacity-80`} />
+              <div className={`absolute bottom-0 left-0 right-0 h-1 ${c.accent} opacity-85`} />
             </div>
           );
         })}
       </div>
 
-      {/* 3. Trade Quota Monitor & Atomic Quota Guard Grid */}
-      <div className="bg-white rounded-3xl border border-slate-200 shadow-xs p-6 space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-3">
+      {/* 3. Trade Quota Monitor */}
+      <div className="bg-white rounded-2xl border border-[#D9C5A3] shadow-2xs p-6 space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-[#E9DEC8] gap-3">
           <div>
             <div className="flex items-center gap-2">
-              <BarChart3 className="w-4 h-4 text-primary-700" />
-              <h3 className="text-sm font-extrabold text-slate-900 uppercase tracking-wider">
-                Category Approval Quotas & Atomic Guard
+              <BarChart3 className="w-4 h-4 text-[#8B5E3C]" />
+              <h3 className="text-xs font-bold text-[#3B3028] uppercase tracking-[0.14em]">
+                Category Approval Quotas &amp; Atomic Guard
               </h3>
             </div>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Row-level locked (SELECT FOR UPDATE). When approved headcount reaches limit, system automatically locks further approvals.
+            <p className="text-xs text-[#6E5D50] mt-0.5">
+              Row-level locked (SELECT FOR UPDATE). Further approvals pause automatically when capacity is reached.
             </p>
           </div>
 
-          <div className="flex items-center gap-2 text-xs font-bold">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-blue-50 text-blue-800 border border-blue-200">
-              <Unlock className="w-3.5 h-3.5 text-blue-600" /> Approvals Open
+          <div className="flex items-center gap-2 text-xs font-semibold">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#EEF2E7] text-[#3E492D] border border-[#5C6B45]/30">
+              <Unlock className="w-3.5 h-3.5 text-[#5C6B45]" /> Open
             </span>
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-rose-50 text-rose-800 border border-rose-200">
-              <Lock className="w-3.5 h-3.5 text-rose-600" /> Quota Locked (Full)
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FDF2EE] text-[#7A3526] border border-[#C97B65]/40">
+              <Lock className="w-3.5 h-3.5 text-[#A9442A]" /> Quota Full
             </span>
           </div>
         </div>
 
-        {/* 9 Category Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {metrics.categories.map(cat => {
+          {metrics.categories.map((cat) => {
             const percent =
               cat.approval_limit > 0
                 ? Math.min(100, Math.round((cat.approved_count / cat.approval_limit) * 100))
                 : 0;
             const isFull = !cat.is_approval_open || cat.approved_count >= cat.approval_limit;
             const isSelected = selectedCategoryId === String(cat.category_id);
-            const theme = getTradeTheme(cat.code);
 
             return (
               <div
                 key={cat.category_id}
                 onClick={() => onSelectCategory && onSelectCategory(isSelected ? "" : String(cat.category_id))}
-                className={`rounded-2xl border transition-all duration-200 flex flex-col justify-between cursor-pointer group relative overflow-hidden ${
+                className={`rounded-xl border transition-all duration-200 flex flex-col justify-between cursor-pointer group relative overflow-hidden ${
                   isSelected
-                    ? "ring-2 ring-primary-600 border-primary-500 bg-primary-50/25 shadow-md -translate-y-0.5"
+                    ? "ring-2 ring-[#8B5E3C] border-[#8B5E3C] bg-[#FAF6EE] shadow-md -translate-y-0.5"
                     : isFull
-                    ? "bg-rose-50/30 border-rose-200 hover:border-rose-400 hover:shadow-sm"
-                    : "bg-white border-slate-200 hover:border-primary-400 hover:shadow-md hover:-translate-y-0.5"
+                    ? "bg-[#FDF2EE]/50 border-[#C97B65]/50 hover:border-[#A9442A]"
+                    : "bg-white border-[#D9C5A3] hover:border-[#8B5E3C] hover:shadow-sm"
                 }`}
               >
-                {/* Active Indicator Top Strip */}
-                {isSelected && (
-                  <div className="absolute top-0 left-0 right-0 h-1 bg-primary-600" />
-                )}
+                {isSelected && <div className="absolute top-0 left-0 right-0 h-1 bg-[#8B5E3C]" />}
 
                 <div className="p-5 space-y-3.5">
-                  {/* Top Row: Code Pill + Quota Status Badge */}
                   <div className="flex items-center justify-between gap-2">
-                    <span
-                      className={`text-xs font-mono font-black px-2.5 py-1 rounded-lg border shadow-2xs ${theme.pill}`}
-                    >
+                    <span className="text-xs font-mono font-bold px-2.5 py-1 rounded-md border border-[#D9C5A3] bg-[#FAF6EE] text-[#8B5E3C]">
                       {cat.code}
                     </span>
 
                     {isFull ? (
-                      <span className="inline-flex items-center gap-1 text-[11px] font-extrabold text-rose-800 bg-rose-100 border border-rose-200 px-2.5 py-0.5 rounded-full shadow-2xs shrink-0">
-                        <Lock className="w-3 h-3 text-rose-700" /> FULL
+                      <span className="inline-flex items-center gap-1 text-[11px] font-bold text-[#7A3526] bg-[#FDF2EE] border border-[#C97B65]/40 px-2.5 py-0.5 rounded-full shrink-0">
+                        <Lock className="w-3 h-3 text-[#A9442A]" /> FULL
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-1 text-[11px] font-black text-blue-800 bg-blue-50 border border-blue-200 px-2.5 py-0.5 rounded-full shadow-2xs shrink-0">
-                        <span className="w-1.5 h-1.5 rounded-full bg-blue-500 inline-block" />
+                      <span className="inline-flex items-center gap-1 text-[11px] font-bold text-[#3E492D] bg-[#EEF2E7] border border-[#5C6B45]/30 px-2.5 py-0.5 rounded-full shrink-0">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#5C6B45] inline-block" />
                         {cat.remaining_quota} left
                       </span>
                     )}
                   </div>
 
-                  {/* Title */}
                   <div>
                     <h4
-                      className="font-extrabold text-slate-900 text-sm leading-snug line-clamp-2 min-h-[2.5rem] group-hover:text-primary-900 transition-colors"
+                      className="font-serif font-medium text-[#3B3028] text-base leading-snug line-clamp-2 min-h-[2.75rem] group-hover:text-[#8B5E3C] transition-colors"
                       title={cat.title}
                     >
                       {cat.title}
                     </h4>
                   </div>
 
-                  {/* Key Metrics Chips */}
                   <div className="grid grid-cols-2 gap-2 pt-1 text-xs">
-                    <div className="bg-slate-50 rounded-xl p-2.5 border border-slate-100 flex flex-col">
-                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                    <div className="bg-[#FAF6EE] rounded-lg p-2.5 border border-[#E9DEC8] flex flex-col">
+                      <span className="text-[10px] font-bold text-[#6E5D50] uppercase tracking-wider">
                         Approved
                       </span>
-                      <span className="font-mono font-black text-slate-900 text-sm mt-0.5">
-                        {cat.approved_count} <span className="text-[11px] text-slate-400 font-medium">/ {cat.approval_limit}</span>
+                      <span className="font-mono font-bold text-[#3B3028] text-sm mt-0.5">
+                        {cat.approved_count}{" "}
+                        <span className="text-[11px] text-[#6E5D50] font-normal">/ {cat.approval_limit}</span>
                       </span>
                     </div>
 
-                    <div className={`rounded-xl p-2.5 border flex flex-col ${
-                      cat.pending_count > 0 
-                        ? "bg-amber-50/60 border-amber-200/80 text-amber-950" 
-                        : "bg-slate-50 border-slate-100 text-slate-500"
-                    }`}>
+                    <div
+                      className={`rounded-lg p-2.5 border flex flex-col ${
+                        cat.pending_count > 0
+                          ? "bg-[#F3EAE2] border-[#D9C5A3] text-[#8B5E3C]"
+                          : "bg-[#FAF6EE] border-[#E9DEC8] text-[#6E5D50]"
+                      }`}
+                    >
                       <span className="text-[10px] font-bold uppercase tracking-wider flex items-center justify-between">
                         Pending
                         {cat.pending_count > 0 && (
-                          <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                          <span className="w-1.5 h-1.5 rounded-full bg-[#8B5E3C] animate-pulse" />
                         )}
                       </span>
-                      <span className={`font-mono font-black text-sm mt-0.5 ${cat.pending_count > 0 ? "text-amber-800" : "text-slate-600"}`}>
+                      <span className="font-mono font-bold text-sm mt-0.5">
                         {cat.pending_count} {cat.pending_count === 1 ? "review" : "reviews"}
                       </span>
                     </div>
                   </div>
 
-                  {/* Progress Meter with Percentage */}
                   <div className="space-y-1.5 pt-1">
-                    <div className="flex justify-between items-center text-[11px] font-bold">
-                      <span className="text-slate-500">Sanctioned Quota Filled</span>
-                      <span className={isFull ? "text-rose-700 font-black" : "text-slate-700 font-mono"}>
+                    <div className="flex justify-between items-center text-[11px] font-semibold">
+                      <span className="text-[#6E5D50]">Quota Filled</span>
+                      <span className={isFull ? "text-[#A9442A] font-bold" : "text-[#3B3028] font-mono"}>
                         {percent}%
                       </span>
                     </div>
-                    <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden shadow-inner p-0.5 border border-slate-200/60">
+                    <div className="w-full bg-[#FAF6EE] rounded-full h-2 overflow-hidden border border-[#D9C5A3]">
                       <div
                         className={`h-full rounded-full transition-all duration-500 ${
                           isFull
-                            ? "bg-rose-600"
+                            ? "bg-[#A9442A]"
                             : percent > 85
-                            ? "bg-amber-500"
-                            : `bg-gradient-to-r ${theme.accent}`
+                            ? "bg-[#8B5E3C]"
+                            : "bg-gradient-to-r from-[#8B5E3C] to-[#5C6B45]"
                         }`}
                         style={{ width: `${percent}%` }}
                       />
@@ -384,23 +306,24 @@ export default function QuotaMetricsHeader({
                   </div>
                 </div>
 
-                {/* Footer Action Bar */}
-                <div className={`px-5 py-2.5 border-t text-[11px] flex items-center justify-between transition-colors ${
-                  isSelected 
-                    ? "bg-primary-100/70 border-primary-200 text-primary-950 font-bold" 
-                    : "bg-slate-50/80 border-slate-100 text-slate-500 group-hover:bg-slate-100/80 group-hover:text-slate-800"
-                }`}>
+                <div
+                  className={`px-5 py-2.5 border-t text-[11px] flex items-center justify-between transition-colors ${
+                    isSelected
+                      ? "bg-[#F3EAE2] border-[#D9C5A3] text-[#3B3028] font-bold"
+                      : "bg-[#FAF6EE] border-[#E9DEC8] text-[#6E5D50] group-hover:bg-[#EDE3D2]"
+                  }`}
+                >
                   <span className="font-semibold flex items-center gap-1">
                     {isSelected ? (
                       <>
-                        <Check className="w-3.5 h-3.5 text-primary-700" />
+                        <Check className="w-3.5 h-3.5 text-[#8B5E3C]" />
                         <span>Filter Active (Click to clear)</span>
                       </>
                     ) : (
                       <span>Capacity: {cat.approval_limit} seats</span>
                     )}
                   </span>
-                  <span className="flex items-center gap-0.5 font-bold group-hover:translate-x-0.5 transition-transform">
+                  <span className="flex items-center gap-0.5 font-semibold group-hover:translate-x-0.5 transition-transform">
                     {isSelected ? "Clear" : "Filter"} <ChevronRight className="w-3.5 h-3.5" />
                   </span>
                 </div>

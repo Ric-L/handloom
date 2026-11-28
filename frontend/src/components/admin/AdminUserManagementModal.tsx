@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+﻿import React, { useState, useEffect } from "react";
 import {
   X,
   Shield,
@@ -255,12 +255,12 @@ export default function AdminUserManagementModal({
   const isSuperAdmin = user.role === "SUPER_ADMIN";
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-2xl w-full overflow-hidden flex flex-col max-h-[90vh] animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#3B3028]/60 backdrop-blur-xs">
+      <div className="bg-white rounded-2xl border border-[#D9C5A3] shadow-2xl max-w-2xl w-full overflow-hidden flex flex-col max-h-[90vh] animate-in fade-in duration-200">
         {/* Modal Header */}
-        <div className="px-6 py-4.5 bg-slate-900 text-white flex items-start justify-between shrink-0">
+        <div className="px-6 py-4.5 bg-[#3B3028] text-white flex items-start justify-between shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-xl bg-blue-600 flex items-center justify-center font-black text-sm text-white shadow-md">
+            <div className="w-11 h-11 rounded-xl bg-[#8B5E3C] flex items-center justify-center font-black text-sm text-white shadow-md">
               {user.full_name?.slice(0, 2).toUpperCase() || user.mobile_number.slice(-2)}
             </div>
             <div>
@@ -272,7 +272,7 @@ export default function AdminUserManagementModal({
                   className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border ${
                     isSuperAdmin
                       ? "bg-amber-500/20 text-amber-300 border-amber-500/40"
-                      : "bg-blue-500/20 text-blue-300 border-blue-500/40"
+                      : "bg-blue-500/20 text-[#D9C5A3] border-[#8B5E3C]/40"
                   }`}
                 >
                   {user.role}
@@ -282,7 +282,7 @@ export default function AdminUserManagementModal({
                     Account Disabled
                   </span>
                 ) : (
-                  <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                  <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-[#5C6B45]/40/40">
                     Active
                   </span>
                 )}
@@ -315,13 +315,13 @@ export default function AdminUserManagementModal({
         )}
 
         {/* Modal Navigation Tabs */}
-        <div className="flex border-b border-slate-200 bg-slate-50/80 px-6 shrink-0">
+        <div className="flex border-b border-[#D9C5A3] bg-[#FAF6EE] px-6 shrink-0">
           <button
             onClick={() => setActiveTab("controls")}
             className={`py-3 px-3 text-xs font-bold border-b-2 transition flex items-center gap-1.5 cursor-pointer ${
               activeTab === "controls"
-                ? "border-blue-600 text-blue-700 bg-white"
-                : "border-transparent text-slate-600 hover:text-slate-900"
+                ? "border-[#8B5E3C] text-[#8B5E3C] bg-white"
+                : "border-transparent text-[#6E5D50] hover:text-[#3B3028]"
             }`}
           >
             <Shield className="w-3.5 h-3.5" />
@@ -332,8 +332,8 @@ export default function AdminUserManagementModal({
             onClick={() => setActiveTab("password")}
             className={`py-3 px-3 text-xs font-bold border-b-2 transition flex items-center gap-1.5 cursor-pointer ${
               activeTab === "password"
-                ? "border-blue-600 text-blue-700 bg-white"
-                : "border-transparent text-slate-600 hover:text-slate-900"
+                ? "border-[#8B5E3C] text-[#8B5E3C] bg-white"
+                : "border-transparent text-[#6E5D50] hover:text-[#3B3028]"
             }`}
           >
             <Key className="w-3.5 h-3.5" />
@@ -344,8 +344,8 @@ export default function AdminUserManagementModal({
             onClick={() => setActiveTab("permissions")}
             className={`py-3 px-3 text-xs font-bold border-b-2 transition flex items-center gap-1.5 cursor-pointer ${
               activeTab === "permissions"
-                ? "border-blue-600 text-blue-700 bg-white"
-                : "border-transparent text-slate-600 hover:text-slate-900"
+                ? "border-[#8B5E3C] text-[#8B5E3C] bg-white"
+                : "border-transparent text-[#6E5D50] hover:text-[#3B3028]"
             }`}
           >
             <Sliders className="w-3.5 h-3.5" />
@@ -356,8 +356,8 @@ export default function AdminUserManagementModal({
             onClick={() => setActiveTab("activity")}
             className={`py-3 px-3 text-xs font-bold border-b-2 transition flex items-center gap-1.5 cursor-pointer ${
               activeTab === "activity"
-                ? "border-blue-600 text-blue-700 bg-white"
-                : "border-transparent text-slate-600 hover:text-slate-900"
+                ? "border-[#8B5E3C] text-[#8B5E3C] bg-white"
+                : "border-transparent text-[#6E5D50] hover:text-[#3B3028]"
             }`}
           >
             <History className="w-3.5 h-3.5" />
@@ -369,8 +369,8 @@ export default function AdminUserManagementModal({
         <div className="p-6 overflow-y-auto space-y-5 flex-1">
           {/* Notification Banners */}
           {successMsg && (
-            <div className="p-3.5 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center gap-2 text-xs font-semibold text-emerald-800">
-              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+            <div className="p-3.5 bg-[#EEF2E7] border border-[#5C6B45]/40 rounded-xl flex items-center gap-2 text-xs font-semibold text-[#5C6B45]">
+              <CheckCircle2 className="w-4 h-4 text-[#5C6B45] shrink-0" />
               <span>{successMsg}</span>
             </div>
           )}
@@ -386,26 +386,26 @@ export default function AdminUserManagementModal({
           {activeTab === "controls" && (
             <div className="space-y-5">
               {/* Identity & Metadata Card */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-4 bg-slate-50 border border-slate-200 rounded-xl text-xs">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-4 bg-[#FAF6EE] border border-[#D9C5A3] rounded-xl text-xs">
                 <div>
                   <span className="text-slate-400 font-semibold block text-[11px]">User ID</span>
-                  <span className="font-mono text-slate-800 font-bold block truncate" title={user.id}>
+                  <span className="font-mono text-[#3B3028] font-bold block truncate" title={user.id}>
                     {user.id}
                   </span>
                 </div>
                 <div>
                   <span className="text-slate-400 font-semibold block text-[11px]">Registered On</span>
-                  <span className="text-slate-800 font-bold block">{formatDate(user.created_at)}</span>
+                  <span className="text-[#3B3028] font-bold block">{formatDate(user.created_at)}</span>
                 </div>
                 <div>
                   <span className="text-slate-400 font-semibold block text-[11px]">Assigned Role</span>
-                  <span className="font-bold text-slate-800 block">{user.role}</span>
+                  <span className="font-bold text-[#3B3028] block">{user.role}</span>
                 </div>
                 <div>
                   <span className="text-slate-400 font-semibold block text-[11px]">Account Status</span>
                   <span
                     className={`font-bold block ${
-                      user.is_disabled ? "text-rose-600" : "text-emerald-700"
+                      user.is_disabled ? "text-rose-600" : "text-[#5C6B45]"
                     }`}
                   >
                     {user.is_disabled ? "Disabled" : "Operational / Active"}
@@ -455,7 +455,7 @@ export default function AdminUserManagementModal({
                   <div className="flex items-center gap-2 pt-1">
                     <button
                       onClick={() => setConfirmAction(null)}
-                      className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 transition cursor-pointer"
+                      className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-[#D9C5A3] bg-white text-slate-700 hover:bg-[#FAF6EE] transition cursor-pointer"
                     >
                       Cancel
                     </button>
@@ -484,7 +484,7 @@ export default function AdminUserManagementModal({
                       <button
                         onClick={handleEnableAccount}
                         disabled={isProcessing}
-                        className="px-3.5 py-1.5 rounded-lg text-xs font-black bg-emerald-600 hover:bg-emerald-700 text-white shadow transition cursor-pointer disabled:opacity-50"
+                        className="px-3.5 py-1.5 rounded-lg text-xs font-black bg-[#5C6B45] hover:bg-[#5C6B45] text-white shadow transition cursor-pointer disabled:opacity-50"
                       >
                         {isProcessing ? "Reactivating..." : "Yes, Reactivate"}
                       </button>
@@ -510,14 +510,14 @@ export default function AdminUserManagementModal({
                 </h4>
 
                 {/* 1. Force Logout */}
-                <div className="p-4 border border-slate-200 rounded-xl flex items-center justify-between gap-4 hover:border-slate-300 transition">
+                <div className="p-4 border border-[#D9C5A3] rounded-xl flex items-center justify-between gap-4 hover:border-[#D9C5A3] transition">
                   <div className="flex items-center gap-3">
                     <div className="w-9 h-9 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center border border-amber-200">
                       <LogOut className="w-4 h-4" />
                     </div>
                     <div>
-                      <h5 className="font-bold text-xs text-slate-900">Force Logout Across Devices</h5>
-                      <p className="text-[11px] text-slate-500">
+                      <h5 className="font-bold text-xs text-[#3B3028]">Force Logout Across Devices</h5>
+                      <p className="text-[11px] text-[#6E5D50]">
                         Terminate all active user sessions immediately without altering password or credentials.
                       </p>
                     </div>
@@ -531,22 +531,22 @@ export default function AdminUserManagementModal({
                 </div>
 
                 {/* 2. Disable / Reactivate Account */}
-                <div className="p-4 border border-slate-200 rounded-xl flex items-center justify-between gap-4 hover:border-slate-300 transition">
+                <div className="p-4 border border-[#D9C5A3] rounded-xl flex items-center justify-between gap-4 hover:border-[#D9C5A3] transition">
                   <div className="flex items-center gap-3">
                     <div
                       className={`w-9 h-9 rounded-lg flex items-center justify-center border ${
                         user.is_disabled
-                          ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                          ? "bg-[#EEF2E7] text-[#5C6B45] border-[#5C6B45]/40"
                           : "bg-rose-50 text-rose-700 border-rose-200"
                       }`}
                     >
                       {user.is_disabled ? <UserCheck className="w-4 h-4" /> : <UserX className="w-4 h-4" />}
                     </div>
                     <div>
-                      <h5 className="font-bold text-xs text-slate-900">
+                      <h5 className="font-bold text-xs text-[#3B3028]">
                         {user.is_disabled ? "Reactivate Account" : "Disable Account"}
                       </h5>
-                      <p className="text-[11px] text-slate-500">
+                      <p className="text-[11px] text-[#6E5D50]">
                         {user.is_disabled
                           ? "Restore administrative sign-in privileges for this account."
                           : "Temporarily suspend sign-in privileges and immediately revoke existing sessions."}
@@ -557,7 +557,7 @@ export default function AdminUserManagementModal({
                   {user.is_disabled ? (
                     <button
                       onClick={() => setConfirmAction("enable")}
-                      className="px-3.5 py-1.5 rounded-lg text-xs font-bold border border-emerald-300 bg-emerald-50 text-emerald-800 hover:bg-emerald-100 transition cursor-pointer shrink-0 shadow-2xs"
+                      className="px-3.5 py-1.5 rounded-lg text-xs font-bold border border-[#5C6B45]/40 bg-[#EEF2E7] text-[#5C6B45] hover:bg-emerald-100 transition cursor-pointer shrink-0 shadow-2xs"
                     >
                       Reactivate Account
                     </button>
@@ -600,27 +600,27 @@ export default function AdminUserManagementModal({
           {/* TAB 2: CHANGE PASSWORD */}
           {activeTab === "password" && (
             <form onSubmit={handleResetPassword} className="space-y-4">
-              <div className="p-3.5 bg-blue-50/80 border border-blue-200 rounded-xl text-xs text-blue-900 space-y-1">
+              <div className="p-3.5 bg-[#FAF6EE] border border-[#D9C5A3] rounded-xl text-xs text-[#3B3028] space-y-1">
                 <span className="font-bold block flex items-center gap-1.5">
-                  <Lock className="w-3.5 h-3.5 text-blue-700" /> Secure Credential Provisioning
+                  <Lock className="w-3.5 h-3.5 text-[#8B5E3C]" /> Secure Credential Provisioning
                 </span>
-                <p className="text-blue-800 text-[11px]">
+                <p className="text-[#734C30] text-[11px]">
                   Existing passwords are cryptographically salted and hashed with bcrypt and are never exposed. Setting a new password will force session termination across all active devices.
                 </p>
               </div>
 
               {/* Generate Password helper */}
               <div className="flex items-center justify-between pb-1">
-                <label className="text-xs font-bold text-slate-800">New Administrator Password *</label>
+                <label className="text-xs font-bold text-[#3B3028]">New Administrator Password *</label>
                 <button
                   type="button"
                   onClick={generateRandomPassword}
-                  className="text-xs font-bold text-blue-700 hover:text-blue-900 flex items-center gap-1 cursor-pointer"
+                  className="text-xs font-bold text-[#8B5E3C] hover:text-[#3B3028] flex items-center gap-1 cursor-pointer"
                 >
                   {copiedGenerated ? (
                     <>
-                      <Check className="w-3.5 h-3.5 text-emerald-600" />
-                      <span className="text-emerald-700">Copied to Clipboard!</span>
+                      <Check className="w-3.5 h-3.5 text-[#5C6B45]" />
+                      <span className="text-[#5C6B45]">Copied to Clipboard!</span>
                     </>
                   ) : (
                     <>
@@ -639,12 +639,12 @@ export default function AdminUserManagementModal({
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   placeholder="Enter new secure password (min 8 characters)"
-                  className="w-full px-3.5 py-2 text-xs border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"
+                  className="w-full px-3.5 py-2 text-xs border border-[#D9C5A3] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#8B5E3C]/30 font-mono"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-800">Confirm New Password *</label>
+                <label className="text-xs font-bold text-[#3B3028]">Confirm New Password *</label>
                 <input
                   type="password"
                   required
@@ -652,7 +652,7 @@ export default function AdminUserManagementModal({
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="Re-type new password to confirm"
-                  className="w-full px-3.5 py-2 text-xs border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"
+                  className="w-full px-3.5 py-2 text-xs border border-[#D9C5A3] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#8B5E3C]/30 font-mono"
                 />
               </div>
 
@@ -660,7 +660,7 @@ export default function AdminUserManagementModal({
                 <button
                   type="submit"
                   disabled={isProcessing}
-                  className="px-4 py-2 rounded-xl text-xs font-black bg-blue-700 hover:bg-blue-800 text-white shadow transition cursor-pointer disabled:opacity-50"
+                  className="px-4 py-2 rounded-xl text-xs font-black bg-[#8B5E3C] hover:bg-[#734C30] text-white shadow transition cursor-pointer disabled:opacity-50"
                 >
                   {isProcessing ? "Resetting Password..." : "Reset Password & Terminate Sessions"}
                 </button>
@@ -671,70 +671,70 @@ export default function AdminUserManagementModal({
           {/* TAB 3: PERMISSIONS MANAGEMENT */}
           {activeTab === "permissions" && (
             <div className="space-y-4">
-              <div className="p-3.5 bg-blue-50/80 border border-blue-200 rounded-xl text-xs text-blue-900">
+              <div className="p-3.5 bg-[#FAF6EE] border border-[#D9C5A3] rounded-xl text-xs text-[#3B3028]">
                 Configure operational permissions for <strong>{user.full_name || user.mobile_number}</strong>. Permissions dictate which moderation functions this administrator can execute on the MHHDC admissions portal.
               </div>
 
               <div className="space-y-2.5">
                 {/* 1. Review Dossiers */}
-                <label className="flex items-start gap-3 p-3.5 border border-slate-200 rounded-xl hover:bg-slate-50 transition cursor-pointer">
+                <label className="flex items-start gap-3 p-3.5 border border-[#D9C5A3] rounded-xl hover:bg-[#FAF6EE] transition cursor-pointer">
                   <input
                     type="checkbox"
                     checked={permissions.can_review}
                     onChange={(e) => setPermissions({ ...permissions, can_review: e.target.checked })}
-                    className="mt-0.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                    className="mt-0.5 rounded border-[#D9C5A3] text-[#8B5E3C] focus:ring-[#8B5E3C]/30 cursor-pointer"
                   />
                   <div>
-                    <span className="font-bold text-xs text-slate-900 block">Can Review Applications</span>
-                    <span className="text-[11px] text-slate-500 block">
+                    <span className="font-bold text-xs text-[#3B3028] block">Can Review Applications</span>
+                    <span className="text-[11px] text-[#6E5D50] block">
                       Inspect candidate dossiers, identity documents, bank proofs, and qualifications.
                     </span>
                   </div>
                 </label>
 
                 {/* 2. Approve Applications */}
-                <label className="flex items-start gap-3 p-3.5 border border-slate-200 rounded-xl hover:bg-slate-50 transition cursor-pointer">
+                <label className="flex items-start gap-3 p-3.5 border border-[#D9C5A3] rounded-xl hover:bg-[#FAF6EE] transition cursor-pointer">
                   <input
                     type="checkbox"
                     checked={permissions.can_approve}
                     onChange={(e) => setPermissions({ ...permissions, can_approve: e.target.checked })}
-                    className="mt-0.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                    className="mt-0.5 rounded border-[#D9C5A3] text-[#8B5E3C] focus:ring-[#8B5E3C]/30 cursor-pointer"
                   />
                   <div>
-                    <span className="font-bold text-xs text-slate-900 block">Can Approve Applications</span>
-                    <span className="text-[11px] text-slate-500 block">
+                    <span className="font-bold text-xs text-[#3B3028] block">Can Approve Applications</span>
+                    <span className="text-[11px] text-[#6E5D50] block">
                       Authorize candidate admissions subject to ACID quota limits and seat thresholds.
                     </span>
                   </div>
                 </label>
 
                 {/* 3. Reject Applications */}
-                <label className="flex items-start gap-3 p-3.5 border border-slate-200 rounded-xl hover:bg-slate-50 transition cursor-pointer">
+                <label className="flex items-start gap-3 p-3.5 border border-[#D9C5A3] rounded-xl hover:bg-[#FAF6EE] transition cursor-pointer">
                   <input
                     type="checkbox"
                     checked={permissions.can_reject}
                     onChange={(e) => setPermissions({ ...permissions, can_reject: e.target.checked })}
-                    className="mt-0.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                    className="mt-0.5 rounded border-[#D9C5A3] text-[#8B5E3C] focus:ring-[#8B5E3C]/30 cursor-pointer"
                   />
                   <div>
-                    <span className="font-bold text-xs text-slate-900 block">Can Reject Applications</span>
-                    <span className="text-[11px] text-slate-500 block">
+                    <span className="font-bold text-xs text-[#3B3028] block">Can Reject Applications</span>
+                    <span className="text-[11px] text-[#6E5D50] block">
                       Issue formal administrative rejections with mandatory statutory reasons.
                     </span>
                   </div>
                 </label>
 
                 {/* 4. Export CSV */}
-                <label className="flex items-start gap-3 p-3.5 border border-slate-200 rounded-xl hover:bg-slate-50 transition cursor-pointer">
+                <label className="flex items-start gap-3 p-3.5 border border-[#D9C5A3] rounded-xl hover:bg-[#FAF6EE] transition cursor-pointer">
                   <input
                     type="checkbox"
                     checked={permissions.can_export}
                     onChange={(e) => setPermissions({ ...permissions, can_export: e.target.checked })}
-                    className="mt-0.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                    className="mt-0.5 rounded border-[#D9C5A3] text-[#8B5E3C] focus:ring-[#8B5E3C]/30 cursor-pointer"
                   />
                   <div>
-                    <span className="font-bold text-xs text-slate-900 block">Can Export Moderation Data</span>
-                    <span className="text-[11px] text-slate-500 block">
+                    <span className="font-bold text-xs text-[#3B3028] block">Can Export Moderation Data</span>
+                    <span className="text-[11px] text-[#6E5D50] block">
                       Download candidate reports and audit-compliant CSV verification registers.
                     </span>
                   </div>
@@ -746,7 +746,7 @@ export default function AdminUserManagementModal({
                   type="button"
                   onClick={handleSavePermissions}
                   disabled={isProcessing}
-                  className="px-4 py-2 rounded-xl text-xs font-black bg-blue-700 hover:bg-blue-800 text-white shadow transition cursor-pointer disabled:opacity-50"
+                  className="px-4 py-2 rounded-xl text-xs font-black bg-[#8B5E3C] hover:bg-[#734C30] text-white shadow transition cursor-pointer disabled:opacity-50"
                 >
                   {isProcessing ? "Saving Permissions..." : "Save Permissions"}
                 </button>
@@ -764,7 +764,7 @@ export default function AdminUserManagementModal({
                 <button
                   onClick={loadActivity}
                   disabled={isLoadingActivity}
-                  className="inline-flex items-center gap-1 text-xs font-bold text-blue-700 hover:text-blue-900 cursor-pointer disabled:opacity-50"
+                  className="inline-flex items-center gap-1 text-xs font-bold text-[#8B5E3C] hover:text-[#3B3028] cursor-pointer disabled:opacity-50"
                 >
                   <RefreshCw className={`w-3.5 h-3.5 ${isLoadingActivity ? "animate-spin" : ""}`} />
                   <span>Refresh</span>
@@ -776,13 +776,13 @@ export default function AdminUserManagementModal({
                   Querying immutable audit logs...
                 </div>
               ) : activityLogs.length === 0 ? (
-                <div className="py-12 text-center border border-dashed border-slate-200 rounded-xl text-xs text-slate-400">
+                <div className="py-12 text-center border border-dashed border-[#D9C5A3] rounded-xl text-xs text-slate-400">
                   No activity logs recorded for this administrator yet.
                 </div>
               ) : (
-                <div className="border border-slate-200 rounded-xl overflow-hidden max-h-72 overflow-y-auto">
+                <div className="border border-[#D9C5A3] rounded-xl overflow-hidden max-h-72 overflow-y-auto">
                   <table className="w-full text-left text-xs">
-                    <thead className="bg-slate-100 text-slate-600 font-bold uppercase tracking-wider text-[10px] border-b border-slate-200">
+                    <thead className="bg-[#FAF6EE] text-[#6E5D50] font-bold uppercase tracking-wider text-[10px] border-b border-[#D9C5A3]">
                       <tr>
                         <th className="px-3 py-2">Action</th>
                         <th className="px-3 py-2">Status</th>
@@ -790,23 +790,23 @@ export default function AdminUserManagementModal({
                         <th className="px-3 py-2">Timestamp</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100">
+                    <tbody className="divide-y divide-[#E9DEC8]">
                       {activityLogs.map((log) => (
-                        <tr key={log.id} className="hover:bg-slate-50 font-mono text-[11px]">
-                          <td className="px-3 py-2 font-bold text-slate-800">{log.action}</td>
+                        <tr key={log.id} className="hover:bg-[#FAF6EE] font-mono text-[11px]">
+                          <td className="px-3 py-2 font-bold text-[#3B3028]">{log.action}</td>
                           <td className="px-3 py-2">
                             <span
                               className={`px-1.5 py-0.5 rounded text-[10px] font-black uppercase ${
                                 log.status === "SUCCESS"
-                                  ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
+                                  ? "bg-[#EEF2E7] text-[#5C6B45] border border-[#5C6B45]/40"
                                   : "bg-rose-50 text-rose-800 border border-rose-200"
                               }`}
                             >
                               {log.status}
                             </span>
                           </td>
-                          <td className="px-3 py-2 text-slate-500">{log.ip_address || "—"}</td>
-                          <td className="px-3 py-2 text-slate-500 whitespace-nowrap">
+                          <td className="px-3 py-2 text-[#6E5D50]">{log.ip_address || "—"}</td>
+                          <td className="px-3 py-2 text-[#6E5D50] whitespace-nowrap">
                             {formatDate(log.created_at)}
                           </td>
                         </tr>
@@ -820,11 +820,11 @@ export default function AdminUserManagementModal({
         </div>
 
         {/* Modal Footer */}
-        <div className="px-6 py-3.5 bg-slate-50 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500 shrink-0">
+        <div className="px-6 py-3.5 bg-[#FAF6EE] border-t border-[#D9C5A3] flex items-center justify-between text-xs text-[#6E5D50] shrink-0">
           <span className="font-mono text-[11px]">Super Admin RBAC Authority Protocol</span>
           <button
             onClick={onClose}
-            className="px-4 py-2 rounded-xl text-xs font-bold border border-slate-300 bg-white text-slate-700 hover:bg-slate-100 transition cursor-pointer"
+            className="px-4 py-2 rounded-xl text-xs font-bold border border-[#D9C5A3] bg-white text-slate-700 hover:bg-[#EDE3D2] transition cursor-pointer"
           >
             Close
           </button>

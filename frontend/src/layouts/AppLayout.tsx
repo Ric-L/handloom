@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, Outlet, useNavigate, useLocation } from "react-router-dom";
 import type { User } from "../types";
 import { logoutUser } from "../api";
+import TrackStatusModal from "../components/TrackStatusModal";
 import {
   Menu,
   X,
@@ -10,14 +11,21 @@ import {
   Shield,
   PhoneCall,
   HelpCircle,
+  ChevronDown,
 } from "lucide-react";
 
 type TextScale = "sm" | "md" | "lg";
+
+export interface AppOutletContext {
+  openTrackModal: () => void;
+}
 
 export default function AppLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [portalDropdownOpen, setPortalDropdownOpen] = useState(false);
+  const [trackModalOpen, setTrackModalOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [textScale, setTextScale] = useState<TextScale>(() => {
     return (localStorage.getItem("portal_text_scale") as TextScale) || "md";
@@ -36,6 +44,10 @@ export default function AppLayout() {
     else root.style.fontSize = "16px";
     localStorage.setItem("portal_text_scale", textScale);
   }, [textScale]);
+
+  useEffect(() => {
+    setPortalDropdownOpen(false);
+  }, [location.pathname, location.hash]);
 
   const token = localStorage.getItem("token");
   const userJson = localStorage.getItem("user");
@@ -58,14 +70,17 @@ export default function AppLayout() {
   };
 
   const navLinks = [
-    { to: "/", label: "HOME" },
-    { to: "/#track-status", label: "APPLICATION STATUS" },
-    { to: "/categories", label: "TRAINING COURSES" },
-    { to: "/dashboard", label: "VERIFY / DOWNLOAD SLIP" },
-    ...(token ? [{ to: "/apply", label: "APPLY ONLINE" }] : []),
+    { to: "/", label: "Overview" },
+    { to: "/categories", label: "Training trades" },
+    { to: "/#pm-vikas-scheme", label: "Eligibility" },
+    { to: "#track-modal", label: "Track status" },
+    ...(token ? [{ to: "/dashboard", label: "My portal" }] : []),
   ];
 
   const isActive = (path: string) => {
+    if (path === "#track-modal") {
+      return location.pathname.startsWith("/track");
+    }
     if (path.startsWith("/#")) {
       return location.pathname === "/" && location.hash === path.replace("/", "");
     }
@@ -74,6 +89,10 @@ export default function AppLayout() {
 
   const handleNavClick = (to: string) => {
     setMobileMenuOpen(false);
+    if (to === "#track-modal") {
+      setTrackModalOpen(true);
+      return;
+    }
     if (to.startsWith("/#")) {
       const hash = to.replace("/", "");
       if (location.pathname !== "/") {
@@ -88,23 +107,27 @@ export default function AppLayout() {
   };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col font-sans text-slate-800">
-      {/* Slim Top Accessibility & Helpline Strip */}
-      <div className="bg-slate-900 text-slate-200 text-[11px] px-4 sm:px-6 lg:px-8 py-1 border-b border-slate-800">
+    <div className="min-h-screen bg-[#F5EFE3] flex flex-col font-sans text-[#3B3028]">
+      {/* Slim Deep Earth Top Strip */}
+      <div className="bg-[#2A211B] text-[#D9C5A3] text-[11px] px-4 sm:px-6 lg:px-8 py-1.5 border-b border-[#3B3028]">
         <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2">
-            <span className="font-semibold text-amber-300">Manipur Handloom &amp; Handicrafts Development Corporation Ltd.</span>
-            <span className="text-slate-600 hidden sm:inline">|</span>
-            <span className="text-slate-300 hidden sm:inline">Paona Bazar, Imphal 795001</span>
+            <span className="font-semibold text-[#F5EFE3]">
+              Manipur Handloom &amp; Handicrafts Development Corporation Ltd.
+            </span>
+            <span className="text-[#8D7B6D] hidden sm:inline">|</span>
+            <span className="text-[#D9C5A3]/85 hidden sm:inline">Paona Bazar, Imphal 795001</span>
           </div>
 
           <div className="flex items-center gap-3">
-            <a href="tel:03852451495" className="flex items-center gap-1 text-slate-200 hover:text-amber-300 transition">
-              <PhoneCall className="w-3 h-3 text-amber-400" />
-              <span>Office: <strong>0385-245 1495</strong></span>
+            <a href="tel:03852451495" className="flex items-center gap-1 text-[#D9C5A3] hover:text-[#F5EFE3] transition">
+              <PhoneCall className="w-3 h-3 text-[#D9C5A3]" />
+              <span>
+                Help &amp; support: <strong className="text-[#F5EFE3]">0385-245 1495</strong>
+              </span>
             </a>
 
-            <span className="text-slate-700 hidden sm:inline">|</span>
+            <span className="text-[#6E5D50] hidden sm:inline">|</span>
 
             <div className="hidden sm:flex items-center gap-1" role="group" aria-label="Text size">
               {(["sm", "md", "lg"] as TextScale[]).map((size, idx) => (
@@ -112,7 +135,9 @@ export default function AppLayout() {
                   key={size}
                   type="button"
                   onClick={() => setTextScale(size)}
-                  className={`px-1.5 py-0.5 rounded text-[10px] font-bold transition cursor-pointer ${textScale === size ? "bg-blue-600 text-white" : "bg-slate-800 text-slate-300 hover:bg-slate-700"
+                  className={`px-1.5 py-0.5 rounded text-[10px] font-bold transition cursor-pointer ${textScale === size
+                    ? "bg-[#8B5E3C] text-[#F5EFE3]"
+                    : "bg-[#3B3028] text-[#D9C5A3] hover:bg-[#5C6B45]"
                     }`}
                 >
                   {idx === 0 ? "A-" : idx === 1 ? "A" : "A+"}
@@ -120,23 +145,26 @@ export default function AppLayout() {
               ))}
             </div>
 
-            <span className="text-slate-700">|</span>
+            <span className="text-[#6E5D50]">|</span>
 
-            <Link to="/admin/login" className="inline-flex items-center gap-1 text-slate-300 hover:text-white transition">
-              <Shield className="w-3 h-3 text-sky-400" />
-              <span>Admin Login</span>
+            <Link
+              to="/admin/login"
+              className="inline-flex items-center gap-1 text-[#D9C5A3] hover:text-[#F5EFE3] transition"
+            >
+              <Shield className="w-3 h-3 text-[#D9C5A3]" />
+              <span>Admin Portal</span>
             </Link>
           </div>
         </div>
       </div>
 
-      {/* Clean White e-Seba Style Main Header */}
+      {/* Clean Sticky Header */}
       <header
-        className={`sticky top-0 z-40 bg-white transition-shadow duration-200 border-b border-slate-200/80 ${scrolled ? "shadow-md" : ""
+        className={`sticky top-0 z-40 bg-[#FAF6EE]/95 backdrop-blur-md transition-shadow duration-200 border-b border-[#D9C5A3] ${scrolled ? "shadow-sm" : ""
           }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-18 flex items-center justify-between gap-4">
-          {/* Left: Company Identity & Brand Lockup */}
+          {/* Left: MHHDCL Brand Lockup */}
           <Link to="/" className="flex items-center gap-3 shrink-0">
             <img
               src="/mhhdcl-logo.png"
@@ -144,19 +172,32 @@ export default function AppLayout() {
               className="h-12 w-auto object-contain shrink-0"
             />
             <div className="leading-tight">
-              <div className="text-[10px] sm:text-[11px] font-bold text-amber-700 tracking-wide uppercase">
-                MHHDC • Admissions Portal
+              <div className="text-[10px] sm:text-[11px] font-bold text-[#5C6B45] tracking-[0.14em] uppercase">
+                MHHDCL
               </div>
-              <div className="text-xs sm:text-[13px] font-extrabold text-[#0f256e] tracking-tight leading-snug max-w-[220px] sm:max-w-[290px]">
-                Manipur Handloom &amp; Handicrafts Development Corporation Ltd.
+              <div className="text-xs sm:text-[13px] font-bold text-[#3B3028] tracking-tight leading-snug max-w-[200px] sm:max-w-[260px]">
+                Manipur Handloom &amp; Handicrafts Development Corp. Ltd.
               </div>
             </div>
           </Link>
 
-          {/* Center: Clean Uppercase Navigation Links */}
+          {/* Center Navigation Links */}
           <nav className="hidden lg:flex items-center gap-7" aria-label="Main navigation">
             {navLinks.map((link) =>
-              link.to.startsWith("/#") ? (
+              link.to === "#track-modal" ? (
+                <button
+                  key={link.to}
+                  type="button"
+                  onClick={() => handleNavClick(link.to)}
+                  className={`text-sm font-medium transition cursor-pointer ${
+                    isActive(link.to)
+                      ? "text-[#8B5E3C] font-semibold underline decoration-[#8B5E3C] underline-offset-8"
+                      : "text-[#3B3028] hover:text-[#8B5E3C]"
+                  }`}
+                >
+                  {link.label}
+                </button>
+              ) : link.to.startsWith("/#") ? (
                 <a
                   key={link.to}
                   href={link.to}
@@ -164,9 +205,9 @@ export default function AppLayout() {
                     e.preventDefault();
                     handleNavClick(link.to);
                   }}
-                  className={`text-xs font-semibold tracking-wider transition cursor-pointer ${isActive(link.to)
-                      ? "text-[#0f256e] font-bold"
-                      : "text-slate-700 hover:text-[#0f256e]"
+                  className={`text-sm font-medium transition cursor-pointer ${isActive(link.to)
+                    ? "text-[#8B5E3C] font-semibold underline decoration-[#8B5E3C] underline-offset-8"
+                    : "text-[#3B3028] hover:text-[#8B5E3C]"
                     }`}
                 >
                   {link.label}
@@ -175,9 +216,9 @@ export default function AppLayout() {
                 <Link
                   key={link.to}
                   to={link.to}
-                  className={`text-xs font-semibold tracking-wider transition ${isActive(link.to)
-                      ? "text-[#0f256e] font-bold"
-                      : "text-slate-700 hover:text-[#0f256e]"
+                  className={`text-sm font-medium transition ${isActive(link.to)
+                    ? "text-[#8B5E3C] font-semibold underline decoration-[#8B5E3C] underline-offset-8"
+                    : "text-[#3B3028] hover:text-[#8B5E3C]"
                     }`}
                 >
                   {link.label}
@@ -186,32 +227,63 @@ export default function AppLayout() {
             )}
           </nav>
 
-          {/* Right: Solid Deep Navy LOGIN Button (or Account Controls) */}
-          <div className="hidden md:flex items-center gap-2.5 shrink-0">
+          {/* Right Controls */}
+          <div className="hidden md:flex items-center gap-2.5 shrink-0 relative">
+            <a
+              href="tel:03852451495"
+              title="Imphal Head Office Helpline: 0385-245 1495"
+              className="w-9 h-9 rounded-full border border-[#D9C5A3] bg-white flex items-center justify-center text-[#6E5D50] hover:text-[#3B3028] hover:border-[#8B5E3C] transition"
+            >
+              <HelpCircle className="w-4 h-4" />
+            </a>
+
             {token ? (
               <>
                 <Link
                   to="/dashboard"
-                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 transition"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold bg-white hover:bg-[#EFE7D6] text-[#3B3028] border border-[#D9C5A3] transition"
                 >
-                  <UserIcon className="w-3.5 h-3.5 text-[#0f256e]" />
-                  <span>{user?.mobile_number || "My Account"}</span>
+                  <UserIcon className="w-3.5 h-3.5 text-[#5C6B45]" />
+                  <span>{user?.full_name?.split(" ")[0] || user?.mobile_number || "My Account"}</span>
                 </Link>
                 <button
                   onClick={logout}
-                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md text-xs font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 transition cursor-pointer"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold text-[#8B5E3C] bg-[#F3EAE2] hover:bg-[#E4D0BA] border border-[#D9C5A3] transition cursor-pointer"
                 >
                   <LogOut className="w-3.5 h-3.5" />
-                  <span>LOGOUT</span>
+                  <span>Sign Out</span>
                 </button>
               </>
             ) : (
-              <Link
-                to="/login"
-                className="px-6 py-2.5 rounded-md text-xs font-bold tracking-wider uppercase text-white bg-[#0f256e] hover:bg-blue-950 shadow-xs transition"
-              >
-                LOGIN
-              </Link>
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setPortalDropdownOpen((o) => !o)}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold text-[#F5EFE3] bg-[#8B5E3C] hover:bg-[#734C30] border border-[#734C30] shadow-xs transition cursor-pointer"
+                >
+                  <span>Login/Sign Up</span>
+                  <ChevronDown className="w-3.5 h-3.5" />
+                </button>
+
+                {portalDropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-44 bg-[#FAF6EE] border border-[#D9C5A3] rounded-xl shadow-lg py-1.5 z-50">
+                    <Link
+                      to="/login"
+                      onClick={() => setPortalDropdownOpen(false)}
+                      className="block px-4 py-2.5 text-sm font-semibold text-[#3B3028] hover:bg-[#EDE3D2] transition"
+                    >
+                      Login
+                    </Link>
+                    <Link
+                      to="/register"
+                      onClick={() => setPortalDropdownOpen(false)}
+                      className="block px-4 py-2.5 text-sm font-semibold text-[#8B5E3C] hover:bg-[#EDE3D2] transition border-t border-[#E9DEC8]"
+                    >
+                      Sign Up
+                    </Link>
+                  </div>
+                )}
+              </div>
             )}
           </div>
 
@@ -219,7 +291,7 @@ export default function AppLayout() {
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label="Toggle navigation menu"
-            className="lg:hidden p-2 rounded-lg text-slate-700 hover:bg-slate-100 border border-slate-200"
+            className="lg:hidden p-2 rounded-lg text-[#3B3028] hover:bg-[#EDE3D2] border border-[#D9C5A3]"
           >
             {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
@@ -227,9 +299,18 @@ export default function AppLayout() {
 
         {/* Mobile Dropdown Menu */}
         {mobileMenuOpen && (
-          <div className="lg:hidden bg-white border-t border-slate-200 px-4 py-4 space-y-2 shadow-lg">
+          <div className="lg:hidden bg-[#FAF6EE] border-t border-[#D9C5A3] px-4 py-4 space-y-2 shadow-lg">
             {navLinks.map((link) =>
-              link.to.startsWith("/#") ? (
+              link.to === "#track-modal" ? (
+                <button
+                  key={link.to}
+                  type="button"
+                  onClick={() => handleNavClick(link.to)}
+                  className="w-full text-left block px-4 py-2.5 rounded-lg text-sm font-medium text-[#3B3028] hover:bg-[#EDE3D2] cursor-pointer"
+                >
+                  {link.label}
+                </button>
+              ) : link.to.startsWith("/#") ? (
                 <a
                   key={link.to}
                   href={link.to}
@@ -237,7 +318,7 @@ export default function AppLayout() {
                     e.preventDefault();
                     handleNavClick(link.to);
                   }}
-                  className="block px-4 py-2.5 rounded-lg text-sm font-semibold text-slate-700 hover:bg-slate-100"
+                  className="block px-4 py-2.5 rounded-lg text-sm font-medium text-[#3B3028] hover:bg-[#EDE3D2]"
                 >
                   {link.label}
                 </a>
@@ -246,31 +327,40 @@ export default function AppLayout() {
                   key={link.to}
                   to={link.to}
                   onClick={() => setMobileMenuOpen(false)}
-                  className="block px-4 py-2.5 rounded-lg text-sm font-semibold text-slate-700 hover:bg-slate-100"
+                  className="block px-4 py-2.5 rounded-lg text-sm font-medium text-[#3B3028] hover:bg-[#EDE3D2]"
                 >
                   {link.label}
                 </Link>
               )
             )}
-            <div className="pt-2 border-t border-slate-100">
+            <div className="pt-2 border-t border-[#D9C5A3] space-y-2">
               {token ? (
                 <button
                   onClick={() => {
                     logout();
                     setMobileMenuOpen(false);
                   }}
-                  className="w-full text-left px-4 py-2.5 text-sm font-bold text-rose-700 hover:bg-rose-50 rounded-lg"
+                  className="w-full text-left px-4 py-2.5 text-sm font-semibold text-[#8B5E3C] hover:bg-[#EDE3D2] rounded-lg"
                 >
-                  LOGOUT ({user?.mobile_number})
+                  Sign Out ({user?.mobile_number})
                 </button>
               ) : (
-                <Link
-                  to="/login"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="block text-center py-2.5 rounded-md text-xs font-bold uppercase tracking-wider text-white bg-[#0f256e]"
-                >
-                  LOGIN
-                </Link>
+                <div className="grid grid-cols-2 gap-2">
+                  <Link
+                    to="/login"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block text-center py-2.5 rounded-lg text-xs font-semibold text-[#F5EFE3] bg-[#8B5E3C]"
+                  >
+                    Login
+                  </Link>
+                  <Link
+                    to="/register"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block text-center py-2.5 rounded-lg text-xs font-semibold text-[#3B3028] border border-[#D9C5A3] bg-white"
+                  >
+                    Sign Up
+                  </Link>
+                </div>
               )}
             </div>
           </div>
@@ -279,48 +369,75 @@ export default function AppLayout() {
 
       {/* Main Content */}
       <main
-        className={`flex-1 w-full bg-slate-50 ${location.pathname === "/" ? "" : "max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8"
+        className={`flex-1 w-full bg-[#F5EFE3] ${location.pathname === "/" ? "" : "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8"
           }`}
       >
-        <Outlet />
+        <Outlet context={{ openTrackModal: () => setTrackModalOpen(true) } satisfies AppOutletContext} />
       </main>
 
-      {/* Footer */}
-      <footer className="bg-slate-900 text-slate-300 text-sm border-t border-slate-800">
+      <TrackStatusModal
+        isOpen={trackModalOpen}
+        onClose={() => setTrackModalOpen(false)}
+      />
+
+      {/* Deep Earth Footer */}
+      <footer className="bg-[#2A211B] text-[#D9C5A3] text-sm border-t border-[#3B3028]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
             <div className="space-y-3">
-              <div className="flex items-center gap-3 text-white font-bold text-base sm:text-lg leading-snug">
-                <span className="bg-white/95 rounded-xl px-2 py-1.5 shadow-xs shrink-0 inline-flex items-center justify-center">
+              <div className="flex items-center gap-3 text-[#F5EFE3] font-bold text-base leading-snug">
+                <span className="bg-[#FAF6EE] rounded-xl px-2 py-1.5 shadow-xs shrink-0 inline-flex items-center justify-center border border-[#D9C5A3]">
                   <img src="/mhhdcl-logo.png" alt="MHHDCL" className="h-10 w-auto object-contain" />
                 </span>
-                <span>Manipur Handloom &amp; Handicrafts Development Corporation Ltd.</span>
+                <span className="font-serif text-lg">
+                  Manipur Handloom &amp; Handicrafts Development Corporation Ltd.
+                </span>
               </div>
-              <p className="text-slate-400 text-sm leading-relaxed">
+              <p className="text-[#D9C5A3]/85 text-xs sm:text-sm leading-relaxed">
                 Registration and admission portal operated by Manipur Handloom &amp; Handicrafts Development Corporation Ltd. (MHHDC) for residential skill training programmes conducted under the PM VIKAS Scheme.
               </p>
             </div>
 
             <div>
-              <h4 className="font-bold text-white text-sm mb-3">Quick Links</h4>
-              <ul className="space-y-2 text-sm text-slate-300">
-                <li><Link to="/categories" className="hover:text-amber-300 transition">Training Courses</Link></li>
-                <li><Link to="/apply" className="hover:text-amber-300 transition">Apply for Training</Link></li>
-                <li><Link to="/dashboard" className="hover:text-amber-300 transition">My Submitted Applications</Link></li>
-                <li><Link to="/login" className="hover:text-amber-300 transition">Applicant Sign In / Register</Link></li>
+              <h4 className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#F5EFE3] mb-3">
+                Quick Links
+              </h4>
+              <ul className="space-y-2 text-sm text-[#D9C5A3]">
+                <li>
+                  <Link to="/categories" className="hover:text-[#F5EFE3] transition">
+                    Training Courses
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/apply" className="hover:text-[#F5EFE3] transition">
+                    Apply for Training
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/dashboard" className="hover:text-[#F5EFE3] transition">
+                    My Submitted Applications
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/login" className="hover:text-[#F5EFE3] transition">
+                    Login / Sign Up
+                  </Link>
+                </li>
               </ul>
             </div>
 
             <div>
-              <h4 className="font-bold text-white text-sm mb-3 flex items-center gap-2">
-                <HelpCircle className="w-4 h-4 text-amber-400" />
-                Need Help?
+              <h4 className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#F5EFE3] mb-3 flex items-center gap-2">
+                <HelpCircle className="w-4 h-4 text-[#D9C5A3]" />
+                Need Assistance?
               </h4>
-              <p className="text-sm text-slate-300 mb-2">
+              <p className="text-sm text-[#D9C5A3] mb-2">
                 Imphal Head Office:
-                <strong className="block text-amber-300 text-base mt-0.5">0385-245 1495</strong>
+                <strong className="block font-serif text-[#F5EFE3] text-xl mt-0.5">
+                  0385-245 1495
+                </strong>
               </p>
-              <p className="text-xs text-slate-400 leading-relaxed">
+              <p className="text-xs text-[#D9C5A3]/80 leading-relaxed">
                 Governor Road, Paona Bazar, Imphal 795001
                 <br />
                 Hours: 9:30 AM to 6:00 PM (Monday – Saturday)
@@ -328,12 +445,18 @@ export default function AppLayout() {
             </div>
           </div>
 
-          <div className="pt-6 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-400 gap-3">
+          <div className="pt-6 border-t border-[#3B3028] flex flex-col sm:flex-row items-center justify-between text-xs text-[#D9C5A3]/75 gap-3">
             <div>© 2026 Manipur Handloom and Handicrafts Development Corporation Ltd. All Rights Reserved.</div>
             <div className="flex gap-5">
-              <Link to="/categories" className="hover:text-white">Courses</Link>
-              <Link to="/apply" className="hover:text-white">Apply</Link>
-              <Link to="/admin/login" className="hover:text-white">Admin Login</Link>
+              <Link to="/categories" className="hover:text-[#F5EFE3]">
+                Courses
+              </Link>
+              <Link to="/apply" className="hover:text-[#F5EFE3]">
+                Apply
+              </Link>
+              <Link to="/admin/login" className="hover:text-[#F5EFE3]">
+                Admin Login
+              </Link>
             </div>
           </div>
         </div>

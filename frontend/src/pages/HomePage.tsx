@@ -1,41 +1,34 @@
 import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { trackApplication, getCategories } from "../api";
-import { formatDate, statusBadgeColor } from "../lib/utils";
-import type { TrackResponse } from "../types";
-import { Link } from "react-router-dom";
+import { getCategories } from "../api";
+import { Link, useOutletContext } from "react-router-dom";
+import type { AppOutletContext } from "../layouts/AppLayout";
 import {
   Search,
   ArrowRight,
+  ArrowDown,
   ShieldCheck,
   CheckCircle2,
   GraduationCap,
   Banknote,
   Award,
-  Clock,
-  UserPlus,
-  ClipboardCheck,
-  Download,
   PhoneCall,
-  AlertCircle,
-  Target,
   MapPin,
   Users,
   BookOpen,
   Store,
-  Sparkles,
+  FileText,
+  ArrowUpRight,
 } from "lucide-react";
 import { ProjectMediaSection } from "../components/ProjectMediaSection";
+import { TrackStatusForm } from "../components/TrackStatusModal";
 
 export default function HomePage() {
-  const [identifier, setIdentifier] = useState("");
-  const [dob, setDob] = useState("");
-  const [result, setResult] = useState<TrackResponse | null>(null);
-  const [error, setError] = useState("");
-  const [searching, setSearching] = useState(false);
-
+  const outletCtx = useOutletContext<AppOutletContext | undefined>();
   const [courseSearch, setCourseSearch] = useState("");
   const [openOnly, setOpenOnly] = useState(false);
+
+  const token = localStorage.getItem("token");
 
   const { data: categories, isLoading: isCategoriesLoading } = useQuery({
     queryKey: ["categories"],
@@ -54,576 +47,651 @@ export default function HomePage() {
     });
   }, [categories, courseSearch, openOnly]);
 
-  const handleTrack = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-    setResult(null);
-    setSearching(true);
-    try {
-      const data = await trackApplication(identifier.trim(), dob);
-      setResult(data);
-    } catch {
-      setError(
-        "We could not find an application matching those details. Please check your Registration ID (or 10-digit mobile number) and Date of Birth."
-      );
-    } finally {
-      setSearching(false);
-    }
-  };
-
   const scrollToSection = (id: string) => {
     document.querySelector(id)?.scrollIntoView({ behavior: "smooth" });
   };
 
   return (
-    <div className="w-full flex flex-col font-sans">
-      {/* 1. e-Seba Style Light Scenic Hero Banner */}
-      <section className="relative w-full min-h-[calc(100vh-6.25rem)] flex items-stretch overflow-hidden bg-gradient-to-r from-[#d8efe2] via-[#e4f3ef] to-[#f4ece1] border-b border-slate-200">
-        <div className="absolute -top-24 -left-24 w-96 h-96 bg-emerald-200/40 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute top-10 right-1/4 w-96 h-96 bg-sky-200/40 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 right-0 w-96 h-72 bg-amber-200/30 rounded-full blur-3xl pointer-events-none" />
+    <div className="w-full flex flex-col font-sans bg-[#F5EFE3] text-[#3B3028]">
+      {/* 1. Full-Screen Handloom Heritage Hero Banner with Overlaying Gradient */}
+      <section
+        id="overview"
+        className="relative w-full min-h-[calc(100vh-6.25rem)] flex items-center overflow-hidden bg-[#2A211B]"
+      >
+        {/* Background Image: Craftsperson weaving traditional textile on a Manipuri handloom */}
+        <div
+          role="img"
+          aria-label="A craftsperson weaving traditional textile on a handloom"
+          className="absolute inset-0 bg-cover bg-[72%_center] sm:bg-center scale-[1.01]"
+          style={{ backgroundImage: "url('/hero-handloom-weaver.jpg')" }}
+        />
 
-        <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 sm:pt-12 pb-0 flex flex-1">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch w-full min-h-full">
-            {/* Left Column: Brand Lockup, Headline, Description, 2 CTA Buttons */}
-            <div className="lg:col-span-7 pb-10 sm:pb-14 space-y-6 flex flex-col justify-center">
-              <div className="flex items-center gap-3.5">
+        {/* Overlaying Earthy Gradient Scrim */}
+        <div
+          aria-hidden="true"
+          className="absolute inset-0"
+          style={{
+            background:
+              "linear-gradient(90deg, rgba(28, 22, 18, 0.94) 0%, rgba(42, 33, 27, 0.85) 38%, rgba(42, 33, 27, 0.5) 62%, rgba(42, 33, 27, 0.14) 100%), linear-gradient(180deg, rgba(28, 22, 18, 0.35) 0%, rgba(28, 22, 18, 0.05) 45%, rgba(28, 22, 18, 0.48) 100%)",
+          }}
+        />
+
+        {/* Editorial Hero Content */}
+        <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-20">
+          <div className="max-w-2xl space-y-6">
+            <div className="flex items-center gap-3.5">
+              <div className="bg-[#FAF6EE] px-2.5 py-1.5 rounded-xl border border-[#D9C5A3] shrink-0 shadow-xs">
                 <img
                   src="/mhhdcl-logo.png"
                   alt="Manipur Handloom and Handicrafts Development Corporation Ltd."
-                  className="h-16 sm:h-20 w-auto object-contain shrink-0 drop-shadow-xs"
+                  className="h-12 sm:h-14 w-auto object-contain"
                 />
-                <div>
-                  <div className="text-xs sm:text-sm font-extrabold text-amber-700 tracking-wide uppercase">
-                    MHHDC Registration &amp; Admission Portal
-                  </div>
-                  <div className="text-xl sm:text-2xl font-bold text-emerald-900 font-serif leading-tight">
-                    Manipur Handloom &amp; Handicrafts Development Corporation Ltd.
-                  </div>
-                </div>
               </div>
-
-              <h1 className="text-2xl sm:text-4xl lg:text-[38px] font-extrabold text-[#0f256e] leading-[1.2] tracking-tight max-w-2xl">
-                Online Registration &amp; Admissions for Handloom &amp; Artisan Skill Training
-              </h1>
-
-              <p className="text-sm sm:text-base text-slate-700 leading-relaxed max-w-xl">
-                Apply online for residential skill training across traditional handloom and craft trades in Manipur. Admissions and registrations are conducted by <strong>Manipur Handloom &amp; Handicrafts Development Corporation Ltd. (MHHDC)</strong> under the PM VIKAS Scheme.
-              </p>
-
-              <div className="flex flex-wrap items-center gap-3.5 pt-1">
-                <Link
-                  to="/apply"
-                  className="inline-flex items-center gap-2.5 px-6 py-3.5 rounded-lg bg-[#0f256e] hover:bg-blue-950 text-white font-bold text-sm shadow-sm transition"
-                >
-                  <UserPlus className="w-4 h-4 shrink-0" />
-                  <span>Register &amp; Apply Now</span>
-                </Link>
-
-                <button
-                  type="button"
-                  onClick={() => scrollToSection("#track-status")}
-                  className="inline-flex items-center gap-2.5 px-6 py-3.5 rounded-lg border-2 border-[#0f256e] text-[#0f256e] bg-white/60 hover:bg-white font-bold text-sm transition cursor-pointer"
-                >
-                  <Target className="w-4 h-4 shrink-0" />
-                  <span>Track Application Status</span>
-                </button>
+              <div className="flex items-center gap-2.5 text-[11px] font-bold uppercase tracking-[0.18em] text-[#D9C5A3]">
+                <span className="w-6 h-[1px] bg-[#D9C5A3]" aria-hidden="true" />
+                <span>MHHDC · SKILLING &amp; TRAINING</span>
               </div>
             </div>
 
-            {/* Right Column: Clean Transparent Portrait */}
-            <div className="lg:col-span-5 flex justify-center lg:justify-end items-end self-stretch">
-              <img
-                src="/pm-narendra-modi.png?v=2"
-                alt="Hon'ble Prime Minister Narendra Modi"
-                className="w-auto max-w-full h-80 sm:h-[430px] lg:h-[520px] xl:h-[580px] max-h-[82vh] object-contain object-bottom"
-              />
-            </div>
-          </div>
-        </div>
-      </section>
+            <h1 className="font-serif text-4xl sm:text-5xl lg:text-[56px] text-[#F5EFE3] leading-[1.06] tracking-tight">
+              Skills that carry
+              <br />
+              our heritage forward.
+            </h1>
 
-      {/* 2. Official Admission Notice Highlights */}
-      <section className="bg-[#0f256e] text-white border-b border-blue-950">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <p className="text-base sm:text-[17px] text-[#E6DAC3] leading-relaxed max-w-xl">
+              A new opportunity to learn, earn and preserve the handloom and handicraft traditions of Manipur — admissions conducted by{" "}
+              <strong className="font-semibold text-[#F5EFE3]">
+                Manipur Handloom &amp; Handicrafts Development Corporation Ltd.
+              </strong>{" "}
+              under the PM VIKAS Scheme.
+            </p>
 
-        </div>
-      </section>
-
-      {/* 3. Simple 3-Step Guide ("How It Works") */}
-      <section className="bg-white border-b border-slate-200 py-6">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
-            <div className="flex items-start gap-3.5 p-3.5 rounded-xl bg-slate-50 border border-slate-200/80">
-              <div className="w-9 h-9 rounded-full bg-[#0f256e] text-white font-extrabold text-sm flex items-center justify-center shrink-0">
-                1
-              </div>
-              <div>
-                <h3 className="font-bold text-sm text-slate-900 flex items-center gap-1.5">
-                  <UserPlus className="w-4 h-4 text-[#0f256e]" />
-                  Register with Mobile
-                </h3>
-                <p className="text-xs text-slate-600 mt-0.5">
-                  Create a free account using your 10-digit mobile number.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-3.5 p-3.5 rounded-xl bg-slate-50 border border-slate-200/80">
-              <div className="w-9 h-9 rounded-full bg-[#0f256e] text-white font-extrabold text-sm flex items-center justify-center shrink-0">
-                2
-              </div>
-              <div>
-                <h3 className="font-bold text-sm text-slate-900 flex items-center gap-1.5">
-                  <ClipboardCheck className="w-4 h-4 text-[#0f256e]" />
-                  Fill Form &amp; Upload Docs
-                </h3>
-                <p className="text-xs text-slate-600 mt-0.5">
-                  Choose a trade, enter your details, and upload your photo &amp; ID.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-3.5 p-3.5 rounded-xl bg-slate-50 border border-slate-200/80">
-              <div className="w-9 h-9 rounded-full bg-emerald-700 text-white font-extrabold text-sm flex items-center justify-center shrink-0">
-                3
-              </div>
-              <div>
-                <h3 className="font-bold text-sm text-slate-900 flex items-center gap-1.5">
-                  <Download className="w-4 h-4 text-emerald-700" />
-                  Track &amp; Download Slip
-                </h3>
-                <p className="text-xs text-slate-600 mt-0.5">
-                  Check approval status anytime and download your admission letter.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 4. Main Content Container */}
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-16">
-        {/* Track Application Status Card */}
-        <section id="track-status" className="scroll-mt-24 max-w-4xl mx-auto">
-          <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 rounded-xl bg-blue-50 text-[#0f256e] flex items-center justify-center border border-blue-200">
-                <Search className="w-5 h-5" />
-              </div>
-              <div>
-                <h2 className="text-xl font-extrabold text-slate-900">Check Your Application Status</h2>
-                <p className="text-sm text-slate-600">
-                  No sign-in needed. Enter your Registration Number or Mobile Number and Date of Birth.
-                </p>
-              </div>
-            </div>
-
-            <form onSubmit={handleTrack} className="mt-6 space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label htmlFor="track-id" className="block text-sm font-bold text-slate-800 mb-1.5">
-                    Registration Number or Mobile Number
-                  </label>
-                  <input
-                    id="track-id"
-                    type="text"
-                    value={identifier}
-                    onChange={(e) => setIdentifier(e.target.value)}
-                    required
-                    placeholder="e.g. HND-2026-EMB-AB12CD or 9876543210"
-                    className="w-full border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-900 focus:ring-2 focus:ring-[#0f256e] focus:border-[#0f256e] focus:outline-none bg-slate-50 focus:bg-white"
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="track-dob" className="block text-sm font-bold text-slate-800 mb-1.5">
-                    Date of Birth
-                  </label>
-                  <input
-                    id="track-dob"
-                    type="date"
-                    value={dob}
-                    onChange={(e) => setDob(e.target.value)}
-                    required
-                    className="w-full border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-900 focus:ring-2 focus:ring-[#0f256e] focus:border-[#0f256e] focus:outline-none bg-slate-50 focus:bg-white"
-                  />
-                </div>
-              </div>
+            <div className="flex flex-wrap items-center gap-4 pt-1">
+              <Link
+                to={token ? "/dashboard" : "/apply"}
+                className="inline-flex items-center gap-2.5 px-6 py-3.5 rounded-lg bg-[#8B5E3C] hover:bg-[#734C30] text-[#F5EFE3] font-semibold text-sm shadow-sm transition"
+              >
+                <span>{token ? "Open candidate portal" : "Register & apply now"}</span>
+                <ArrowRight className="w-4 h-4 shrink-0" aria-hidden="true" />
+              </Link>
 
               <button
-                type="submit"
-                disabled={searching}
-                className="w-full sm:w-auto px-8 py-3 bg-[#0f256e] hover:bg-blue-950 text-white font-bold rounded-xl text-sm transition shadow-xs disabled:opacity-50 cursor-pointer"
+                type="button"
+                onClick={() => scrollToSection("#trades")}
+                className="inline-flex items-center gap-2 px-5 py-3.5 rounded-lg border border-[#D9C5A3]/50 text-[#F5EFE3] bg-[#2A211B]/45 hover:bg-[#2A211B]/70 font-medium text-sm transition cursor-pointer"
               >
-                {searching ? "Checking Status..." : "Check Status"}
+                <span>Explore training trades</span>
+                <ArrowDown className="w-4 h-4 shrink-0" aria-hidden="true" />
               </button>
-            </form>
+            </div>
 
-            {error && (
-              <div className="mt-5 p-4 text-sm text-rose-900 bg-rose-50 border border-rose-200 rounded-xl flex items-start gap-2.5">
-                <AlertCircle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
-                <span>{error}</span>
-              </div>
-            )}
-
-            {result && (
-              <div className="mt-6 p-5 sm:p-6 bg-slate-50 rounded-2xl border border-slate-200 space-y-4">
-                <div className="grid grid-cols-3 gap-2 pb-4 border-b border-slate-200 text-center">
-                  <div className="flex flex-col items-center gap-1">
-                    <span className="w-7 h-7 rounded-full bg-emerald-600 text-white text-xs font-bold flex items-center justify-center">
-                      ✓
-                    </span>
-                    <span className="text-xs font-bold text-slate-800">Submitted</span>
-                  </div>
-                  <div className="flex flex-col items-center gap-1">
-                    <span
-                      className={`w-7 h-7 rounded-full text-xs font-bold flex items-center justify-center ${result.status === "PENDING" ? "bg-amber-500 text-white" : "bg-emerald-600 text-white"
-                        }`}
-                    >
-                      {result.status === "PENDING" ? "2" : "✓"}
-                    </span>
-                    <span className="text-xs font-bold text-slate-800">Under Review</span>
-                  </div>
-                  <div className="flex flex-col items-center gap-1">
-                    <span
-                      className={`w-7 h-7 rounded-full text-xs font-bold flex items-center justify-center ${result.status === "APPROVED"
-                        ? "bg-emerald-600 text-white"
-                        : result.status === "REJECTED"
-                          ? "bg-rose-600 text-white"
-                          : "bg-slate-200 text-slate-500"
-                        }`}
-                    >
-                      {result.status === "APPROVED" ? "✓" : result.status === "REJECTED" ? "!" : "3"}
-                    </span>
-                    <span className="text-xs font-bold text-slate-800">
-                      {result.status === "REJECTED" ? "Needs Attention" : "Approved"}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-                  {result.registration_no && (
-                    <div>
-                      <span className="text-xs text-slate-500 block">Registration Number</span>
-                      <span className="font-mono font-bold text-slate-900">{result.registration_no}</span>
-                    </div>
-                  )}
-                  <div>
-                    <span className="text-xs text-slate-500 block">Applicant Name</span>
-                    <span className="font-bold text-slate-900">{result.full_name}</span>
-                  </div>
-                  <div>
-                    <span className="text-xs text-slate-500 block">Course Applied</span>
-                    <span className="font-semibold text-slate-900">
-                      {result.category_code ? `${result.category_code} - ` : ""}
-                      {result.category}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-xs text-slate-500 block">Submitted On</span>
-                    <span className="font-medium text-slate-800">{formatDate(result.submitted_at)}</span>
-                  </div>
-                </div>
-
-                <div className="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-slate-200">
-                  <span className="text-sm font-bold text-slate-700">Current Status:</span>
-                  <span className={`px-3.5 py-1 rounded-full text-xs font-bold ${statusBadgeColor(result.status)}`}>
-                    {result.status}
-                  </span>
-                </div>
-
-                {result.rejection_reason && (
-                  <div className="p-3.5 bg-rose-50 border border-rose-200 rounded-xl text-sm text-rose-900">
-                    <strong>Reason / Remarks:</strong> {result.rejection_reason}
-                  </div>
-                )}
-              </div>
-            )}
+            <div className="pt-2 flex flex-wrap items-center gap-2 text-xs sm:text-sm text-[#D9C5A3]">
+              <ShieldCheck className="w-4 h-4 text-[#D9C5A3] shrink-0" aria-hidden="true" />
+              <span>Manipur Handloom &amp; Handicrafts Development Corporation Ltd. · Paona Bazar, Imphal</span>
+            </div>
           </div>
-        </section>
+        </div>
 
-        {/* 5. Scheme Context Section (PM VIKAS Allocation) */}
-        <section id="pm-vikas-scheme" className="scroll-mt-24 bg-white rounded-2xl border border-slate-200 p-6 sm:p-10 shadow-xs space-y-8">
-          <div className="max-w-3xl space-y-2">
-            <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-800 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
-              <Sparkles className="w-3.5 h-3.5" />
-              Allocated Training Quota Context
+        <div className="absolute bottom-0 inset-x-0 h-[3px] bg-gradient-to-r from-[#8B5E3C] via-[#5C6B45] to-[#D9C5A3]" />
+      </section>
+
+      {/* 2. Subtle Hairline Application Notice Strip */}
+      <section className="relative bg-[#FAF6EE] border-b border-[#D9C5A3]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-start sm:items-center gap-3">
+            <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-[#8B5E3C] shrink-0">
+              <span className="w-2 h-2 rounded-full bg-[#8B5E3C]" />
+              Admission Notice
             </span>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-[#0f256e] tracking-tight">
-              About Admissions Under the PM VIKAS Scheme
-            </h2>
-            <p className="text-sm sm:text-base text-slate-600 leading-relaxed">
-              <strong>Manipur Handloom &amp; Handicrafts Development Corporation Ltd. (MHHDC)</strong> has been allocated a dedicated admission quota under the <strong>PM VIKAS Scheme (Pradhan Mantri Virasat Ka Samvardhan)</strong>. Registrations and admissions on this portal are operated by MHHDC to deliver skill training across traditional craft trades under this scheme, which unites five artisan welfare initiatives—<em>Seekho aur Kamao</em>, <em>USTTAD</em>, <em>Hamari Dharohar</em>, <em>Nai Roshni</em>, and <em>Nai Manzil</em>.
-            </p>
-          </div>
-
-          {/* 4 Core Components of PM VIKAS */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
-              <GraduationCap className="w-6 h-6 text-[#0f256e]" />
-              <h3 className="font-bold text-base text-slate-900">1. Skill &amp; Craft Training</h3>
-              <p className="text-xs text-slate-600 leading-relaxed">
-                Hands-on traditional training under master artisans (<em>Guru-Shishya Parampara</em>) and NSQF-aligned job courses.
-              </p>
-            </div>
-
-            <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
-              <Users className="w-6 h-6 text-emerald-700" />
-              <h3 className="font-bold text-base text-slate-900">2. Leadership &amp; Biz Sakhis</h3>
-              <p className="text-xs text-slate-600 leading-relaxed">
-                Leadership and entrepreneurship training for youth and women, including trained <em>Biz Sakhi</em> business mentors.
-              </p>
-            </div>
-
-            <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
-              <BookOpen className="w-6 h-6 text-amber-700" />
-              <h3 className="font-bold text-base text-slate-900">3. Open Schooling Bridge</h3>
-              <p className="text-xs text-slate-600 leading-relaxed">
-                Education support for school dropouts from artisan families to complete Class 8th, 10th, or 12th via NIOS.
-              </p>
-            </div>
-
-            <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
-              <Store className="w-6 h-6 text-purple-700" />
-              <h3 className="font-bold text-base text-slate-900">4. Craft Villages &amp; Markets</h3>
-              <p className="text-xs text-slate-600 leading-relaxed">
-                <em>Vishwakarma Villages</em> with common training halls, display centres, trade fairs, and <em>Hunar Haat</em> market access.
-              </p>
+            <div className="text-sm font-semibold text-[#3B3028]">
+              Residential handloom &amp; craft skill training admissions open
+              <span className="block sm:inline sm:ml-2 text-xs font-normal text-[#6E5D50]">
+                Ref: MHHDC-122/HWT/2020 • Conducted under MHHDC&apos;s allocated quota
+              </span>
             </div>
           </div>
 
-          {/* Who Can Apply (Eligibility & Reservations) */}
-          <div className="bg-blue-50/70 border border-blue-200 rounded-2xl p-5 sm:p-6 space-y-3">
-            <h3 className="font-extrabold text-base text-[#0f256e]">Who Can Apply (Eligibility &amp; Seat Reservation)</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-slate-700">
-              <div className="flex items-start gap-2">
-                <CheckCircle2 className="w-4 h-4 text-[#0f256e] shrink-0 mt-0.5" />
-                <span><strong>Age:</strong> 14 to 45 years for Skill Training &amp; Education (18–45 years for Leadership).</span>
-              </div>
-              <div className="flex items-start gap-2">
-                <CheckCircle2 className="w-4 h-4 text-[#0f256e] shrink-0 mt-0.5" />
-                <span><strong>Communities:</strong> Notified minority communities (Muslims, Christians, Sikhs, Buddhists, Jains, Parsis) and eligible EWS / state-notified categories.</span>
-              </div>
-              <div className="flex items-start gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-700 shrink-0 mt-0.5" />
-                <span><strong>Reserved Seats:</strong> At least <strong>33% seats reserved for women</strong> and <strong>3% for Persons with Disability (PwDs)</strong>.</span>
-              </div>
-              <div className="flex items-start gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-700 shrink-0 mt-0.5" />
-                <span><strong>Attendance &amp; Bank:</strong> Aadhaar-linked bank account for stipend; 70% attendance required for certification.</span>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* 6. Available Training Courses */}
-        <section id="trades" className="scroll-mt-24 space-y-6">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-            <div>
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-[#0f256e] tracking-tight">
-                Available Handloom &amp; Craft Courses
-              </h2>
-              <p className="mt-1 text-sm text-slate-600 max-w-2xl">
-                Select any open course below to apply online. You can apply for one course per admission cycle.
-              </p>
-            </div>
-            <Link
-              to="/categories"
-              className="inline-flex items-center gap-1.5 text-sm font-bold text-[#0f256e] hover:underline shrink-0"
+          <div className="flex items-center gap-3 shrink-0">
+            <button
+              type="button"
+              onClick={() => outletCtx?.openTrackModal?.()}
+              className="text-xs font-semibold text-[#5C6B45] hover:text-[#3B3028] transition cursor-pointer"
             >
-              <span>View All Courses</span>
-              <ArrowRight className="w-4 h-4" />
+              Track status
+            </button>
+            <Link
+              to="/apply"
+              className="w-8 h-8 rounded-md border border-[#D9C5A3] bg-white flex items-center justify-center text-[#3B3028] hover:border-[#8B5E3C] hover:text-[#8B5E3C] transition"
+              title="Apply online"
+            >
+              <ArrowUpRight className="w-4 h-4" />
             </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* 3. Editorial Intro + Connected Highlight Strip */}
+      <section className="bg-white border-b border-[#D9C5A3]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-16">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            <div className="lg:col-span-6 space-y-2">
+              <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#5C6B45]">
+                AN OPPORTUNITY TO GROW
+              </span>
+              <h2 className="font-serif text-3xl sm:text-4xl lg:text-[42px] text-[#3B3028] leading-[1.12]">
+                Build a livelihood.
+                <span className="block italic text-[#8B5E3C]">Keep tradition alive.</span>
+              </h2>
+            </div>
+
+            <div className="lg:col-span-6 space-y-4 lg:pt-4">
+              <p className="text-sm sm:text-base text-[#6E5D50] leading-relaxed">
+                Manipur Handloom &amp; Handicrafts Development Corporation Ltd. invites applications from eligible trainees across Manipur for residential skill training conducted under its allocated PM VIKAS Scheme quota, empowering weavers and craftspeople with modern stipends, tools, and certification.
+              </p>
+              <button
+                type="button"
+                onClick={() => scrollToSection("#pm-vikas-scheme")}
+                className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#3B3028] hover:text-[#8B5E3C] transition cursor-pointer"
+              >
+                <span>About the scheme</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* 4-Column Hairline Facts Strip */}
+        <div className="bg-[#FAF6EE] border-t border-[#D9C5A3]">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid grid-cols-2 lg:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-[#D9C5A3]">
+              <div className="py-6 sm:px-5 flex items-center gap-3.5">
+                <div className="w-10 h-10 rounded-full border border-[#D9C5A3] bg-white flex items-center justify-center text-[#5C6B45] shrink-0">
+                  <Users className="w-4 h-4" />
+                </div>
+                <div>
+                  <div className="font-serif text-xl sm:text-2xl text-[#3B3028]">14–45 years</div>
+                  <div className="text-xs text-[#6E5D50]">Eligible age range</div>
+                </div>
+              </div>
+
+              <div className="py-6 sm:px-5 flex items-center gap-3.5">
+                <div className="w-10 h-10 rounded-full border border-[#D9C5A3] bg-white flex items-center justify-center text-[#8B5E3C] shrink-0">
+                  <BookOpen className="w-4 h-4" />
+                </div>
+                <div>
+                  <div className="font-serif text-xl sm:text-2xl text-[#3B3028]">
+                    {String(categories?.length ?? 9).padStart(2, "0")} trades
+                  </div>
+                  <div className="text-xs text-[#6E5D50]">Craft training disciplines</div>
+                </div>
+              </div>
+
+              <div className="py-6 sm:px-5 flex items-center gap-3.5">
+                <div className="w-10 h-10 rounded-full border border-[#D9C5A3] bg-white flex items-center justify-center text-[#5C6B45] shrink-0">
+                  <MapPin className="w-4 h-4" />
+                </div>
+                <div>
+                  <div className="font-serif text-xl sm:text-2xl text-[#3B3028]">All districts</div>
+                  <div className="text-xs text-[#6E5D50]">Applicants across Manipur</div>
+                </div>
+              </div>
+
+              <div className="py-6 sm:px-5 flex items-center gap-3.5">
+                <div className="w-10 h-10 rounded-full border border-[#D9C5A3] bg-white flex items-center justify-center text-[#8B5E3C] shrink-0">
+                  <Award className="w-4 h-4" />
+                </div>
+                <div>
+                  <div className="font-serif text-xl sm:text-2xl text-[#3B3028]">Free + Stipend</div>
+                  <div className="text-xs text-[#6E5D50]">Residential &amp; NSQF support</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 4. Connected Architectural Matrix: Training Trades */}
+      <section id="trades" className="scroll-mt-20 py-14 sm:py-16 bg-[#F5EFE3]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+            <div className="space-y-1">
+              <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#5C6B45]">
+                FIND YOUR CRAFT
+              </span>
+              <h2 className="font-serif text-3xl sm:text-4xl text-[#3B3028]">
+                Training trades
+              </h2>
+            </div>
+            <div className="flex items-center gap-4">
+              <span className="text-xs text-[#6E5D50]">
+                {filteredCategories.length} pathways available
+              </span>
+              <Link
+                to="/categories"
+                className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#8B5E3C] hover:text-[#734C30]"
+              >
+                <span>View all courses</span>
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="relative flex-1">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <Search className="w-4 h-4 text-[#8D7B6D] absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
                 value={courseSearch}
                 onChange={(e) => setCourseSearch(e.target.value)}
-                placeholder="Search courses (e.g. Weaving, Embroidery, Bamboo)..."
-                className="w-full pl-10 pr-4 py-2.5 text-sm border border-slate-300 rounded-xl bg-white focus:ring-2 focus:ring-[#0f256e] focus:outline-none"
+                placeholder="Search trades (e.g. Weaving, Embroidery, Bamboo)..."
+                className="w-full pl-10 pr-4 py-2.5 text-sm border border-[#D9C5A3] rounded-lg bg-white focus:ring-2 focus:ring-[#8B5E3C]/25 focus:border-[#8B5E3C] focus:outline-none text-[#3B3028] placeholder-[#8D7B6D]"
               />
             </div>
             <button
               type="button"
               onClick={() => setOpenOnly(!openOnly)}
-              className={`px-4 py-2.5 rounded-xl text-sm font-semibold border transition cursor-pointer whitespace-nowrap ${openOnly
-                ? "bg-[#0f256e] text-white border-[#0f256e]"
-                : "bg-white text-slate-700 border-slate-300 hover:bg-slate-50"
+              className={`px-4 py-2.5 rounded-lg text-sm font-semibold border transition cursor-pointer whitespace-nowrap ${openOnly
+                ? "bg-[#5C6B45] text-[#F5EFE3] border-[#5C6B45]"
+                : "bg-white text-[#3B3028] border-[#D9C5A3] hover:bg-[#EDE3D2]"
                 }`}
             >
-              {openOnly ? "Showing: Open Courses Only" : "Show Open Courses Only"}
+              {openOnly ? "Showing: Open Trades Only" : "Show Open Trades Only"}
             </button>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {isCategoriesLoading ? (
-              <div className="col-span-full text-center py-12 text-slate-500 text-sm font-medium">
-                Loading training courses...
-              </div>
-            ) : filteredCategories.length === 0 ? (
-              <div className="col-span-full text-center py-12 bg-white rounded-2xl border border-slate-200 text-slate-600 text-sm">
-                No courses match your search. Try clearing the search box.
-              </div>
-            ) : (
-              filteredCategories.map((cat) => (
+          {isCategoriesLoading ? (
+            <div className="text-center py-12 text-[#6E5D50] text-sm font-medium">
+              Loading training trades...
+            </div>
+          ) : filteredCategories.length === 0 ? (
+            <div className="text-center py-12 bg-white rounded-xl border border-[#D9C5A3] text-[#6E5D50] text-sm">
+              No trades match your search. Try clearing the filter.
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 border-t border-l border-[#D9C5A3] rounded-xl overflow-hidden bg-white shadow-xs">
+              {filteredCategories.map((cat, idx) => (
                 <div
                   key={cat.id}
-                  className="bg-white rounded-2xl border border-slate-200 hover:border-blue-300 hover:shadow-md transition-all p-6 flex flex-col justify-between"
+                  className="border-r border-b border-[#D9C5A3] p-6 sm:p-7 flex flex-col justify-between bg-white hover:bg-[#FAF6EE] transition-colors"
                 >
                   <div>
-                    <div className="flex items-center justify-between gap-2 mb-3">
-                      <span className="text-xs font-mono font-bold px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 border border-slate-200">
-                        {cat.code}
-                      </span>
-                      <span
-                        className={`inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-full ${cat.is_approval_open
-                          ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
-                          : "bg-rose-50 text-rose-700 border border-rose-200"
-                          }`}
-                      >
+                    <div className="flex items-start justify-between gap-2 mb-4">
+                      <div className="space-y-1.5">
+                        <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#8B5E3C] block">
+                          {cat.code}
+                        </span>
                         <span
-                          className={`w-2 h-2 rounded-full ${cat.is_approval_open ? "bg-emerald-600" : "bg-rose-500"
+                          className={`inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-0.5 rounded-full ${cat.is_approval_open
+                            ? "bg-[#EEF2E7] text-[#3E492D] border border-[#5C6B45]/30"
+                            : "bg-[#F7E5DF] text-[#7A3526] border border-[#C97B65]/40"
                             }`}
-                        />
-                        {cat.is_approval_open ? "Open" : "Batch Full"}
+                        >
+                          <span
+                            className={`w-1.5 h-1.5 rounded-full ${cat.is_approval_open ? "bg-[#5C6B45]" : "bg-[#8B5E3C]"
+                              }`}
+                          />
+                          {cat.is_approval_open ? "Open" : "Batch Full"}
+                        </span>
+                      </div>
+                      <span className="font-serif text-2xl text-[#D9C5A3] select-none">
+                        {String(idx + 1).padStart(2, "0")}
                       </span>
                     </div>
 
-                    <h3 className="font-bold text-slate-900 text-lg leading-snug mb-4">{cat.title}</h3>
-
-                    <div className="space-y-2 text-sm text-slate-600 py-3 border-y border-slate-100 mb-5">
-                      <div className="flex items-center gap-2">
-                        <Clock className="w-4 h-4 text-[#0f256e] shrink-0" />
-                        <span>Residential Skill Training</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Award className="w-4 h-4 text-[#0f256e] shrink-0" />
-                        <span>NSQF / SSC Certificate</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                        <span>Free Training + Monthly Stipend</span>
-                      </div>
-                    </div>
+                    <h3 className="font-serif text-xl text-[#3B3028] leading-snug mb-3">{cat.title}</h3>
+                    <p className="text-xs text-[#6E5D50] leading-relaxed mb-5">
+                      Residential skill training with monthly stipend support and NSQF / sector skill assessment.
+                    </p>
                   </div>
 
-                  {cat.is_approval_open ? (
-                    <Link
-                      to={`/apply?category=${cat.id}`}
-                      className="w-full inline-flex items-center justify-center gap-2 bg-[#0f256e] hover:bg-blue-950 text-white font-bold py-3 rounded-xl text-sm transition"
-                    >
-                      <span>Apply Now</span>
-                      <ArrowRight className="w-4 h-4" />
-                    </Link>
-                  ) : (
-                    <button
-                      disabled
-                      className="w-full bg-slate-100 text-slate-500 font-semibold py-3 rounded-xl text-sm cursor-not-allowed border border-slate-200"
-                    >
-                      Admissions Closed
-                    </button>
-                  )}
+                  <div>
+                    {cat.is_approval_open ? (
+                      <Link
+                        to={`/apply?category=${cat.id}`}
+                        className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#8B5E3C] hover:text-[#734C30] group"
+                      >
+                        <span>Explore pathway</span>
+                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                      </Link>
+                    ) : (
+                      <span className="text-xs font-medium text-[#8D7B6D]">Admissions Closed</span>
+                    )}
+                  </div>
                 </div>
-              ))
-            )}
-          </div>
-        </section>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
 
-        {/* 7. Documents Required Before Applying (from MHHDC Notice) */}
-        <section className="bg-blue-50/70 border border-blue-200 rounded-2xl p-6 sm:p-8">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <div className="space-y-2.5 max-w-2xl">
-              <h2 className="text-xl font-extrabold text-slate-900">Documents Required Before You Apply</h2>
-              <p className="text-sm text-slate-600">
-                Keep clear photos or PDFs (strictly below 5 MB each) ready. Offline forms are also available at <strong>MHHDC Head Office (Governor Road, Paona Bazar, Imphal 795001)</strong> and participating training centres.
+      {/* 5. Dark Showcase Eligibility Band ("WHO CAN APPLY") */}
+      <section className="relative overflow-hidden bg-gradient-to-br from-[#2A211B] via-[#342921] to-[#2A211B] text-[#F5EFE3] py-16 sm:py-20 border-y border-[#D9C5A3]/25">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-start">
+            <div className="lg:col-span-5 space-y-5">
+              <div className="flex items-center gap-2.5 text-[11px] font-bold uppercase tracking-[0.18em] text-[#D9C5A3]">
+                <span className="w-5 h-[1px] bg-[#8B5E3C]" aria-hidden="true" />
+                <span>WHO CAN APPLY</span>
+              </div>
+              <h2 className="font-serif text-3xl sm:text-4xl lg:text-[44px] text-[#F5EFE3] leading-[1.1]">
+                A clear path
+                <span className="block italic text-[#D9C5A3]">to get started.</span>
+              </h2>
+              <p className="text-sm sm:text-[15px] text-[#E6DAC3] leading-relaxed max-w-md">
+                Check the eligibility and reservation norms carefully before submitting your admission application through MHHDC.
               </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1 text-sm text-slate-800">
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-[#0f256e] shrink-0" />
-                  <span>Aadhaar Card (self-attested)</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-[#0f256e] shrink-0" />
-                  <span>Minority / Community or EWS Certificate</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-[#0f256e] shrink-0" />
-                  <span>Education &amp; Age Proof Certificate</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-[#0f256e] shrink-0" />
-                  <span>Aadhaar-linked Bank Passbook Copy</span>
-                </div>
-                <div className="flex items-center gap-2 sm:col-span-2">
-                  <CheckCircle2 className="w-4 h-4 text-[#0f256e] shrink-0" />
-                  <span>Recent Passport-Size Photographs</span>
-                </div>
+              <div className="pt-1">
+                <Link
+                  to="/apply"
+                  className="inline-flex items-center gap-2 px-6 py-3.5 rounded-lg bg-[#F5EFE3] hover:bg-white text-[#2A211B] font-semibold text-sm shadow-sm transition"
+                >
+                  <span>Open application form</span>
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
               </div>
             </div>
 
-            <div className="flex flex-col gap-2.5 shrink-0">
-              <Link
-                to="/apply"
-                className="inline-flex items-center justify-center gap-2 bg-[#0f256e] hover:bg-blue-950 text-white font-bold px-6 py-3.5 rounded-xl text-sm shadow-sm transition"
-              >
-                <span>Start Application</span>
-                <ArrowRight className="w-4 h-4" />
-              </Link>
-              <a
-                href="tel:03852451495"
-                className="inline-flex items-center justify-center gap-2 text-xs font-semibold text-[#0f256e] hover:underline"
-              >
-                <PhoneCall className="w-3.5 h-3.5" />
-                Imphal Office: 0385-245 1495
-              </a>
+            <div className="lg:col-span-7">
+              <div className="divide-y divide-[#D9C5A3]/15 border-t border-b border-[#D9C5A3]/20">
+                <div className="py-4 sm:py-5 flex items-start gap-4">
+                  <div className="w-7 h-7 rounded-full bg-[#5C6B45]/25 border border-[#D9C5A3]/30 text-[#D9C5A3] flex items-center justify-center shrink-0 mt-0.5">
+                    <CheckCircle2 className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-sm sm:text-base text-[#F5EFE3]">Age 14–45 years</h3>
+                    <p className="text-xs sm:text-sm text-[#D9C5A3]/90 mt-1 leading-relaxed">
+                      14 to 45 years for Skill Training &amp; Open Schooling; 18–45 years for Leadership tracks.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="py-4 sm:py-5 flex items-start gap-4">
+                  <div className="w-7 h-7 rounded-full bg-[#5C6B45]/25 border border-[#D9C5A3]/30 text-[#D9C5A3] flex items-center justify-center shrink-0 mt-0.5">
+                    <CheckCircle2 className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-sm sm:text-base text-[#F5EFE3]">
+                      Eligible communities &amp; reservations
+                    </h3>
+                    <p className="text-xs sm:text-sm text-[#D9C5A3]/90 mt-1 leading-relaxed">
+                      Notified minority communities and ST / SC / OBC categories, with 33% seats reserved for women and 3% for PwDs.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="py-4 sm:py-5 flex items-start gap-4">
+                  <div className="w-7 h-7 rounded-full bg-[#5C6B45]/25 border border-[#D9C5A3]/30 text-[#D9C5A3] flex items-center justify-center shrink-0 mt-0.5">
+                    <CheckCircle2 className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-sm sm:text-base text-[#F5EFE3]">Aadhaar-linked bank account</h3>
+                    <p className="text-xs sm:text-sm text-[#D9C5A3]/90 mt-1 leading-relaxed">
+                      Required for monthly training stipend disbursement (up to ₹3,000/month + residential support) with 70% attendance.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="py-4 sm:py-5 flex items-start gap-4">
+                  <div className="w-7 h-7 rounded-full bg-[#5C6B45]/25 border border-[#D9C5A3]/30 text-[#D9C5A3] flex items-center justify-center shrink-0 mt-0.5">
+                    <CheckCircle2 className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-sm sm:text-base text-[#F5EFE3]">Job-role &amp; document readiness</h3>
+                    <p className="text-xs sm:text-sm text-[#D9C5A3]/90 mt-1 leading-relaxed">
+                      Education and community/ST/minority certificates are verified against the selected NSQF craft trade.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <p className="text-[11px] text-[#D9C5A3]/70 pt-3">
+                Eligibility details are subject to the current official admission notice and PM VIKAS Scheme guidelines.
+              </p>
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* 8. Project Media Section */}
+      {/* 6. Four Connected Scheme Pillars ("PM VIKAS QUOTA CONTEXT") */}
+      <section id="pm-vikas-scheme" className="scroll-mt-20 py-14 sm:py-16 bg-white border-b border-[#D9C5A3]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+          <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4">
+            <div className="space-y-1 max-w-2xl">
+              <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#5C6B45]">
+                PM VIKAS SCHEME QUOTA
+              </span>
+              <h2 className="font-serif text-3xl sm:text-4xl text-[#3B3028]">
+                Four parts of a stronger future
+              </h2>
+            </div>
+            <p className="text-xs sm:text-sm text-[#6E5D50] max-w-lg">
+              Conducted by MHHDC under its allocated quota for Pradhan Mantri Virasat Ka Samvardhan (PM VIKAS), uniting five artisan welfare initiatives.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 border-t border-l border-[#D9C5A3] rounded-xl overflow-hidden bg-white">
+            <div className="border-r border-b border-[#D9C5A3] p-6 space-y-2.5 bg-[#FAF6EE]/50">
+              <span className="font-serif text-lg text-[#8B5E3C] block">01</span>
+              <GraduationCap className="w-5 h-5 text-[#5C6B45]" />
+              <h3 className="font-serif text-lg text-[#3B3028]">Skilling &amp; training</h3>
+              <p className="text-xs text-[#6E5D50] leading-relaxed">
+                Hands-on traditional training under master artisans (<em>Guru-Shishya Parampara</em>) and NSQF-aligned craft courses.
+              </p>
+            </div>
+
+            <div className="border-r border-b border-[#D9C5A3] p-6 space-y-2.5 bg-[#FAF6EE]/50">
+              <span className="font-serif text-lg text-[#8B5E3C] block">02</span>
+              <Users className="w-5 h-5 text-[#5C6B45]" />
+              <h3 className="font-serif text-lg text-[#3B3028]">Leadership &amp; enterprise</h3>
+              <p className="text-xs text-[#6E5D50] leading-relaxed">
+                Leadership and entrepreneurship training for women and youth, including trained <em>Biz Sakhi</em> business mentors.
+              </p>
+            </div>
+
+            <div className="border-r border-b border-[#D9C5A3] p-6 space-y-2.5 bg-[#FAF6EE]/50">
+              <span className="font-serif text-lg text-[#8B5E3C] block">03</span>
+              <BookOpen className="w-5 h-5 text-[#5C6B45]" />
+              <h3 className="font-serif text-lg text-[#3B3028]">Open schooling bridge</h3>
+              <p className="text-xs text-[#6E5D50] leading-relaxed">
+                Education bridge support for school dropouts from artisan families to complete Class 8th, 10th, or 12th via NIOS.
+              </p>
+            </div>
+
+            <div className="border-r border-b border-[#D9C5A3] p-6 space-y-2.5 bg-[#FAF6EE]/50">
+              <span className="font-serif text-lg text-[#8B5E3C] block">04</span>
+              <Store className="w-5 h-5 text-[#5C6B45]" />
+              <h3 className="font-serif text-lg text-[#3B3028]">Craft villages &amp; markets</h3>
+              <p className="text-xs text-[#6E5D50] leading-relaxed">
+                Common training facilities, SHG credit linkage, exhibition stalls, and market access for trained artisans.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 7. Track Application Status */}
+      <section id="track-status" className="scroll-mt-24 py-14 bg-[#F5EFE3]">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <TrackStatusForm />
+        </div>
+      </section>
+
+      {/* 8. Minimalist Mandatory Documents Checklist (Screenshot 5) */}
+      <section className="bg-[#EFE7D6] border-y border-[#D9C5A3] py-14">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            <div className="lg:col-span-5 space-y-2">
+              <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#5C6B45]">
+                BEFORE YOU APPLY
+              </span>
+              <h2 className="font-serif text-3xl text-[#3B3028]">
+                Keep these documents ready.
+              </h2>
+              <p className="text-sm text-[#6E5D50] leading-relaxed">
+                All five uploads below are mandatory for submission. Ensure clear JPG, PNG, WEBP, or PDF files strictly under <strong>5 MB</strong> each.
+              </p>
+            </div>
+
+            <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-[#3B3028]">
+              <div className="flex items-start gap-2.5 bg-white/75 p-4 rounded-xl border border-[#D9C5A3]">
+                <CheckCircle2 className="w-4 h-4 text-[#5C6B45] shrink-0 mt-0.5" />
+                <div>
+                  <strong className="block">Aadhaar Card</strong>
+                  <span className="text-xs text-[#6E5D50]">Self-attested clear copy</span>
+                </div>
+              </div>
+              <div className="flex items-start gap-2.5 bg-white/75 p-4 rounded-xl border border-[#D9C5A3]">
+                <CheckCircle2 className="w-4 h-4 text-[#5C6B45] shrink-0 mt-0.5" />
+                <div>
+                  <strong className="block">ST / Minority Certificate</strong>
+                  <span className="text-xs text-[#6E5D50]">Community, ST/SC/OBC, or minority proof</span>
+                </div>
+              </div>
+              <div className="flex items-start gap-2.5 bg-white/75 p-4 rounded-xl border border-[#D9C5A3]">
+                <CheckCircle2 className="w-4 h-4 text-[#5C6B45] shrink-0 mt-0.5" />
+                <div>
+                  <strong className="block">Address Proof</strong>
+                  <span className="text-xs text-[#6E5D50]">Residential address verification document</span>
+                </div>
+              </div>
+              <div className="flex items-start gap-2.5 bg-white/75 p-4 rounded-xl border border-[#D9C5A3]">
+                <CheckCircle2 className="w-4 h-4 text-[#5C6B45] shrink-0 mt-0.5" />
+                <div>
+                  <strong className="block">Education Certificate</strong>
+                  <span className="text-xs text-[#6E5D50]">School / age proof per job-role norms</span>
+                </div>
+              </div>
+              <div className="flex items-start gap-2.5 sm:col-span-2 bg-white/75 p-4 rounded-xl border border-[#D9C5A3]">
+                <CheckCircle2 className="w-4 h-4 text-[#5C6B45] shrink-0 mt-0.5" />
+                <div>
+                  <strong className="block">Recent Passport-Size Photograph</strong>
+                  <span className="text-xs text-[#6E5D50]">Plus Aadhaar-linked bank passbook details for stipend transfers</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 9. In-Person Assistance Section (Screenshot 5) */}
+      <section className="bg-white py-14 border-b border-[#D9C5A3]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            <div className="lg:col-span-6 space-y-2">
+              <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#5C6B45]">
+                NEED ASSISTANCE?
+              </span>
+              <h2 className="font-serif text-3xl sm:text-4xl text-[#3B3028] leading-tight">
+                Apply online or{" "}
+                <span className="block italic text-[#8B5E3C]">get local support.</span>
+              </h2>
+              <p className="text-sm text-[#6E5D50] max-w-md pt-1">
+                Offline forms and application guidance are also available at MHHDC headquarters in Imphal and participating district centres.
+              </p>
+            </div>
+
+            <div className="lg:col-span-6">
+              <div className="bg-[#FAF6EE] border border-[#D9C5A3] rounded-2xl p-6 flex items-start gap-4 shadow-2xs">
+                <div className="w-11 h-11 rounded-full bg-[#EEF2E7] text-[#5C6B45] flex items-center justify-center border border-[#5C6B45]/25 shrink-0">
+                  <MapPin className="w-5 h-5" />
+                </div>
+                <div className="space-y-1.5">
+                  <h3 className="font-semibold text-base text-[#3B3028]">
+                    MHHDC Head Office, Governor Road, Paona Bazar, Imphal
+                  </h3>
+                  <p className="text-xs text-[#6E5D50]">
+                    Manipur 795001 • Monday – Saturday, 9:30 AM to 6:00 PM
+                  </p>
+                  <a
+                    href="tel:03852451495"
+                    className="inline-flex items-center gap-1.5 text-sm font-bold text-[#8B5E3C] hover:underline pt-1"
+                  >
+                    <PhoneCall className="w-3.5 h-3.5" />
+                    <span>0385-245 1495</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 10. Natural Khaki Action Banner (Screenshot 5) */}
+      <section className="bg-[#D9C5A3]/60 border-b border-[#D9C5A3] py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="space-y-1">
+            <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#8B5E3C]">
+              START YOUR APPLICATION
+            </span>
+            <h2 className="font-serif text-2xl sm:text-3xl text-[#3B3028]">
+              Make room for what you can create.
+            </h2>
+            <p className="text-sm text-[#6E5D50]">
+              Submit your application and documents through MHHDC&apos;s candidate portal.
+            </p>
+          </div>
+          <Link
+            to={token ? "/dashboard" : "/register"}
+            className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-lg bg-[#3B3028] hover:bg-[#2A211B] text-[#F5EFE3] font-semibold text-sm shadow-xs transition shrink-0"
+          >
+            <span>{token ? "Go to candidate portal" : "Register & start application"}</span>
+            <ArrowRight className="w-4 h-4" />
+          </Link>
+        </div>
+      </section>
+
+      {/* 11. Project Media & Stipend Benefits */}
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 space-y-14">
         <ProjectMediaSection />
 
-        {/* 9. Trainee Benefits */}
-        <section className="bg-slate-900 text-white rounded-2xl p-6 sm:p-10">
+        <section className="bg-gradient-to-br from-[#2A211B] to-[#3B3028] text-[#F5EFE3] rounded-2xl p-6 sm:p-10 border border-[#D9C5A3]/25 shadow-sm">
           <div className="text-center max-w-2xl mx-auto space-y-2 mb-8">
-            <h2 className="text-2xl font-extrabold tracking-tight">Benefits for Every Selected Trainee</h2>
-            <p className="text-sm text-slate-300">
+            <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#D9C5A3]">
+              TRAINEE BENEFITS
+            </span>
+            <h2 className="font-serif text-3xl text-[#F5EFE3]">
+              Support for every admitted trainee
+            </h2>
+            <p className="text-sm text-[#D9C5A3]/90">
               Financial, training, and market support provided under MHHDC&apos;s allocated PM VIKAS Scheme quota
             </p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            <div className="bg-white/5 p-5 rounded-xl border border-white/10 space-y-2">
-              <Banknote className="w-6 h-6 text-amber-300" />
-              <h3 className="font-bold text-base">Monthly Stipend</h3>
-              <p className="text-xs text-slate-300 leading-relaxed">
-                Up to ₹3,000/month for traditional craft training, plus ₹2,000/month residential support for outstation trainees.
+            <div className="bg-[#3B3028]/70 p-5 rounded-xl border border-[#D9C5A3]/20 space-y-2.5">
+              <div className="w-9 h-9 rounded-lg bg-[#8B5E3C]/25 border border-[#D9C5A3]/25 flex items-center justify-center text-[#D9C5A3]">
+                <Banknote className="w-4 h-4" />
+              </div>
+              <h3 className="font-semibold text-base text-[#F5EFE3]">Monthly Stipend</h3>
+              <p className="text-xs text-[#D9C5A3]/85 leading-relaxed">
+                Up to ₹3,000/month for traditional craft training, plus ₹2,000/month residential support where applicable.
               </p>
             </div>
-            <div className="bg-white/5 p-5 rounded-xl border border-white/10 space-y-2">
-              <GraduationCap className="w-6 h-6 text-sky-300" />
-              <h3 className="font-bold text-base">Master Artisan Trainers</h3>
-              <p className="text-xs text-slate-300 leading-relaxed">
-                Learn hands-on weaving and craft skills under experienced local master trainers in batches of up to 30.
+            <div className="bg-[#3B3028]/70 p-5 rounded-xl border border-[#D9C5A3]/20 space-y-2.5">
+              <div className="w-9 h-9 rounded-lg bg-[#8B5E3C]/25 border border-[#D9C5A3]/25 flex items-center justify-center text-[#D9C5A3]">
+                <GraduationCap className="w-4 h-4" />
+              </div>
+              <h3 className="font-semibold text-base text-[#F5EFE3]">Master Trainers</h3>
+              <p className="text-xs text-[#D9C5A3]/85 leading-relaxed">
+                Learn hands-on weaving and craft techniques under experienced master artisan trainers.
               </p>
             </div>
-            <div className="bg-white/5 p-5 rounded-xl border border-white/10 space-y-2">
-              <ShieldCheck className="w-6 h-6 text-emerald-300" />
-              <h3 className="font-bold text-base">NSQF / SSC Certificate</h3>
-              <p className="text-xs text-slate-300 leading-relaxed">
-                Receive an accredited assessment certificate upon completing training with at least 70% attendance.
+            <div className="bg-[#3B3028]/70 p-5 rounded-xl border border-[#D9C5A3]/20 space-y-2.5">
+              <div className="w-9 h-9 rounded-lg bg-[#8B5E3C]/25 border border-[#D9C5A3]/25 flex items-center justify-center text-[#D9C5A3]">
+                <FileText className="w-4 h-4" />
+              </div>
+              <h3 className="font-semibold text-base text-[#F5EFE3]">NSQF / SSC Certificate</h3>
+              <p className="text-xs text-[#D9C5A3]/85 leading-relaxed">
+                Receive an accredited assessment certificate upon completing training with minimum attendance.
               </p>
             </div>
-            <div className="bg-white/5 p-5 rounded-xl border border-white/10 space-y-2">
-              <CheckCircle2 className="w-6 h-6 text-purple-300" />
-              <h3 className="font-bold text-base">Credit &amp; Market Access</h3>
-              <p className="text-xs text-slate-300 leading-relaxed">
-                Support for Self-Help Groups, NMDFC/bank loans, trade fairs, and e-commerce product catalogues.
+            <div className="bg-[#3B3028]/70 p-5 rounded-xl border border-[#D9C5A3]/20 space-y-2.5">
+              <div className="w-9 h-9 rounded-lg bg-[#8B5E3C]/25 border border-[#D9C5A3]/25 flex items-center justify-center text-[#D9C5A3]">
+                <CheckCircle2 className="w-4 h-4" />
+              </div>
+              <h3 className="font-semibold text-base text-[#F5EFE3]">Credit &amp; Market Access</h3>
+              <p className="text-xs text-[#D9C5A3]/85 leading-relaxed">
+                Guidance for Self-Help Groups, credit linkage, exhibitions, and craft retail catalogues.
               </p>
             </div>
           </div>

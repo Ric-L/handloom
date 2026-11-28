@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Tag,
@@ -166,19 +166,19 @@ export default function AdminCategoriesPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-blue-700 flex items-center justify-center shadow-md">
+            <div className="w-9 h-9 rounded-xl bg-[#8B5E3C] flex items-center justify-center shadow-md">
               <Tag className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h1 className="text-xl font-black text-slate-900 tracking-tight">Trade Category Management</h1>
-              <p className="text-xs text-slate-500 font-medium">Dynamic CRUD and real-time intake control for registration categories</p>
+              <h1 className="text-xl font-black text-[#3B3028] tracking-tight">Trade Category Management</h1>
+              <p className="text-xs text-[#6E5D50] font-medium">Dynamic CRUD and real-time intake control for registration categories</p>
             </div>
           </div>
         </div>
 
         <button
           onClick={openAddModal}
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-700 hover:bg-blue-800 text-white text-xs font-bold shadow-md shadow-blue-700/20 transition cursor-pointer self-start sm:self-auto"
+          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#8B5E3C] hover:bg-[#734C30] text-white text-xs font-bold shadow-md  transition cursor-pointer self-start sm:self-auto"
         >
           <Plus className="w-4 h-4" /> Add New Category
         </button>
@@ -189,29 +189,29 @@ export default function AdminCategoriesPage() {
         <div
           className={`p-3.5 rounded-xl border flex items-center justify-between gap-2 text-xs font-semibold ${
             actionMsg.type === "success"
-              ? "bg-blue-50 text-blue-800 border-blue-200"
+              ? "bg-[#FAF6EE] text-[#734C30] border-[#D9C5A3]"
               : "bg-rose-50 text-rose-700 border-rose-200"
           }`}
         >
           <div className="flex items-center gap-2">
             {actionMsg.type === "success" ? (
-              <CheckCircle2 className="w-4 h-4 text-blue-600 shrink-0" />
+              <CheckCircle2 className="w-4 h-4 text-[#8B5E3C] shrink-0" />
             ) : (
               <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
             )}
             <span>{actionMsg.text}</span>
           </div>
-          <button onClick={() => setActionMsg(null)} className="text-slate-400 hover:text-slate-600 cursor-pointer">
+          <button onClick={() => setActionMsg(null)} className="text-slate-400 hover:text-[#6E5D50] cursor-pointer">
             <X className="w-4 h-4" />
           </button>
         </div>
       )}
 
       {/* Categories Table Card */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-2xl border border-[#D9C5A3] shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left">
-            <thead className="bg-slate-50 text-slate-500 text-xs font-bold uppercase tracking-wider border-b border-slate-200">
+            <thead className="bg-[#FAF6EE] text-[#6E5D50] text-xs font-bold uppercase tracking-wider border-b border-[#D9C5A3]">
               <tr>
                 <th className="px-6 py-4">Code</th>
                 <th className="px-6 py-4">Title</th>
@@ -222,7 +222,7 @@ export default function AdminCategoriesPage() {
                 <th className="px-6 py-4 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-[#E9DEC8]">
               {isLoading ? (
                 Array.from({ length: 5 }).map((_, i) => (
                   <tr key={i} className="animate-pulse">
@@ -246,7 +246,7 @@ export default function AdminCategoriesPage() {
                   <td colSpan={7} className="text-center py-16 space-y-2">
                     <Layers className="w-8 h-8 text-slate-300 mx-auto" />
                     <p className="font-bold text-slate-700">No categories found</p>
-                    <p className="text-xs text-slate-500">Add a new category to get started.</p>
+                    <p className="text-xs text-[#6E5D50]">Add a new category to get started.</p>
                   </td>
                 </tr>
               ) : (
@@ -256,17 +256,17 @@ export default function AdminCategoriesPage() {
                   const remaining = Math.max(0, limit - approved);
 
                   return (
-                    <tr key={cat.id} className="hover:bg-slate-50 transition-colors">
+                    <tr key={cat.id} className="hover:bg-[#FAF6EE] transition-colors">
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="font-mono text-xs font-bold px-2.5 py-1 rounded-md bg-slate-100 text-slate-700 border border-slate-200">
+                        <span className="font-mono text-xs font-bold px-2.5 py-1 rounded-md bg-[#FAF6EE] text-slate-700 border border-[#D9C5A3]">
                           {cat.code}
                         </span>
                       </td>
-                      <td className="px-6 py-4 font-semibold text-slate-900">{cat.title}</td>
+                      <td className="px-6 py-4 font-semibold text-[#3B3028]">{cat.title}</td>
                       <td className="px-6 py-4 text-center font-mono font-bold text-slate-700">{limit}</td>
-                      <td className="px-6 py-4 text-center font-mono font-bold text-blue-700">{approved}</td>
+                      <td className="px-6 py-4 text-center font-mono font-bold text-[#8B5E3C]">{approved}</td>
                       <td className="px-6 py-4 text-center font-mono font-bold">
-                        <span className={remaining > 0 ? "text-blue-700" : "text-rose-600"}>
+                        <span className={remaining > 0 ? "text-[#8B5E3C]" : "text-rose-600"}>
                           {remaining}
                         </span>
                       </td>
@@ -274,13 +274,13 @@ export default function AdminCategoriesPage() {
                         <span
                           className={`inline-flex items-center gap-1 text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full border ${
                             cat.is_approval_open
-                              ? "bg-blue-50 text-blue-700 border-blue-200"
+                              ? "bg-[#FAF6EE] text-[#8B5E3C] border-[#D9C5A3]"
                               : "bg-rose-50 text-rose-700 border-rose-200"
                           }`}
                         >
                           <span
                             className={`w-1.5 h-1.5 rounded-full ${
-                              cat.is_approval_open ? "bg-blue-600" : "bg-rose-600"
+                              cat.is_approval_open ? "bg-[#8B5E3C]" : "bg-rose-600"
                             }`}
                           />
                           {cat.is_approval_open ? "Intake Open" : "Closed"}
@@ -293,10 +293,10 @@ export default function AdminCategoriesPage() {
                             title={cat.is_approval_open ? "Close Intake" : "Open Intake"}
                             onClick={() => toggleMutation.mutate(cat.id)}
                             disabled={toggleMutation.isPending}
-                            className="p-1.5 text-slate-500 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition cursor-pointer disabled:opacity-50"
+                            className="p-1.5 text-[#6E5D50] hover:text-[#8B5E3C] hover:bg-[#FAF6EE] rounded-lg transition cursor-pointer disabled:opacity-50"
                           >
                             {cat.is_approval_open ? (
-                              <ToggleRight className="w-5 h-5 text-blue-700" />
+                              <ToggleRight className="w-5 h-5 text-[#8B5E3C]" />
                             ) : (
                               <ToggleLeft className="w-5 h-5 text-slate-400" />
                             )}
@@ -306,7 +306,7 @@ export default function AdminCategoriesPage() {
                           <button
                             title="Edit Category Details & Limit"
                             onClick={() => openEditModal(cat)}
-                            className="p-1.5 text-slate-500 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition cursor-pointer"
+                            className="p-1.5 text-[#6E5D50] hover:text-[#8B5E3C] hover:bg-[#FAF6EE] rounded-lg transition cursor-pointer"
                           >
                             <Pencil className="w-4 h-4" />
                           </button>
@@ -316,7 +316,7 @@ export default function AdminCategoriesPage() {
                             title="Delete Category"
                             onClick={() => handleDelete(cat)}
                             disabled={deleteMutation.isPending}
-                            className="p-1.5 text-slate-500 hover:text-rose-700 hover:bg-rose-50 rounded-lg transition cursor-pointer disabled:opacity-50"
+                            className="p-1.5 text-[#6E5D50] hover:text-rose-700 hover:bg-rose-50 rounded-lg transition cursor-pointer disabled:opacity-50"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -333,9 +333,9 @@ export default function AdminCategoriesPage() {
 
       {/* Add Category Modal */}
       {isAddModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden">
-            <div className="px-6 py-4 bg-slate-900 text-white flex items-center justify-between">
+        <div className="fixed inset-0 z-50 bg-[#3B3028]/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-[#D9C5A3] overflow-hidden">
+            <div className="px-6 py-4 bg-[#3B3028] text-white flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Tag className="w-5 h-5 text-sky-400" />
                 <h3 className="font-bold text-sm">Add New Trade Category</h3>
@@ -366,7 +366,7 @@ export default function AdminCategoriesPage() {
                   placeholder="e.g. MER-01, JQW-03"
                   value={formCode}
                   onChange={(e) => setFormCode(e.target.value.toUpperCase())}
-                  className="w-full px-3.5 py-2 text-sm font-mono border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 uppercase"
+                  className="w-full px-3.5 py-2 text-sm font-mono border border-[#D9C5A3] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#8B5E3C]/30 uppercase"
                 />
                 <span className="text-[11px] text-slate-400 mt-1 block">Unique official trade designation code</span>
               </div>
@@ -381,7 +381,7 @@ export default function AdminCategoriesPage() {
                   placeholder="e.g. Jacquard Weaver"
                   value={formTitle}
                   onChange={(e) => setFormTitle(e.target.value)}
-                  className="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3.5 py-2 text-sm border border-[#D9C5A3] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#8B5E3C]/30"
                 />
               </div>
 
@@ -395,7 +395,7 @@ export default function AdminCategoriesPage() {
                   min={1}
                   value={formLimit}
                   onChange={(e) => setFormLimit(Number(e.target.value))}
-                  className="w-full px-3.5 py-2 text-sm font-mono border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3.5 py-2 text-sm font-mono border border-[#D9C5A3] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#8B5E3C]/30"
                 />
                 <span className="text-[11px] text-slate-400 mt-1 block">Maximum trainees permitted for admission under this trade</span>
               </div>
@@ -404,14 +404,14 @@ export default function AdminCategoriesPage() {
                 <button
                   type="button"
                   onClick={() => setIsAddModalOpen(false)}
-                  className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition cursor-pointer"
+                  className="px-4 py-2 rounded-xl text-xs font-bold text-[#6E5D50] bg-[#FAF6EE] hover:bg-slate-200 transition cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={createMutation.isPending}
-                  className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-blue-700 hover:bg-blue-800 disabled:opacity-50 transition cursor-pointer"
+                  className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-[#8B5E3C] hover:bg-[#734C30] disabled:opacity-50 transition cursor-pointer"
                 >
                   {createMutation.isPending ? "Registering..." : "Create Category"}
                 </button>
@@ -423,9 +423,9 @@ export default function AdminCategoriesPage() {
 
       {/* Edit Category Modal */}
       {editingCategory && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden">
-            <div className="px-6 py-4 bg-slate-900 text-white flex items-center justify-between">
+        <div className="fixed inset-0 z-50 bg-[#3B3028]/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-[#D9C5A3] overflow-hidden">
+            <div className="px-6 py-4 bg-[#3B3028] text-white flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Pencil className="w-5 h-5 text-sky-400" />
                 <h3 className="font-bold text-sm">Edit Category: {editingCategory.code}</h3>
@@ -454,7 +454,7 @@ export default function AdminCategoriesPage() {
                   type="text"
                   disabled
                   value={formCode}
-                  className="w-full px-3.5 py-2 text-sm font-mono border border-slate-200 rounded-xl bg-slate-100 text-slate-500 cursor-not-allowed"
+                  className="w-full px-3.5 py-2 text-sm font-mono border border-[#D9C5A3] rounded-xl bg-[#FAF6EE] text-[#6E5D50] cursor-not-allowed"
                 />
               </div>
 
@@ -467,7 +467,7 @@ export default function AdminCategoriesPage() {
                   required
                   value={formTitle}
                   onChange={(e) => setFormTitle(e.target.value)}
-                  className="w-full px-3.5 py-2 text-sm border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3.5 py-2 text-sm border border-[#D9C5A3] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#8B5E3C]/30"
                 />
               </div>
 
@@ -481,7 +481,7 @@ export default function AdminCategoriesPage() {
                   min={editingCategory.approved_count ?? 1}
                   value={formLimit}
                   onChange={(e) => setFormLimit(Number(e.target.value))}
-                  className="w-full px-3.5 py-2 text-sm font-mono border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3.5 py-2 text-sm font-mono border border-[#D9C5A3] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#8B5E3C]/30"
                 />
                 <span className="text-[11px] text-slate-400 mt-1 block">
                   Cannot be lower than current approved count ({editingCategory.approved_count ?? 0})
@@ -492,14 +492,14 @@ export default function AdminCategoriesPage() {
                 <button
                   type="button"
                   onClick={() => setEditingCategory(null)}
-                  className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition cursor-pointer"
+                  className="px-4 py-2 rounded-xl text-xs font-bold text-[#6E5D50] bg-[#FAF6EE] hover:bg-slate-200 transition cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={updateMutation.isPending}
-                  className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-blue-700 hover:bg-blue-800 disabled:opacity-50 transition cursor-pointer"
+                  className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-[#8B5E3C] hover:bg-[#734C30] disabled:opacity-50 transition cursor-pointer"
                 >
                   {updateMutation.isPending ? "Saving..." : "Save Changes"}
                 </button>
