@@ -12,7 +12,6 @@ import {
   GraduationCap,
   Banknote,
   Award,
-  PhoneCall,
   MapPin,
   Users,
   BookOpen,
@@ -581,74 +580,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 9. In-Person Assistance Section (Screenshot 5) */}
-      <section className="bg-white py-14 border-b border-[#D9C5A3]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-            <div className="lg:col-span-6 space-y-2">
-              <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#5C6B45]">
-                NEED ASSISTANCE?
-              </span>
-              <h2 className="font-serif text-3xl sm:text-4xl text-[#3B3028] leading-tight">
-                Apply online or{" "}
-                <span className="block italic text-[#8B5E3C]">get local support.</span>
-              </h2>
-              <p className="text-sm text-[#6E5D50] max-w-md pt-1">
-                Offline forms and application guidance are also available at MHHDC headquarters in Imphal and participating district centres.
-              </p>
-            </div>
-
-            <div className="lg:col-span-6">
-              <div className="bg-[#FAF6EE] border border-[#D9C5A3] rounded-2xl p-6 flex items-start gap-4 shadow-2xs">
-                <div className="w-11 h-11 rounded-full bg-[#EEF2E7] text-[#5C6B45] flex items-center justify-center border border-[#5C6B45]/25 shrink-0">
-                  <MapPin className="w-5 h-5" />
-                </div>
-                <div className="space-y-1.5">
-                  <h3 className="font-semibold text-base text-[#3B3028]">
-                    MHHDC Head Office, Governor Road, Paona Bazar, Imphal
-                  </h3>
-                  <p className="text-xs text-[#6E5D50]">
-                    Manipur 795001 • Monday – Saturday, 9:30 AM to 6:00 PM
-                  </p>
-                  <a
-                    href="tel:03852451495"
-                    className="inline-flex items-center gap-1.5 text-sm font-bold text-[#8B5E3C] hover:underline pt-1"
-                  >
-                    <PhoneCall className="w-3.5 h-3.5" />
-                    <span>0385-245 1495</span>
-                  </a>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 10. Natural Khaki Action Banner (Screenshot 5) */}
-      <section className="bg-[#D9C5A3]/60 border-b border-[#D9C5A3] py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="space-y-1">
-            <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#8B5E3C]">
-              START YOUR APPLICATION
-            </span>
-            <h2 className="font-serif text-2xl sm:text-3xl text-[#3B3028]">
-              Make room for what you can create.
-            </h2>
-            <p className="text-sm text-[#6E5D50]">
-              Submit your application and documents through MHHDC&apos;s candidate portal.
-            </p>
-          </div>
-          <Link
-            to={token ? "/dashboard" : "/register"}
-            className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-lg bg-[#3B3028] hover:bg-[#2A211B] text-[#F5EFE3] font-semibold text-sm shadow-xs transition shrink-0"
-          >
-            <span>{token ? "Go to candidate portal" : "Register & start application"}</span>
-            <ArrowRight className="w-4 h-4" />
-          </Link>
-        </div>
-      </section>
-
-      {/* 11. Project Media & Stipend Benefits */}
+      {/* 9. MHHDCL Video & Media Archive & Stipend Benefits */}
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 space-y-14">
         <ProjectMediaSection />
 
