@@ -156,10 +156,16 @@ export default function RegisterPage() {
       if (serverData?.errors && typeof serverData.errors === "object") {
         setFieldErrors(serverData.errors as FieldErrors);
       }
-      setFormError(
-        serverData?.error ||
-          "Could not create your account. Please verify your information or sign in if already registered."
-      );
+      if (!err.response) {
+        setFormError(
+          "Unable to reach the admission server. Please verify the backend service is running and API/CORS settings allow this origin."
+        );
+      } else {
+        setFormError(
+          serverData?.error ||
+            "Could not create your account. Please verify your information or sign in if already registered."
+        );
+      }
     } finally {
       setLoading(false);
     }

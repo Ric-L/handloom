@@ -42,10 +42,16 @@ export default function AdminLoginPage() {
       localStorage.setItem("user", JSON.stringify(response.user));
       navigate(from, { replace: true });
     } catch (err: any) {
-      setServerError(
-        err.response?.data?.error ||
+      if (!err.response) {
+        setServerError(
+          "Unable to reach the admission server. Please verify the backend service is running and API/CORS settings allow this origin."
+        );
+      } else {
+        setServerError(
+          err.response?.data?.error ||
           "Authentication failed. Verify your administrator credentials and privileges."
-      );
+        );
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -115,9 +121,8 @@ export default function AdminLoginPage() {
                   {...register("mobile_number")}
                   placeholder="10-digit registered number"
                   maxLength={10}
-                  className={`block w-full pl-10 pr-3 py-2.5 bg-white border ${
-                    errors.mobile_number ? "border-[#A9442A] ring-1 ring-[#A9442A]" : "border-[#D9C5A3]"
-                  } rounded-lg text-sm text-[#3B3028] placeholder-[#8D7B6D] focus:outline-none focus:ring-2 focus:ring-[#8B5E3C]/30 focus:border-[#8B5E3C] transition`}
+                  className={`block w-full pl-10 pr-3 py-2.5 bg-white border ${errors.mobile_number ? "border-[#A9442A] ring-1 ring-[#A9442A]" : "border-[#D9C5A3]"
+                    } rounded-lg text-sm text-[#3B3028] placeholder-[#8D7B6D] focus:outline-none focus:ring-2 focus:ring-[#8B5E3C]/30 focus:border-[#8B5E3C] transition`}
                 />
               </div>
               {errors.mobile_number && (
@@ -137,9 +142,8 @@ export default function AdminLoginPage() {
                   type="password"
                   {...register("password")}
                   placeholder="Enter administrator password"
-                  className={`block w-full pl-10 pr-3 py-2.5 bg-white border ${
-                    errors.password ? "border-[#A9442A] ring-1 ring-[#A9442A]" : "border-[#D9C5A3]"
-                  } rounded-lg text-sm text-[#3B3028] placeholder-[#8D7B6D] focus:outline-none focus:ring-2 focus:ring-[#8B5E3C]/30 focus:border-[#8B5E3C] transition`}
+                  className={`block w-full pl-10 pr-3 py-2.5 bg-white border ${errors.password ? "border-[#A9442A] ring-1 ring-[#A9442A]" : "border-[#D9C5A3]"
+                    } rounded-lg text-sm text-[#3B3028] placeholder-[#8D7B6D] focus:outline-none focus:ring-2 focus:ring-[#8B5E3C]/30 focus:border-[#8B5E3C] transition`}
                 />
               </div>
               {errors.password && (

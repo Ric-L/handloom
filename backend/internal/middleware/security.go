@@ -88,10 +88,12 @@ func CookieSameSiteMode(c *gin.Context) (http.SameSite, bool) {
 }
 
 // SetCSRFCookie sets the CSRF token cookie on the response if not already present.
-// Note: csrf_token cookie has HttpOnly=false so the SPA can read it and send X-CSRF-Token.
+// Note: csrf_token cookie has HttpOnly=false so the SPA can read it on same-origin,
+// and X-CSRF-Token response header mirrors it for allowlisted cross-origin deployments.
 func SetCSRFCookie(c *gin.Context) string {
 	existing, err := c.Cookie("csrf_token")
 	if err == nil && existing != "" {
+		c.Header("X-CSRF-Token", existing)
 		return existing
 	}
 
@@ -99,6 +101,7 @@ func SetCSRFCookie(c *gin.Context) string {
 	sameSite, isSecure := CookieSameSiteMode(c)
 	c.SetSameSite(sameSite)
 	c.SetCookie("csrf_token", token, 86400, "/", "", isSecure, false)
+	c.Header("X-CSRF-Token", token)
 	return token
 }
 
@@ -108,6 +111,8 @@ func CSRFProtection() gin.HandlerFunc {
 		csrfCookie, err := c.Cookie("csrf_token")
 		if err != nil || csrfCookie == "" {
 			csrfCookie = SetCSRFCookie(c)
+		} else {
+			c.Header("X-CSRF-Token", csrfCookie)
 		}
 
 		method := c.Request.Method

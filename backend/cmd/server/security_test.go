@@ -72,6 +72,37 @@ func TestCORSBlocksUntrustedOrigins(t *testing.T) {
 	if wOK.Header().Get("Access-Control-Allow-Origin") != "http://localhost:5173" {
 		t.Fatalf("expected exact allowlisted origin, got %q", wOK.Header().Get("Access-Control-Allow-Origin"))
 	}
+
+	// Render default CORS permits HTTPS single-label *.onrender.com when enabled,
+	// while still rejecting HTTP, multi-label subdomains, and arbitrary third-party origins.
+	audit.Init(t.TempDir())
+	renderCfg := &config.Config{
+		JWTSecret:          "super-secret-test-key-at-least-32-chars-long",
+		UploadDir:          t.TempDir(),
+		AllowedOrigins:     []string{"https://handloom-api.onrender.com"},
+		AllowRenderOrigins: true,
+	}
+	renderRouter := NewRouter(nil, renderCfg)
+
+	for _, allowed := range []string{"https://handloom-frontend.onrender.com", "https://handloom-api.onrender.com"} {
+		req := httptest.NewRequest(http.MethodOptions, "/api/v1/auth/login", nil)
+		req.Header.Set("Origin", allowed)
+		w := httptest.NewRecorder()
+		renderRouter.ServeHTTP(w, req)
+		if w.Code != http.StatusNoContent || w.Header().Get("Access-Control-Allow-Origin") != allowed {
+			t.Fatalf("expected 204 + ACAO %q on Render router, got status=%d acao=%q", allowed, w.Code, w.Header().Get("Access-Control-Allow-Origin"))
+		}
+	}
+
+	for _, blocked := range []string{"http://handloom-frontend.onrender.com", "https://sub.evil.onrender.com", "https://evil-attacker.example"} {
+		req := httptest.NewRequest(http.MethodOptions, "/api/v1/auth/login", nil)
+		req.Header.Set("Origin", blocked)
+		w := httptest.NewRecorder()
+		renderRouter.ServeHTTP(w, req)
+		if w.Code != http.StatusForbidden || w.Header().Get("Access-Control-Allow-Origin") != "" {
+			t.Fatalf("expected 403 + empty ACAO for %q, got status=%d acao=%q", blocked, w.Code, w.Header().Get("Access-Control-Allow-Origin"))
+		}
+	}
 }
 
 func TestSecurityHeadersAndHSTS(t *testing.T) {
@@ -201,6 +232,18 @@ func TestCSRFRejectsMismatchedOrMissingTokenWithCookieAuth(t *testing.T) {
 	r.ServeHTTP(wBadCSRF, reqBadCSRF)
 	if wBadCSRF.Code != http.StatusForbidden {
 		t.Fatalf("expected 403 on mismatched CSRF token, got %d", wBadCSRF.Code)
+	}
+
+	// CSRF token response header must be exposed on /api/v1 responses for allowlisted cross-origin SPAs
+	reqHeaderCheck := httptest.NewRequest(http.MethodGet, "/api/v1/auth/csrf-token", nil)
+	reqHeaderCheck.Header.Set("Origin", "http://localhost:5173")
+	wHeaderCheck := httptest.NewRecorder()
+	r.ServeHTTP(wHeaderCheck, reqHeaderCheck)
+	if wHeaderCheck.Header().Get("X-CSRF-Token") == "" {
+		t.Fatalf("expected X-CSRF-Token header to be set on API responses")
+	}
+	if wHeaderCheck.Header().Get("Access-Control-Expose-Headers") == "" {
+		t.Fatalf("expected Access-Control-Expose-Headers to expose X-CSRF-Token")
 	}
 }
 

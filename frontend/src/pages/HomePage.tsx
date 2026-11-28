@@ -30,7 +30,11 @@ export default function HomePage() {
 
   const token = localStorage.getItem("token");
 
-  const { data: categories, isLoading: isCategoriesLoading } = useQuery({
+  const {
+    data: categories,
+    isLoading: isCategoriesLoading,
+    isError: isCategoriesError,
+  } = useQuery({
     queryKey: ["categories"],
     queryFn: getCategories,
   });
@@ -303,6 +307,10 @@ export default function HomePage() {
           {isCategoriesLoading ? (
             <div className="text-center py-12 text-[#6E5D50] text-sm font-medium">
               Loading training trades...
+            </div>
+          ) : isCategoriesError ? (
+            <div className="text-center py-12 px-6 bg-[#FDF2EE] rounded-xl border border-[#C97B65]/50 text-[#7A3526] text-sm">
+              Unable to load training trades from the admission server right now. Please refresh or check API/CORS configuration.
             </div>
           ) : filteredCategories.length === 0 ? (
             <div className="text-center py-12 bg-white rounded-xl border border-[#D9C5A3] text-[#6E5D50] text-sm">

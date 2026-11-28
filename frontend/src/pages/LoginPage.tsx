@@ -57,10 +57,16 @@ export default function LoginPage() {
       }
     } catch (err: any) {
       const serverMsg = err.response?.data?.error;
-      setError(
-        serverMsg ||
-          "The mobile number or password you entered is incorrect. Please check and try again."
-      );
+      if (!err.response) {
+        setError(
+          "Unable to reach the admission server. Please verify the backend service is running and API/CORS settings allow this origin."
+        );
+      } else {
+        setError(
+          serverMsg ||
+            "The mobile number or password you entered is incorrect. Please check and try again."
+        );
+      }
     } finally {
       setLoading(false);
     }

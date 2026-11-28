@@ -10,7 +10,29 @@ export const JOB_CATEGORIES = [
   { code: "PPM.09", title: "Puppet Maker", quota: 60 },
 ] as const;
 
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080/api/v1";
+function resolveApiBaseUrl(raw?: string): string {
+  const value = (raw ?? "").trim().replace(/\/+$/, "");
+  if (!value) {
+    return "http://localhost:8080/api/v1";
+  }
+
+  let normalized = value;
+  if (!/^https?:\/\//i.test(normalized) && !normalized.startsWith("/")) {
+    const isLocalHost =
+      normalized.startsWith("localhost") || normalized.startsWith("127.0.0.1");
+    normalized = `${isLocalHost ? "http" : "https"}://${normalized}`;
+  }
+
+  if (normalized.endsWith("/api/v1")) {
+    return normalized;
+  }
+  if (normalized.endsWith("/api")) {
+    return `${normalized}/v1`;
+  }
+  return `${normalized}/api/v1`;
+}
+
+export const API_BASE_URL = resolveApiBaseUrl(import.meta.env.VITE_API_BASE_URL);
 export const MAX_FILE_SIZE_MB = 5;
 export const ALLOWED_FILE_TYPES = ["image/jpeg", "image/png", "image/webp", "application/pdf"];
 
