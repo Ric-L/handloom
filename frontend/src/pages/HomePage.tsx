@@ -20,7 +20,6 @@ import {
   ArrowUpRight,
 } from "lucide-react";
 import { ProjectMediaSection } from "../components/ProjectMediaSection";
-import { TrackStatusForm } from "../components/TrackStatusModal";
 
 export default function HomePage() {
   const outletCtx = useOutletContext<AppOutletContext | undefined>();
@@ -516,14 +515,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 7. Track Application Status */}
-      <section id="track-status" className="scroll-mt-24 py-14 bg-[#F5EFE3]">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <TrackStatusForm />
-        </div>
-      </section>
-
-      {/* 8. Minimalist Mandatory Documents Checklist (Screenshot 5) */}
+      {/* 7. Minimalist Mandatory Documents Checklist */}
       <section className="bg-[#EFE7D6] border-y border-[#D9C5A3] py-14">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">

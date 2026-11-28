@@ -163,11 +163,10 @@ export const ProjectMediaSection: React.FC = () => {
                   key={tab.id}
                   type="button"
                   onClick={() => handleFilterChange(tab.id)}
-                  className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all shrink-0 cursor-pointer ${
-                    isSelected
-                      ? "bg-[#8B5E3C] text-[#F5EFE3] shadow-xs"
-                      : "bg-white text-[#3B3028] border border-[#D9C5A3] hover:bg-[#EDE3D2]"
-                  }`}
+                  className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all shrink-0 cursor-pointer ${isSelected
+                    ? "bg-[#8B5E3C] text-[#F5EFE3] shadow-xs"
+                    : "bg-white text-[#3B3028] border border-[#D9C5A3] hover:bg-[#EDE3D2]"
+                    }`}
                 >
                   <Icon className="w-4 h-4" />
                   <span>{tab.label}</span>
@@ -431,11 +430,10 @@ export const ProjectMediaSection: React.FC = () => {
                             key={idx}
                             type="button"
                             onClick={() => setGalleryIndex(idx)}
-                            className={`px-2 py-0.5 rounded-full text-[11px] font-semibold transition cursor-pointer ${
-                              galleryIndex === idx
-                                ? "bg-[#8B5E3C] text-[#F5EFE3]"
-                                : "text-[#D9C5A3] hover:text-white"
-                            }`}
+                            className={`px-2 py-0.5 rounded-full text-[11px] font-semibold transition cursor-pointer ${galleryIndex === idx
+                              ? "bg-[#8B5E3C] text-[#F5EFE3]"
+                              : "text-[#D9C5A3] hover:text-white"
+                              }`}
                           >
                             Photo {idx + 1}
                           </button>
